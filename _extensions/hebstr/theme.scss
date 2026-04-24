@@ -2,7 +2,7 @@
 
 $primary: #0099FF !default;
 $secondary: #FF0000 !default;
-$font-size-root: 1.25rem;
+$font-size-root: 1.2rem;
 $font-family-sans-serif: "Luciole";
 $font-family-monospace: "Fira Code";
 $callout-icon-scale: -10% !default;
@@ -29,10 +29,6 @@ $callout-icon-scale: -10% !default;
 html {
   scrollbar-color: var(--primary) var(--primary-back);
   scrollbar-width: thin;
-}
-
-body {
-  text-align: justify !important;
 }
 
 .cb1, .cb2, .nb {
@@ -83,14 +79,21 @@ body {
 }
 
 #title-block-header {
+  background-color: var(--primary-back);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  .title {
+    margin-top: 0.5rem;
+    border-bottom: none;
+    color: var(--primary);
+  }
   .subtitle {
     font-size: 24px;
-    color: var(--primary);
+    color: var(--primary-dark);
   }
   .quarto-title-meta-heading,
   .block-title {
     color: var(--primary);
-    font-weight: bold !important;
   }
 }
 
@@ -99,18 +102,18 @@ body {
   padding-left: 1.5rem;
   background-color: var(--primary-back);
   #toc-title {
-    font-size: 1.1rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
+    // font-size: 1.1rem;
+    // margin-bottom: 0.5rem;
+    display: none;
   }
   .toc-active {
     > ul a {
-      border-left: 3px solid #fff;
+      border-left: 2px solid #fff;
       padding-bottom: 0.3rem;
     }
     :is(ul > li, ul > li > ul > li) > a.active {
-      font-weight: bold;
-      border-left: 3px solid var(--primary);
+      // font-weight: bold;
+      border-left: 2px solid var(--primary);
     }
   }
 }
@@ -120,9 +123,9 @@ body {
   font-weight: 700;
 }
 
-h1, h2, h3 {
-  color: var(--primary);
-}
+// h1, h2, h3 {
+//   color: var(--primary);
+// }
 
 h2, h3, h4, h5 {
   margin-top: 1.5em;
@@ -132,6 +135,7 @@ h2, h3, h4, h5 {
 h1, h2, h3, h4, h5 {
   border-bottom: 2px solid var(--line-color);
   padding-bottom: 0.3rem;
+  font-weight: normal;
 }
 
 h1 {
@@ -141,13 +145,11 @@ h1 {
 h2 {
   margin-left: 0.5rem;
   font-size: 1.4rem;
-  font-weight: bold;
 }
 
 h3 {
   margin-left: 1rem;
   font-size: 1.2rem;
-  font-weight: normal;
 }
 
 h4 {
@@ -181,8 +183,7 @@ h5 {
     padding-bottom: 1em;
   }
   &-tbl {
-    margin-top: 2em;
-    margin-bottom: 0.15rem;
+    margin-top: 2rem;
     text-align: center;
   }
 }
@@ -198,7 +199,7 @@ div.sourceCode {
   background-color: var(--code-background-color) !important;
   color: var(--code-foreground-color);
   border-top: 1px solid var(--code-background-color);
-  border-radius: 5px;
+  border-radius: 12px;
   padding: 1em;
   margin: 1em 0;
   font-weight: bold;
@@ -234,7 +235,7 @@ code {
       font-weight: bold;
     }
     .fu, .bu {
-      color: #a2fff6;
+      color: #90E1FF;
     }
     .co, .do {
       font-style: normal !important;

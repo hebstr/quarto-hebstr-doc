@@ -1,0 +1,159 @@
+---
+title: "hebstr — Example Document"
+subtitle: "Multi-format Quarto extension"
+author: "hebstr"
+date: today
+format:
+  hebstr-html: default
+  hebstr-typst: default
+  # hebstr-docx: default
+---
+
+# Typography and headings
+
+This document exercises every capability declared in `_extension.yml` so a single `quarto render example.qmd` validates the extension across HTML, Typst, and DOCX.
+
+The body font is **Luciole** (sans-serif, designed for low-vision readers). Inline `code()` uses **Fira Code** with programming ligatures.
+
+## Level 2 heading
+
+Headings are numbered down to level 4 (`number-depth: 4`). The cross-reference title delimiter is a literal dot (e.g. *Figure 1.1*).
+
+### Level 3 heading
+
+Paragraph with *emphasis*, **strong emphasis**, a [link to the Quarto docs](https://quarto.org), and an internal reference to @sec-figure.
+
+#### Level 4 heading
+
+Deepest numbered level.
+
+# Lists
+
+Unordered:
+
+- First item
+- Second item with a *nested* block:
+    - Nested bullet one
+    - Nested bullet two
+- Third item
+
+Ordered:
+
+1. Initialise the R session
+2. Load the tidyverse
+3. Render the document
+
+# Figure {#sec-figure}
+
+@fig-penguins is generated inline by **ggplot2** using the `palmerpenguins` dataset, driven by the shared knitr chunk options from `_extension.yml` (`echo: false`, `message: false`, `warning: false`).
+
+```{r}
+#| label: fig-penguins
+#| fig-cap: "Bill length vs flipper length by species (palmerpenguins)."
+#| fig-width: 6
+#| fig-height: 4
+
+library(ggplot2)
+
+ggplot(
+  palmerpenguins::penguins,
+  aes(x = flipper_length_mm, y = bill_length_mm, colour = species)
+) +
+  geom_point(size = 3, alpha = 0.85) +
+  geom_smooth(method = "lm", se = FALSE, linewidth = 0.6) +
+  labs(
+    x = "Flipper length (mm)",
+    y = "Bill length (mm)",
+    colour = "Species"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+The HTML output wraps figures in lightbox; click the image to enlarge.
+
+# Table
+
+@tbl-penguins-summary is a simple aggregation rendered as a Markdown table. `tbl-cap-location: top` puts the caption above the table; `tbl-title: "Table"` is language-neutral.
+
+```{r}
+#| label: tbl-penguins-summary
+#| tbl-cap: "Sample size by species (palmerpenguins)."
+#| echo: true
+#| code-fold: false
+
+library(dplyr)
+
+palmerpenguins::penguins |>
+  count(species) |>
+  rename(Sp = species)
+```
+
+# Code block
+
+The chunk below is shown with `echo: true` (overriding the default) to exercise syntax highlighting, code folding, and the copy-on-hover button (HTML), plus the `code.tmTheme` TextMate theme applied by Typst via `#set raw(theme: …)` in `template.typ`.
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(dplyr)
+
+palmerpenguins::penguins |>
+  filter(!is.na(body_mass_g)) |>
+  group_by(species, island) |>
+  summarise(
+    n = n(),
+    mean_mass_g = mean(body_mass_g),
+    .groups = "drop"
+  ) |>
+  arrange(desc(mean_mass_g))
+```
+
+# Equation
+
+Inline math: $y = \beta_0 + \beta_1 x + \varepsilon$.
+
+Display math with a cross-reference target (@eq-ols):
+
+$$
+\hat{\beta} = (X^\top X)^{-1} X^\top y
+$$ {#eq-ols}
+
+The HTML output uses `html-math-method: plain` (plain CSS rendering, no MathJax).
+
+# Callouts
+
+Callouts use `callout-appearance: simple`.
+
+::: {.callout-note}
+# A note callout.
+:::
+
+::: {.callout-tip}
+# A tip callout.
+:::
+
+::: {.callout-caution}
+# A caution callout.
+:::
+
+::: {.callout-warning}
+# A warning callout.
+:::
+
+::: {.callout-important}
+# A important callout.
+:::
+
+# Block quote
+
+> A citation.
+>
+> --- author
+
+# Cross-references
+
+- Section reference: @sec-figure
+- Figure reference: @fig-penguins
+- Table reference: @tbl-penguins-summary
+- Equation reference: @eq-ols

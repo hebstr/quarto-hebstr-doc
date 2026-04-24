@@ -1,22 +1,28 @@
+/*
+ * size-adjust: 95% harmonises x-height between Luciole and Fira Code
+ * when used side by side (prose + inline code). Must be repeated per
+ * @font-face — CSS does not allow factoring this descriptor.
+ */
+
 @font-face {
   font-family: "Fira Code";
   font-weight: 500;
   font-display: swap;
-  src: url('fonts/FiraCode-Medium.woff2') format("woff2");
+  src: url('FiraCode-Medium.woff2') format("woff2");
 }
 
 @font-face {
   font-family: "Fira Code";
   font-weight: 700;
   font-display: swap;
-  src: url('fonts/FiraCode-Bold.woff2') format("woff2");
+  src: url('FiraCode-Bold.woff2') format("woff2");
 }
 
 @font-face {
   font-family: "Luciole";
   font-weight: 400;
   font-display: swap;
-  src: url('fonts/Luciole-Regular.woff2') format("woff2");
+  src: url('Luciole-Regular.woff2') format("woff2");
   size-adjust: 95%;
 }
 
@@ -25,7 +31,7 @@
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url('fonts/Luciole-Italic.woff2') format("woff2");
+  src: url('Luciole-Italic.woff2') format("woff2");
   size-adjust: 95%;
 }
 
@@ -33,7 +39,7 @@
   font-family: "Luciole";
   font-weight: 700;
   font-display: swap;
-  src: url('fonts/Luciole-Bold.woff2') format("woff2");
+  src: url('Luciole-Bold.woff2') format("woff2");
   size-adjust: 95%;
 }
 
@@ -42,6 +48,6 @@
   font-style: italic;
   font-weight: 700;
   font-display: swap;
-  src: url('fonts/Luciole-BoldItalic.woff2') format("woff2");
+  src: url('Luciole-BoldItalic.woff2') format("woff2");
   size-adjust: 95%;
 }
