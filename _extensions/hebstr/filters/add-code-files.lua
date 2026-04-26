@@ -1,5 +1,5 @@
 local lang_from_ext = {
-  r = "r", R = "r",
+  r = "r", R = "r", ".Rprofile" == "r",
   py = "python", python = "python",
   lua = "lua",
   js = "javascript", ts = "typescript",
