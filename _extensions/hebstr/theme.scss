@@ -10,6 +10,7 @@ $callout-icon-scale: -10% !default;
 :root {
   --primary: #{$primary};
   --primary-back: color-mix(in srgb, var(--primary), white 95%);
+  --primary-surface: color-mix(in srgb, var(--primary), white 98%);
   --primary-dark: color-mix(in srgb, var(--primary), black 50%);
   --secondary: #{$secondary};
   --neutral: #555;
@@ -37,6 +38,11 @@ $callout-icon-scale: -10% !default;
 html {
   scrollbar-color: var(--primary) var(--primary-back);
   scrollbar-width: thin;
+}
+
+body {
+  background-color: var(--primary-surface);
+  line-height: 1.75rem;
 }
 
 .cb1, .cb2, .nb {
@@ -102,6 +108,12 @@ html {
   .quarto-title-meta-heading,
   .block-title {
     color: var(--primary);
+  }
+  .quarto-title-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 2rem;
+    grid-template-columns: none;
   }
 }
 
@@ -211,40 +223,43 @@ div.sourceCode {
   }
 }
 
-code {
+code:not(.sourceCode) {
   color: var(--primary);
-  span {
-    .va {
-      color: var(--code-foreground-color);
-    }
-    .dv, .fl {
-      color: #ff7869;
-    }
-    .cn {
-      color: #ffbc6a;
-      font-weight: bold;
-    }
-    .st, .ss {
-      color: #c5ff93;
-    }
-    .op, .ot, .sc {
-      color: #a2fff6;
-      font-weight: normal;
-    }
-    .kw, .cf, .im {
-      color: #d08aff;
-      font-weight: bold;
-    }
-    .fu, .bu, .ex {
-      color: #90E1FF;
-    }
-    .co, .do {
-      font-style: normal !important;
-      color: var(--code-comment-color);
-    }
-    .at {
-      color: var(--code-foreground-color);
-    }
+  background-color: var(--primary-back) !important;
+  padding: 0.2rem 0.4rem !important;
+}
+
+code span {
+  .va {
+    color: var(--code-foreground-color);
+  }
+  .dv, .fl {
+    color: #ff7869;
+  }
+  .cn {
+    color: #ffbc6a;
+    font-weight: bold;
+  }
+  .st, .ss {
+    color: #c5ff93;
+  }
+  .op, .ot, .sc {
+    color: #a2fff6;
+    font-weight: normal;
+  }
+  .kw, .cf, .im {
+    color: #d08aff;
+    font-weight: bold;
+  }
+  .fu, .bu, .ex {
+    color: #90E1FF;
+  }
+  .co, .do {
+    font-style: normal !important;
+    color: var(--code-comment-color);
+  }
+  .at {
+    color: var(--code-foreground-color);
   }
 }
 
@@ -278,9 +293,11 @@ body div[data-code-filename] > details,
 body details.code-fold {
   > summary {
     width: fit-content;
+    font-family: $font-family-monospace;
+    font-size: 0.9rem;
     letter-spacing: 1px;
     color: var(--code-window-titlebar-bg);
-    background-color: color-mix(in srgb, var(--code-window-titlebar-bg), white 95%);
+    background-color: transparent;
     margin-bottom: 0;
     padding: 0.4rem 1rem;
     border-radius: 10px;
