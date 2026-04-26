@@ -107,13 +107,7 @@ body {
   }
   .quarto-title-meta-heading,
   .block-title {
-    color: var(--primary);
-  }
-  .quarto-title-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 2rem;
-    grid-template-columns: none;
+    color: var(--primary-dark);
   }
 }
 
