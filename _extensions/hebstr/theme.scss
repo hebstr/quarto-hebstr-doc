@@ -5,6 +5,7 @@ $secondary: #FF0000 !default;
 $font-size-root: 1.2rem !default;
 $font-family-sans-serif: "Luciole", system-ui, sans-serif !default;
 $font-family-monospace: "Fira Code", ui-monospace, monospace !default;
+$toc-font-size: 0.825rem !default;
 $callout-icon-scale: -10% !default;
 
 :root {
@@ -42,6 +43,9 @@ html {
 
 body {
   background-color: var(--primary-surface);
+}
+
+p {
   line-height: 1.75rem;
 }
 
