@@ -1,6 +1,7 @@
-This filter (`add-code-files.lua` and its `resources/`) is derived from
-shafayetShafee/add-code-files, redistributed and modified under the terms
-of the MIT License reproduced below.
+The JS file `add-code-files.js` (used by `add-code-files.lua` via
+`quarto.doc.add_html_dependency` to rewrite the foldable `<summary>` text
+with the filename) is derived from shafayetShafee/add-code-files,
+redistributed and modified under the terms of the MIT License reproduced below.
 
 Upstream: https://github.com/shafayetShafee/add-code-files
 

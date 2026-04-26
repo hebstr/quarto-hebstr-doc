@@ -3,6 +3,8 @@ author: hebstr
 version: 0.10.0
 quarto-required: ">=1.9.36"
 contributes:
+  shortcodes:
+    - filters/add-code-files.lua
   formats:
     common:
       number-sections: true
@@ -48,7 +50,6 @@ contributes:
           path: _extensions/mcanouil/code-window/main.lua
         - at: post-quarto
           path: _extensions/mcanouil/code-window/_modules/hotfix/typst-title-fix.lua
-        - filters/add-code-files.lua
       extensions:
         code-window:
           enabled: true

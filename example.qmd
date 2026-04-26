@@ -133,14 +133,11 @@ quarto render example.qmd
 
 # Injected script
 
-The block below is **not** an inline chunk — it is the content of `scripts/demo_penguins.R`, injected via the in-tree `filters/add-code-files.lua` filter (derived from [`shafayetShafee/add-code-files`](https://github.com/shafayetShafee/add-code-files), MIT). The `code-filename` attribute wraps the block in a foldable `<details>` element (collapsed by default) ; clicking the filename header expands it.
+The block below is **not** an inline chunk — it is the content of `scripts/demo_penguins.R`, injected via the `script` shortcode (in-tree `filters/add-code-files.lua`). The shortcode reads the file, emits the populated code block with the `cell-code` class so Quarto's `code-fold` wraps it in a foldable `<details>` element (collapsed by default) ; clicking the filename header expands it. The `<summary>` text is rewritten to the filename by `filters/add-code-files.js` (derived from [`shafayetShafee/add-code-files`](https://github.com/shafayetShafee/add-code-files), MIT).
 
-This is the canonical pattern for hebstr: inline chunks display as `code-window`, externalised scripts display as foldable `add-code-files` blocks.
+This is the canonical pattern for hebstr: inline chunks display as `code-window`, externalised scripts display as foldable `script` blocks.
 
-::: {add-from="scripts/demo_penguins.R" code-line-numbers="true" code-filename="demo_penguins.R"}
-```r
-```
-:::
+{{< script scripts/demo_penguins.R >}}
 
 # Equation
 

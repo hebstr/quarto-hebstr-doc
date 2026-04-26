@@ -9,7 +9,18 @@
   `scripts/demo_penguins.R` for the externalised-script demo.
 - Bundled font licences (Luciole CC-BY 4.0, Fira Code OFL 1.1).
 - Embedded [`mcanouil/code-window`](https://github.com/mcanouil/quarto-code-window)
-  (HTML + Typst) and inlined `add-code-files` filter under `filters/`.
+  (HTML + Typst).
+- `script` shortcode (`filters/add-code-files.lua`): one-liner `{{< script path/to/file.R >}}`
+  for injecting external scripts. Auto-derives `source-lang` from extension,
+  defaults `code-filename` to the path, line numbers on by default. Args:
+  `lang=`, `filename=`, `numbers=`, `lines=10-30`, `dedent=N`. The shortcode
+  reads the file itself and emits the populated CodeBlock with `cell-code`
+  class (so Quarto's `code-fold` wraps it in `<details>`) plus the `cw-auto`
+  + `filename` attributes that hand off to `code-window`'s JS for the chrome.
+  Registers `filters/add-code-files.js` (derived from
+  [`shafayetShafee/add-code-files`](https://github.com/shafayetShafee/add-code-files),
+  MIT) via `quarto.doc.add_html_dependency` to rewrite the foldable `<summary>`
+  text with the filename.
 - SCSS custom properties for code-window chrome and surface/caption colours.
 
 ### Changed

@@ -15,7 +15,6 @@ $callout-icon-scale: -10% !default;
   --primary-dark: color-mix(in srgb, var(--primary), black 50%);
   --secondary: #{$secondary};
   --neutral: #555;
-  --line-color: color-mix(in srgb, var(--primary), white 90%);
   --em-background-color: #f8f8f8;
   --surface-default: #ffffff;
   --caption-color: #111;
@@ -144,7 +143,7 @@ h2, h3, h4, h5 {
 }
 
 h1, h2, h3, h4, h5 {
-  border-bottom: 2px solid var(--line-color);
+  border-bottom: 3px solid var(--primary-back);
   padding-bottom: 0.3rem;
   font-weight: normal;
 }
