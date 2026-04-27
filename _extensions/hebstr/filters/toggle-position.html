@@ -2,7 +2,8 @@
 (function () {
   function moveToggle() {
     var toggle = document.querySelector('.quarto-color-scheme-toggle');
-    var codeTools = document.getElementById('quarto-code-tools-menu');
+    var codeTools = document.getElementById('quarto-code-tools-menu')
+      || document.getElementById('quarto-code-tools-source');
     if (!toggle || !codeTools || !codeTools.parentNode) return false;
     if (toggle.parentNode === codeTools.parentNode && toggle.nextSibling === codeTools) return true;
     toggle.classList.remove('top-right');
