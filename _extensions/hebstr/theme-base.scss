@@ -1,39 +1,56 @@
 /*-- scss:defaults --*/
 
-$primary: #0099FF !default;
-$secondary: #FF0000 !default;
+// Theme-invariant typography
 $font-size-root: 1.2rem !default;
 $font-family-sans-serif: "Luciole", system-ui, sans-serif !default;
 $font-family-monospace: "Fira Code", ui-monospace, monospace !default;
 $toc-font-size: 0.825rem !default;
 $callout-icon-scale: -10% !default;
 
-:root {
-  --primary: #{$primary};
-  --primary-back: color-mix(in srgb, var(--primary), white 95%);
-  --primary-surface: color-mix(in srgb, var(--primary), white 98%);
-  --primary-dark: color-mix(in srgb, var(--primary), black 50%);
-  --secondary: #{$secondary};
-  --neutral: #555;
-  --em-background-color: #f8f8f8;
-  --surface-default: #ffffff;
-  --caption-color: #111;
-  --code-foreground-color: #ffffff;
-  --code-background-color: #262624;
-  --code-comment-color: #6c675f;
-  --code-window-titlebar-bg: #212120;
-  --code-window-border: #383835;
-  --code-window-line-divider: #383835;
-  --code-window-muted: #938e87;
-  --code-window-line-number: #5a5955;
-  --callout-note-color: #0099FF;
-  --callout-tip-color: #3fb618;
-  --callout-caution-color: #f0ad4e;
-  --callout-warning-color: #ff6a00;
-  --callout-important-color: #FF0000;
-}
+// Theme-invariant code chrome (dark code window in both light and dark themes)
+$code-foreground-color: #ffffff !default;
+$code-background-color: #262624 !default;
+$code-comment-color: #6c675f !default;
+$code-window-titlebar-bg: #212120 !default;
+$code-window-border: #383835 !default;
+$code-window-line-divider: #383835 !default;
+$code-window-muted: #938e87 !default;
+$code-window-line-number: #5a5955 !default;
 
 /*-- scss:rules --*/
+
+:root {
+  --primary: #{$primary};
+  --secondary: #{$secondary};
+  --primary-back: #{$primary-back};
+  --primary-surface: #{$primary-surface};
+  --primary-dark: #{$primary-dark};
+  --neutral: #{$neutral};
+  --em-background-color: #{$em-background-color};
+  --surface-default: #{$surface-default};
+  --caption-color: #{$caption-color};
+  --figure-shadow: #{$figure-shadow};
+  --str-color: #{$str-color};
+  --dig-color: #{$dig-color};
+  --tab-background: #{$tab-background};
+  --summary-fold-color: #{$summary-fold-color};
+  --code-foreground-color: #{$code-foreground-color};
+  --code-background-color: #{$code-background-color};
+  --code-comment-color: #{$code-comment-color};
+  --code-window-titlebar-bg: #{$code-window-titlebar-bg};
+  --code-window-border: #{$code-window-border};
+  --code-window-line-divider: #{$code-window-line-divider};
+  --code-window-muted: #{$code-window-muted};
+  --code-window-line-number: #{$code-window-line-number};
+  --callout-note-color: #{$callout-note-color};
+  --callout-tip-color: #{$callout-tip-color};
+  --callout-caution-color: #{$callout-caution-color};
+  --callout-warning-color: #{$callout-warning-color};
+  --callout-important-color: #{$callout-important-color};
+  --callout-mix-base: #{$callout-mix-base};
+  --callout-text-mix: #{$callout-text-mix};
+  --callout-bg-mix: #{$callout-bg-mix};
+}
 
 html {
   scrollbar-color: var(--primary) var(--primary-back);
@@ -75,11 +92,11 @@ p {
 }
 
 .str {
-  color: #20794D;
+  color: var(--str-color);
 }
 
 .dig {
-  color: #AD0000;
+  color: var(--dig-color);
 }
 
 .sm-em {
@@ -91,7 +108,7 @@ p {
 }
 
 .tab-content {
-  background-color: var(--surface-default);
+  background-color: var(--tab-background);
   margin-bottom: 2rem;
 }
 
@@ -134,7 +151,7 @@ p {
   }
   .toc-active {
     > ul a {
-      border-left: 2px solid #fff;
+      border-left: 2px solid var(--primary-back);
       padding-bottom: 0.3rem;
     }
     :is(ul > li, ul > li > ul > li) > a.active {
@@ -305,7 +322,7 @@ body details.code-fold {
     font-family: $font-family-monospace;
     font-size: 0.9rem;
     letter-spacing: 1px;
-    color: var(--code-window-titlebar-bg);
+    color: var(--summary-fold-color);
     background-color: transparent;
     margin-bottom: 0;
     padding: 0.4rem 1rem;
@@ -330,7 +347,7 @@ body div[data-code-filename] {
   .code-with-filename.code-window-auto,
   .code-with-filename.code-window-default {
     margin: 0;
-    background: transparent;
+    background-color: var(--code-window-titlebar-bg);
     border: 1px solid var(--code-window-border);
     border-top-left-radius: 0;
     .code-with-filename-file {
@@ -352,6 +369,7 @@ body div[data-code-filename] {
   --code-window-titlebar-height: 2.5rem;
   position: relative;
   margin: 1.2em 0;
+  background-color: var(--code-window-titlebar-bg);
   border: 1px solid var(--code-window-border);
   border-radius: 10px;
   overflow: hidden;
@@ -469,61 +487,61 @@ body div[data-code-filename] {
 }
 
 div.callout.callout-note {
-  border: 2px solid color-mix(in srgb, var(--callout-note-color), white 40%);
+  border: 2px solid color-mix(in srgb, var(--callout-note-color), var(--callout-mix-base) 40%);
   border-left: 5px solid var(--callout-note-color);
-  background-color: color-mix(in srgb, var(--callout-note-color), white 97%);
+  background-color: color-mix(in srgb, var(--callout-note-color), var(--callout-mix-base) var(--callout-bg-mix));
   .callout-header {
     color: var(--callout-note-color);
   }
   .callout-body {
-    color: color-mix(in srgb, var(--callout-note-color), black 20%);
+    color: color-mix(in srgb, var(--callout-note-color), var(--callout-text-mix) 20%);
   }
 }
 
 div.callout.callout-important {
-  border: 2px solid color-mix(in srgb, var(--callout-important-color), white 30%);
+  border: 2px solid color-mix(in srgb, var(--callout-important-color), var(--callout-mix-base) 30%);
   border-left: 5px solid var(--callout-important-color);
-  background-color: color-mix(in srgb, var(--callout-important-color), white 97%);
+  background-color: color-mix(in srgb, var(--callout-important-color), var(--callout-mix-base) var(--callout-bg-mix));
   .callout-header {
     color: var(--callout-important-color);
   }
   .callout-body {
-    color: color-mix(in srgb, var(--callout-important-color), black 10%);
+    color: color-mix(in srgb, var(--callout-important-color), var(--callout-text-mix) 10%);
   }
 }
 
 div.callout.callout-tip {
-  border: 2px solid color-mix(in srgb, var(--callout-tip-color), white 60%);
+  border: 2px solid color-mix(in srgb, var(--callout-tip-color), var(--callout-mix-base) 60%);
   border-left: 5px solid var(--callout-tip-color);
-  background-color: color-mix(in srgb, var(--callout-tip-color), white 97%);
+  background-color: color-mix(in srgb, var(--callout-tip-color), var(--callout-mix-base) var(--callout-bg-mix));
   .callout-header {
     color: var(--callout-tip-color);
   }
   .callout-body {
-    color: color-mix(in srgb, var(--callout-tip-color), black 10%);
+    color: color-mix(in srgb, var(--callout-tip-color), var(--callout-text-mix) 10%);
   }
 }
 
 div.callout.callout-caution {
-  border: 2px solid color-mix(in srgb, var(--callout-caution-color), white 25%);
+  border: 2px solid color-mix(in srgb, var(--callout-caution-color), var(--callout-mix-base) 25%);
   border-left: 5px solid var(--callout-caution-color);
-  background-color: color-mix(in srgb, var(--callout-caution-color), white 97%);
+  background-color: color-mix(in srgb, var(--callout-caution-color), var(--callout-mix-base) var(--callout-bg-mix));
   .callout-header {
-    color: color-mix(in srgb, var(--callout-caution-color), black 10%);
+    color: color-mix(in srgb, var(--callout-caution-color), var(--callout-text-mix) 10%);
   }
   .callout-body {
-    color: color-mix(in srgb, var(--callout-caution-color), black 30%);
+    color: color-mix(in srgb, var(--callout-caution-color), var(--callout-text-mix) 30%);
   }
 }
 
 div.callout.callout-warning {
-  border: 2px solid color-mix(in srgb, var(--callout-warning-color), white 25%);
+  border: 2px solid color-mix(in srgb, var(--callout-warning-color), var(--callout-mix-base) 25%);
   border-left: 5px solid var(--callout-warning-color);
-  background-color: color-mix(in srgb, var(--callout-warning-color), white 97%);
+  background-color: color-mix(in srgb, var(--callout-warning-color), var(--callout-mix-base) var(--callout-bg-mix));
   .callout-header {
     color: var(--callout-warning-color);
   }
   .callout-body {
-    color: color-mix(in srgb, var(--callout-warning-color), black 10%);
+    color: color-mix(in srgb, var(--callout-warning-color), var(--callout-text-mix) 10%);
   }
 }

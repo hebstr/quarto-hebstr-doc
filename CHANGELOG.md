@@ -1,5 +1,37 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Light/dark theme split. SCSS theme is now a triplet:
+  - `theme-base.scss` — invariant defaults (typography, code-window chrome) +
+    `:root` block exposing every SCSS variable as a CSS custom property +
+    every `scss:rules`.
+  - `theme-light.scss` — `scss:defaults` only, light palette.
+  - `theme-dark.scss` — `scss:defaults` only, dark palette.
+  - Wiring in `_extension.yml` :
+    `theme: { light: [theme-light.scss, theme-base.scss], dark: [theme-dark.scss, theme-base.scss] }`.
+- New SCSS variables exposed as part of the public theme API:
+  `$body-bg`, `$body-color`, `$primary-back`, `$primary-surface`, `$primary-dark`,
+  `$figure-shadow`, `$tab-background`, `$str-color`, `$dig-color`,
+  `$summary-fold-color`, `$callout-mix-base`, `$callout-text-mix`, `$callout-bg-mix`.
+- New custom properties exposed in `:root` for consumer overrides:
+  `--str-color`, `--dig-color`, `--figure-shadow`, `--tab-background`,
+  `--summary-fold-color`, `--callout-mix-base`, `--callout-text-mix`,
+  `--callout-bg-mix`.
+
+### Changed
+
+- **Breaking** if a consumer overrides `theme.scss` directly:
+  the file no longer exists. Consumers must reference
+  `[theme-light.scss, theme-base.scss]` (or rely on `format: hebstr-html`,
+  which already wires the pair).
+- Callout color-mixes now use `--callout-mix-base` / `--callout-text-mix` /
+  `--callout-bg-mix` instead of hardcoded `white` / `black` / `97%` literals.
+- `.str` and `.dig` foreground colors moved from rule-level literals to
+  `--str-color` / `--dig-color` so they switch with the active theme.
+
 ## [0.10.0] — 2026-04-26
 
 ### Added

@@ -63,25 +63,42 @@ Both are shipped as `.woff` and `.woff2` under `_extensions/hebstr/fonts/` and r
 
 ## Customisation
 
-The SCSS theme exposes named CSS custom properties under `:root`, grouped by purpose:
+The HTML theme is split across three SCSS files loaded as ordered pairs by Quarto's `theme:` key:
 
-- **brand colours**: `--primary`, `--primary-back`, `--primary-dark`, `--secondary`, `--neutral`, `--line-color`
-- **surfaces**: `--surface-default`, `--em-background-color`, `--caption-color`
+- `_extensions/hebstr/theme-light.scss` — light-mode `scss:defaults` only.
+- `_extensions/hebstr/theme-dark.scss` — dark-mode `scss:defaults` only.
+- `_extensions/hebstr/theme-base.scss` — invariant defaults (typography, code-window chrome) + `:root` block exposing every SCSS variable as a CSS custom property + every `scss:rules`.
+
+The active theme is selected by Quarto's color-scheme toggle (default in the title block).
+
+CSS custom properties exposed under `:root`, grouped by purpose:
+
+- **brand colours**: `--primary`, `--secondary`, `--primary-back`, `--primary-surface`, `--primary-dark`, `--neutral`
+- **surfaces**: `--surface-default`, `--em-background-color`, `--caption-color`, `--figure-shadow`, `--tab-background`
+- **inline highlights**: `--str-color`, `--dig-color`, `--summary-fold-color`
 - **code highlight**: `--code-foreground-color`, `--code-background-color`, `--code-comment-color`
 - **code-window chrome**: `--code-window-titlebar-bg`, `--code-window-border`, `--code-window-line-divider`, `--code-window-muted`, `--code-window-line-number`
 - **callout colours**: `--callout-{note,tip,caution,warning,important}-color`
+- **callout mix knobs** (drive the light/dark tint logic): `--callout-mix-base`, `--callout-text-mix`, `--callout-bg-mix`
 
-The SCSS variables `$primary`, `$secondary`, `$font-family-sans-serif`, `$font-family-monospace`, `$font-size-root`, and `$callout-icon-scale` are declared with `!default` and can also be overridden from a consumer SCSS file.
+SCSS variables exposed with `!default` (override before the theme files are loaded):
 
-To override in a consumer project:
+- typography: `$font-family-sans-serif`, `$font-family-monospace`, `$font-size-root`, `$toc-font-size`, `$callout-icon-scale`
+- brand & body: `$primary`, `$secondary`, `$body-bg`, `$body-color`, `$primary-back`, `$primary-surface`, `$primary-dark`
+- surfaces, inline highlights, callouts: same names as the matching custom properties (drop the `--` prefix, replace with `$`)
+- code chrome (invariant across light/dark): `$code-foreground-color`, `$code-background-color`, `$code-comment-color`, `$code-window-{titlebar-bg,border,line-divider,muted,line-number}`
+
+To override in a consumer project, redeclare both halves of the theme key (overriding the whole `theme:` value drops the dark variant):
 
 ```yaml
 format:
   hebstr-html:
     theme:
-      - hebstr
-      - custom.scss
+      light: [theme-light.scss, theme-base.scss, custom.scss]
+      dark:  [theme-dark.scss,  theme-base.scss, custom.scss]
 ```
+
+Place `custom.scss` **last** : Quarto layers SCSS files in the order given, with the **last** file's `scss:defaults` taking precedence over preceding ones — opposite to the standard Bootstrap convention.
 
 ## Example
 
