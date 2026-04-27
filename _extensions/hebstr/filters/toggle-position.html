@@ -2,13 +2,12 @@
 (function () {
   function moveToggle() {
     var toggle = document.querySelector('.quarto-color-scheme-toggle');
-    var codeTools = document.getElementById('quarto-code-tools-menu')
-      || document.getElementById('quarto-code-tools-source');
-    if (!toggle || !codeTools || !codeTools.parentNode) return false;
-    if (toggle.parentNode === codeTools.parentNode && toggle.nextSibling === codeTools) return true;
+    var titleEl = document.querySelector('#title-block-header h1.title');
+    if (!toggle || !titleEl) return false;
+    if (toggle.parentNode === titleEl) return true;
     toggle.classList.remove('top-right');
-    toggle.classList.add('hebstr-inline-toggle');
-    codeTools.parentNode.insertBefore(toggle, codeTools);
+    toggle.classList.add('hebstr-title-toggle');
+    titleEl.appendChild(toggle);
     return true;
   }
   function tryMove(retries) {

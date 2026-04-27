@@ -1,13 +1,11 @@
 /*-- scss:defaults --*/
 
-// Theme-invariant typography
 $font-size-root: 1.2rem !default;
 $font-family-sans-serif: "Luciole", system-ui, sans-serif !default;
 $font-family-monospace: "Fira Code", ui-monospace, monospace !default;
 $toc-font-size: 0.825rem !default;
 $callout-icon-scale: -10% !default;
 
-// Theme-invariant code chrome (dark code window in both light and dark themes)
 $code-foreground-color: #ffffff !default;
 $code-background-color: #262624 !default;
 $code-comment-color: #6c675f !default;
@@ -33,7 +31,6 @@ $code-window-line-number: #5a5955 !default;
   --str-color: #{$str-color};
   --dig-color: #{$dig-color};
   --tab-background: #{$tab-background};
-  --summary-fold-color: #{$summary-fold-color};
   --code-foreground-color: #{$code-foreground-color};
   --code-background-color: #{$code-background-color};
   --code-comment-color: #{$code-comment-color};
@@ -120,6 +117,10 @@ p {
     margin-top: 0.5rem;
     border-bottom: none;
     color: var(--primary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
   }
   .subtitle {
     font-size: 24px;
@@ -129,16 +130,30 @@ p {
   .block-title {
     color: var(--primary-dark);
   }
-  .quarto-title-block > div { gap: 1rem; }
-  .quarto-color-scheme-toggle.hebstr-inline-toggle {
+  .quarto-title-block > div {
+    gap: 1.5rem;
+  }
+  .quarto-color-scheme-toggle.hebstr-title-toggle {
     display: inline-flex;
-    align-items: center;
     color: var(--primary-dark);
-    font-size: 1.1rem;
-    line-height: 1;
-    > i.bi::before { content: "\f5d6"; }
-    &.alternate > i.bi::before { content: "\f5d5"; }
-    &:hover { color: var(--primary); }
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    &:hover {
+      color: var(--primary);
+    }
+  }
+}
+
+.quarto-color-scheme-toggle {
+  > i.bi::before {
+    background-image: none !important;
+    font-family: "Font Awesome 7 Free" !important;
+    // font-weight: 900 !important;
+    content: "\f185";
+    color: inherit;
+  }
+  &.alternate > i.bi::before {
+    content: "\f186";
   }
 }
 
@@ -151,7 +166,7 @@ p {
   }
   .toc-active {
     > ul a {
-      border-left: 2px solid var(--primary-back);
+      border-left: 2px solid var(--primary-surface);
       padding-bottom: 0.3rem;
     }
     :is(ul > li, ul > li > ul > li) > a.active {
@@ -322,7 +337,7 @@ body details.code-fold {
     font-family: $font-family-monospace;
     font-size: 0.9rem;
     letter-spacing: 1px;
-    color: var(--summary-fold-color);
+    color: var(--neutral);
     background-color: transparent;
     margin-bottom: 0;
     padding: 0.4rem 1rem;
@@ -463,13 +478,17 @@ body div[data-code-filename] {
   border-radius: 5px;
   .callout-title-container {
     font-size: 1rem;
-    margin-top: 0.4rem;
-    margin-bottom: 0.8rem;
+    text-align: left;
+    margin: 0.4rem 0.2rem;
     padding-right: 1.3rem;
   }
   .callout-body {
     padding-right: 1.3rem;
   }
+}
+
+.callout.callout-style-simple .callout-body {
+  margin-top: 0;
 }
 
 .callout:not(.no-icon).callout-titled.callout-style-simple .callout-body {
@@ -477,71 +496,52 @@ body div[data-code-filename] {
 }
 
 .callout.callout-style-simple {
-  .callout-icon::before,
   .callout-toggle::before {
     height: 1.2rem;
     width: 1.2rem;
     background-size: 1.2rem;
     margin-top: 0.3rem;
   }
-}
-
-div.callout.callout-note {
-  border: 2px solid color-mix(in srgb, var(--callout-note-color), var(--callout-mix-base) 40%);
-  border-left: 5px solid var(--callout-note-color);
-  background-color: color-mix(in srgb, var(--callout-note-color), var(--callout-mix-base) var(--callout-bg-mix));
-  .callout-header {
-    color: var(--callout-note-color);
-  }
-  .callout-body {
-    color: color-mix(in srgb, var(--callout-note-color), var(--callout-text-mix) 20%);
+  .callout-icon::before {
+    background-image: none !important;
+    height: auto;
+    font-family: "Font Awesome 7 Free";
+    font-style: normal;
+    font-weight: 900;
+    font-size: 1.1rem;
   }
 }
 
-div.callout.callout-important {
-  border: 2px solid color-mix(in srgb, var(--callout-important-color), var(--callout-mix-base) 30%);
-  border-left: 5px solid var(--callout-important-color);
-  background-color: color-mix(in srgb, var(--callout-important-color), var(--callout-mix-base) var(--callout-bg-mix));
-  .callout-header {
-    color: var(--callout-important-color);
-  }
-  .callout-body {
-    color: color-mix(in srgb, var(--callout-important-color), var(--callout-text-mix) 10%);
-  }
-}
+$callout-types: (
+  "note": ("\f05a", 40%, 0%, 20%),
+  "important": ("\f06a", 30%, 0%, 10%),
+  "tip": ("\f0eb", 60%, 0%, 25%),
+  "caution": ("\f06d", 25%, 10%, 30%),
+  "warning": ("\f071", 25%, 0%, 15%),
+);
 
-div.callout.callout-tip {
-  border: 2px solid color-mix(in srgb, var(--callout-tip-color), var(--callout-mix-base) 60%);
-  border-left: 5px solid var(--callout-tip-color);
-  background-color: color-mix(in srgb, var(--callout-tip-color), var(--callout-mix-base) var(--callout-bg-mix));
-  .callout-header {
-    color: var(--callout-tip-color);
-  }
-  .callout-body {
-    color: color-mix(in srgb, var(--callout-tip-color), var(--callout-text-mix) 10%);
-  }
-}
+@each $type, $conf in $callout-types {
+  $icon: nth($conf, 1);
+  $border-light: nth($conf, 2);
+  $header-dark: nth($conf, 3);
+  $body-dark: nth($conf, 4);
 
-div.callout.callout-caution {
-  border: 2px solid color-mix(in srgb, var(--callout-caution-color), var(--callout-mix-base) 25%);
-  border-left: 5px solid var(--callout-caution-color);
-  background-color: color-mix(in srgb, var(--callout-caution-color), var(--callout-mix-base) var(--callout-bg-mix));
-  .callout-header {
-    color: color-mix(in srgb, var(--callout-caution-color), var(--callout-text-mix) 10%);
-  }
-  .callout-body {
-    color: color-mix(in srgb, var(--callout-caution-color), var(--callout-text-mix) 30%);
-  }
-}
-
-div.callout.callout-warning {
-  border: 2px solid color-mix(in srgb, var(--callout-warning-color), var(--callout-mix-base) 25%);
-  border-left: 5px solid var(--callout-warning-color);
-  background-color: color-mix(in srgb, var(--callout-warning-color), var(--callout-mix-base) var(--callout-bg-mix));
-  .callout-header {
-    color: var(--callout-warning-color);
-  }
-  .callout-body {
-    color: color-mix(in srgb, var(--callout-warning-color), var(--callout-text-mix) 10%);
+  div.callout.callout-#{$type} {
+    border: 2px solid color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-mix-base) #{$border-light});
+    border-left: 5px solid var(--callout-#{$type}-color);
+    background-color: color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-mix-base) var(--callout-bg-mix));
+    .callout-icon::before {
+      content: "#{$icon}";
+    }
+    .callout-header {
+      @if $header-dark == 0% {
+        color: var(--callout-#{$type}-color);
+      } @else {
+        color: color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-text-mix) #{$header-dark});
+      }
+    }
+    .callout-body {
+      color: color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-text-mix) #{$body-dark});
+    }
   }
 }

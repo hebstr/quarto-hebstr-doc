@@ -73,11 +73,9 @@ The HTML output wraps figures in lightbox; click the image to enlarge.
 
 # Table
 
-@tbl-penguins-summary is a simple aggregation rendered as a Markdown table. `tbl-cap-location: top` puts the caption above the table; `tbl-title: "Table"` is language-neutral.
+Code chunk below is a simple aggregation rendered as a Markdown table. `tbl-cap-location: top` puts the caption above the table; `tbl-title: "Table"` is language-neutral.
 
 ```{r}
-#| label: tbl-penguins-summary
-#| tbl-cap: "Sample size by species (palmerpenguins)."
 #| echo: true
 #| code-fold: false
 
@@ -157,22 +155,37 @@ Callouts use `callout-appearance: simple`.
 
 ::: {.callout-note}
 # A note callout.
+
+{{< lipsum 1 >}}
+
 :::
 
 ::: {.callout-tip}
 # A tip callout.
+
+{{< lipsum 1 >}}
+
 :::
 
 ::: {.callout-caution}
 # A caution callout.
+
+{{< lipsum 1 >}}
+
 :::
 
 ::: {.callout-warning}
 # A warning callout.
+
+{{< lipsum 1 >}}
+
 :::
 
 ::: {.callout-important}
 # A important callout.
+
+{{< lipsum 1 >}}
+
 :::
 
 # Block quote
@@ -185,5 +198,15 @@ Callouts use `callout-appearance: simple`.
 
 - Section reference: @sec-figure
 - Figure reference: @fig-penguins
-- Table reference: @tbl-penguins-summary
 - Equation reference: @eq-ols
+
+\ 
+
+***
+
+# Session {.unnumbered .unlisted}
+
+```{r}
+#| echo: true
+devtools::session_info(pkgs = "attached")
+```

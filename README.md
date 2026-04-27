@@ -2,7 +2,7 @@
 
 A Quarto extension providing a shared multi-format theme for HTML documents, Typst (PDF) reports, and Word (DOCX) documents.
 
-> **Status (v0.10.0)** — only the **HTML** format is operational. Typst and DOCX formats are planned but not yet shippable.
+> **Status (v0.11.0)** — only the **HTML** format is operational. Typst and DOCX formats are planned but not yet shippable.
 
 ## Installation
 
@@ -16,7 +16,7 @@ If you are using version control, you will want to check in this directory.
 To pin a specific version:
 
 ```bash
-quarto add hebstr/quarto-hebstr@v0.10.0
+quarto add hebstr/quarto-hebstr@v0.11.0
 ```
 
 ## Formats
@@ -59,7 +59,9 @@ The extension bundles the following open-licensed fonts:
 - [Luciole](https://luciole-vision.com/) — a sans-serif font designed for low-vision readers (CC-BY 4.0).
 - [Fira Code](https://github.com/tonsky/FiraCode) — a monospace font with programming ligatures (SIL OFL 1.1).
 
-Both are shipped as `.woff` and `.woff2` under `_extensions/hebstr/fonts/` and referenced via `@font-face` (HTML) and `font-paths` (Typst). Licence texts are bundled alongside the font files (`Luciole.LICENSE`, `FiraCode.LICENSE`).
+Both are shipped as `.woff` and `.woff2` under `_extensions/hebstr/fonts/` and referenced via `@font-face` (HTML) and `font-paths` (Typst). Font Awesome 7 Solid is also bundled there as `fa-solid-900.woff2`. Licence texts are bundled alongside the font files (`Luciole.LICENSE`, `FiraCode.LICENSE`, `FontAwesome.LICENSE`).
+
+Callout icons are rendered with **Font Awesome 7 Solid**, shipped locally as `fa-solid-900.woff2` under `_extensions/hebstr/fonts/` and declared in the same `@font-face` block as Luciole and Fira Code. No render-time network access is required.
 
 ## Customisation
 
@@ -75,7 +77,7 @@ CSS custom properties exposed under `:root`, grouped by purpose:
 
 - **brand colours**: `--primary`, `--secondary`, `--primary-back`, `--primary-surface`, `--primary-dark`, `--neutral`
 - **surfaces**: `--surface-default`, `--em-background-color`, `--caption-color`, `--figure-shadow`, `--tab-background`
-- **inline highlights**: `--str-color`, `--dig-color`, `--summary-fold-color`
+- **inline highlights**: `--str-color`, `--dig-color`
 - **code highlight**: `--code-foreground-color`, `--code-background-color`, `--code-comment-color`
 - **code-window chrome**: `--code-window-titlebar-bg`, `--code-window-border`, `--code-window-line-divider`, `--code-window-muted`, `--code-window-line-number`
 - **callout colours**: `--callout-{note,tip,caution,warning,important}-color`

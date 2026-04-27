@@ -1,6 +1,6 @@
 title: hebstr
 author: hebstr
-version: 0.10.0
+version: 0.11.0
 quarto-required: ">=1.9.36"
 contributes:
   shortcodes:
@@ -32,6 +32,7 @@ contributes:
       embed-resources: true
       date: last-modified
       toc-expand: true
+      anchor-sections: false
       code-link: false
       code-fold: true
       code-copy: always
