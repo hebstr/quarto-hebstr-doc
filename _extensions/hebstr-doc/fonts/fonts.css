@@ -1,7 +1,7 @@
 /*
  * size-adjust: 95% harmonises x-height between Luciole and Fira Code
  * when used side by side (prose + inline code). Must be repeated per
- * @font-face — CSS does not allow factoring this descriptor.
+ * @font-face : CSS does not allow factoring this descriptor.
  */
 
 @font-face {

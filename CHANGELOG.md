@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [0.12.0] — 2026-04-28
+## [0.12.0] - 2026-04-28
 
 ### Changed
 
@@ -22,7 +22,7 @@
   retune typography and layout from a document's YAML without writing SCSS.
 - `_brand.yml` interop: existing `$primary` / `$secondary` `!default` SCSS
   already defers to Quarto's brand layer, and derived shades recompute via
-  `color-mix` — cross-format brand colours and typography work without any
+  `color-mix`. Cross-format brand colours and typography work without any
   extension change.
 - Release pipeline via GitHub Actions: `render.yml` (HTML render on push/PR,
   artefact upload), `pages.yml` (deploy demo via `actions/deploy-pages@v4`),
@@ -38,13 +38,13 @@
   `$line-height-base`, silently ignoring any consumer override. The rule was
   removed; `linestretch: 1.75` (the new default) reproduces the prior look.
 
-## [0.11.0] — 2026-04-27
+## [0.11.0] - 2026-04-27
 
 ### Added
 
 - Light and dark theme support, switchable via Quarto's color-scheme toggle
   (sun/moon icon, rendered with Font Awesome, anchored in the document title).
-- Font Awesome 7 Solid bundled locally — no CDN dependency at render time.
+- Font Awesome 7 Solid bundled locally (no CDN dependency at render time).
 
 ### Changed
 
@@ -53,15 +53,15 @@
   `theme: { light: [theme-light.scss, theme-base.scss], dark: [theme-dark.scss, theme-base.scss] }`.
 - Callout colors adapt to the active theme. `tip` and `warning` body text
   are slightly darker than before.
-- `anchor-sections: false` by default — no hover-anchor icons next to headings.
+- `anchor-sections: false` by default (no hover-anchor icons next to headings).
 
-## [0.10.0] — 2026-04-26
+## [0.10.0] - 2026-04-26
 
 ### Added
 
 - Self-contained `example.qmd` demonstrating the theme (HTML).
 - `script` shortcode for injecting external scripts:
-  `{{< script path/to/file.R >}}` — auto-derives language and filename,
+  `{{< script path/to/file.R >}}` auto-derives language and filename,
   renders inside a foldable code block. Optional args: `lang=`, `filename=`,
   `numbers=`, `lines=10-30`, `dedent=N`, `suffix=`.
 - Embedded [`mcanouil/code-window`](https://github.com/mcanouil/quarto-code-window)
@@ -72,11 +72,11 @@
 - **Breaking**: extension renamed `hebstr-template` → `hebstr`. Re-run
   `quarto add hebstr/quarto-hebstr` and update `format:` to `hebstr-html` /
   `hebstr-typst` / `hebstr-docx`.
-- **Breaking**: `lang` removed from common defaults — declare your own `lang:`
+- **Breaking**: `lang` removed from common defaults. Declare your own `lang:`
   in `_quarto.yml`.
 - `quarto-required` bumped to `>=1.9.36`.
 
-## [0.9.0] — 2026-04-24
+## [0.9.0] - 2026-04-24
 
 ### Added
 

@@ -7,7 +7,7 @@
 
 A Quarto extension providing a shared multi-format theme for HTML documents, Typst (PDF) reports, and Word (DOCX) documents.
 
-> **Status (v0.12.0)** — only the **HTML** format is operational. Typst and DOCX formats are planned but not yet shippable.
+> **Status (v0.12.0)** : only the **HTML** format is operational. Typst and DOCX formats are planned but not yet shippable.
 
 ## Installation
 
@@ -61,8 +61,8 @@ format: hebstr-doc-docx    # planned
 
 The extension bundles the following open-licensed fonts:
 
-- [Luciole](https://luciole-vision.com/) — a sans-serif font designed for low-vision readers (CC-BY 4.0).
-- [Fira Code](https://github.com/tonsky/FiraCode) — a monospace font with programming ligatures (SIL OFL 1.1).
+- [Luciole](https://luciole-vision.com/) : a sans-serif font designed for low-vision readers (CC-BY 4.0).
+- [Fira Code](https://github.com/tonsky/FiraCode) : a monospace font with programming ligatures (SIL OFL 1.1).
 
 Both are shipped as `.woff` and `.woff2` under `_extensions/hebstr-doc/fonts/` and referenced via `@font-face` (HTML) and `font-paths` (Typst). Font Awesome 7 Solid is also bundled there as `fa-solid-900.woff2`. Licence texts are bundled alongside the font files (`Luciole.LICENSE`, `FiraCode.LICENSE`, `FontAwesome.LICENSE`).
 
@@ -96,7 +96,7 @@ Available knobs:
 
 | Key | Default | Notes |
 |---|---|---|
-| `mainfont` | `Luciole` | Bound to `$font-family-sans-serif`. Setting it to a non-bundled family loses the system fallback chain — for robust fallbacks, override SCSS instead (see below). |
+| `mainfont` | `Luciole` | Bound to `$font-family-sans-serif`. Setting it to a non-bundled family loses the system fallback chain ; for robust fallbacks, override SCSS instead (see below). |
 | `monofont` | `Fira Code` | Bound to `$font-family-monospace`. Same caveat. |
 | `fontsize` | `1.2rem` | Bound to `$font-size-root`. Accepts `rem`, `em`, `px`. |
 | `linestretch` | `1.75` | Bound to Bootstrap's `$line-height-base` (unitless multiplier). |
@@ -120,15 +120,15 @@ typography:
     family: "Fira Code"
 ```
 
-Quarto wires `color.palette.primary` to Bootstrap's `$primary` (and `secondary` to `$secondary`) before the extension's SCSS layers load — the derived `$primary-back` / `$primary-surface` / `$primary-dark` are recomputed from the brand colour automatically. See [Quarto — Brand](https://quarto.org/docs/authoring/brand.html) for the full schema.
+Quarto wires `color.palette.primary` to Bootstrap's `$primary` (and `secondary` to `$secondary`) before the extension's SCSS layers load. The derived `$primary-back` / `$primary-surface` / `$primary-dark` are recomputed from the brand colour automatically. See [Quarto Brand](https://quarto.org/docs/authoring/brand.html) for the full schema.
 
 ### Deeper SCSS overrides
 
 For everything else (callout colours, code-window chrome, surface tints, callout mix knobs), the HTML theme is split across three SCSS files loaded as ordered pairs by Quarto's `theme:` key:
 
-- `_extensions/hebstr-doc/theme-light.scss` — light-mode `scss:defaults` only.
-- `_extensions/hebstr-doc/theme-dark.scss` — dark-mode `scss:defaults` only.
-- `_extensions/hebstr-doc/theme-base.scss` — invariant defaults (typography, code-window chrome) + `:root` block exposing every SCSS variable as a CSS custom property + every `scss:rules`.
+- `_extensions/hebstr-doc/theme-light.scss` : light-mode `scss:defaults` only.
+- `_extensions/hebstr-doc/theme-dark.scss` : dark-mode `scss:defaults` only.
+- `_extensions/hebstr-doc/theme-base.scss` : invariant defaults (typography, code-window chrome) + `:root` block exposing every SCSS variable as a CSS custom property + every `scss:rules`.
 
 The active theme is selected by Quarto's color-scheme toggle (default in the title block).
 
@@ -144,7 +144,7 @@ CSS custom properties exposed under `:root`, grouped by purpose:
 
 SCSS variables exposed with `!default` (override before the theme files are loaded):
 
-- typography: `$font-family-sans-serif`, `$font-family-monospace`, `$toc-font-size`, `$callout-icon-scale` (root font size and line height are driven by `fontsize` / `linestretch` in the YAML — see above)
+- typography: `$font-family-sans-serif`, `$font-family-monospace`, `$toc-font-size`, `$callout-icon-scale` (root font size and line height are driven by `fontsize` / `linestretch` in the YAML ; see above)
 - brand & body: `$primary`, `$secondary`, `$body-bg`, `$body-color`, `$primary-back`, `$primary-surface`, `$primary-dark`
 - surfaces, inline highlights, callouts: same names as the matching custom properties (drop the `--` prefix, replace with `$`)
 - code chrome (invariant across light/dark): `$code-foreground-color`, `$code-background-color`, `$code-comment-color`, `$code-window-{titlebar-bg,border,line-divider,muted,line-number}`
@@ -159,7 +159,7 @@ format:
       dark:  [theme-dark.scss,  theme-base.scss, custom.scss]
 ```
 
-Place `custom.scss` **last** : Quarto layers SCSS files in the order given, with the **last** file's `scss:defaults` taking precedence over preceding ones — opposite to the standard Bootstrap convention.
+Place `custom.scss` **last** : Quarto layers SCSS files in the order given, with the **last** file's `scss:defaults` taking precedence over preceding ones. This is opposite to the standard Bootstrap convention.
 
 ## Example
 
