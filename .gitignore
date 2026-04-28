@@ -5,4 +5,9 @@
 /*.html
 /*.pdf
 /*_files/
+/_site/
 /.claude/
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/

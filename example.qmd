@@ -1,17 +1,17 @@
 ---
-title: "hebstr — Example Document"
+title: "hebstr-doc — Example Document"
 subtitle: "Multi-format Quarto extension"
 author: "hebstr"
-date: today
+date: last-modified
 format:
-  hebstr-html:
+  hebstr-doc-html:
     code-tools:
-      source: https://github.com/hebstr/quarto-hebstr
+      source: https://github.com/hebstr/quarto-hebstr-doc
 ---
 
 # Typography and headings
 
-This document exercises every capability declared in `_extension.yml` so a single `quarto render example.qmd` validates the extension. Only `hebstr-html` is declared on `main`; Typst and DOCX outputs will be added once those formats are validated.
+This document exercises every capability declared in `_extension.yml` so a single `quarto render example.qmd` validates the extension. Only `hebstr-doc-html` is declared on `main`; Typst and DOCX outputs will be added once those formats are validated.
 
 The body font is **Luciole** (sans-serif, designed for low-vision readers). Inline `code()` uses **Fira Code** with programming ligatures.
 
@@ -125,7 +125,7 @@ penguins |>
 ```
 
 ```bash
-quarto add hebstr/quarto-hebstr --no-prompt
+quarto add hebstr/quarto-hebstr-doc --no-prompt
 quarto render example.qmd
 ```
 
@@ -133,7 +133,7 @@ quarto render example.qmd
 
 The block below is **not** an inline chunk — it is the content of `scripts/demo_penguins.R`, injected via the `script` shortcode (in-tree `filters/add-code-files.lua`). The shortcode reads the file, emits the populated code block with the `cell-code` class so Quarto's `code-fold` wraps it in a foldable `<details>` element (collapsed by default) ; clicking the filename header expands it. The `<summary>` text is rewritten to the filename by `filters/add-code-files.js` (derived from [`shafayetShafee/add-code-files`](https://github.com/shafayetShafee/add-code-files), MIT).
 
-This is the canonical pattern for hebstr: inline chunks display as `code-window`, externalised scripts display as foldable `script` blocks.
+This is the canonical pattern for hebstr-doc: inline chunks display as `code-window`, externalised scripts display as foldable `script` blocks.
 
 {{< script scripts/demo_penguins.R >}}
 
@@ -212,5 +212,5 @@ Callouts use `callout-appearance: simple`.
 
 ```{r}
 #| echo: true
-devtools::session_info(pkgs = "attached")
+sessioninfo::session_info(pkgs = "attached")
 ```

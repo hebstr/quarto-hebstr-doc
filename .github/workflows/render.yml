@@ -1,0 +1,42 @@
+name: Render
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          packages: |
+            any::knitr
+            any::rmarkdown
+            any::dplyr
+            any::ggplot2
+            any::palmerpenguins
+            any::sessioninfo
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.9.37
+
+      - name: Render example.qmd (HTML)
+        run: quarto render example.qmd --to hebstr-doc-html
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-html
+          path: |
+            example.html
+            example_files/
+          if-no-files-found: warn

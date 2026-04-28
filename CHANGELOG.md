@@ -2,18 +2,34 @@
 
 ## [Unreleased]
 
+## [0.12.0] — 2026-04-28
+
+### Changed
+
+- **Breaking**: extension renamed `hebstr` → `hebstr-doc` and repo renamed
+  `quarto-hebstr` → `quarto-hebstr-doc` to make room for upcoming
+  `hebstr-book` and `hebstr-website` project templates. Re-run
+  `quarto add hebstr/quarto-hebstr-doc` and update `format:` to
+  `hebstr-doc-html` / `hebstr-doc-typst` / `hebstr-doc-docx`. Extension
+  directory moved to `_extensions/hebstr-doc/`; the Typst raw-theme path in
+  `template.typ` was updated accordingly.
+
 ### Added
 
 - Frontmatter overrides for the most common aesthetic knobs, surfaced at the
   format level in `_extension.yml`: `mainfont`, `monofont`, `fontsize`,
-  `linestretch` (joining the existing `page-layout`, `toc*`, `grid.*`).
-  Consumers can now retune typography and layout from a document's YAML
-  without writing SCSS.
-- README section "Frontmatter overrides" listing the 8 directly overridable
-  parameters with an example, plus a `_brand.yml` subsection covering
-  cross-format brand colours and typography (no extension change required —
-  the existing `$primary` / `$secondary` `!default` SCSS already defers to
-  Quarto's brand layer, and derived shades are recomputed via `color-mix`).
+  `linestretch` (joining `page-layout`, `toc*`, `grid.*`). Consumers can
+  retune typography and layout from a document's YAML without writing SCSS.
+- `_brand.yml` interop: existing `$primary` / `$secondary` `!default` SCSS
+  already defers to Quarto's brand layer, and derived shades recompute via
+  `color-mix` — cross-format brand colours and typography work without any
+  extension change.
+- Release pipeline via GitHub Actions: `render.yml` (HTML render on push/PR,
+  artefact upload), `pages.yml` (deploy demo via `actions/deploy-pages@v4`),
+  `release.yml` (GitHub Release on `v*` tag with auto-generated notes).
+  README badges (CI, Pages, release, MIT) and `.gitignore` entries for
+  `_site/` plus R session artefacts (`.Rhistory`, `.RData`, `.Ruserdata`,
+  `.Rproj.user/`).
 
 ### Fixed
 

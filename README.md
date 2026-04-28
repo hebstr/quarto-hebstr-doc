@@ -1,13 +1,18 @@
-# hebstr Extension For Quarto
+# hebstr-doc Extension For Quarto
+
+[![Render](https://github.com/hebstr/quarto-hebstr-doc/actions/workflows/render.yml/badge.svg)](https://github.com/hebstr/quarto-hebstr-doc/actions/workflows/render.yml)
+[![Pages](https://github.com/hebstr/quarto-hebstr-doc/actions/workflows/pages.yml/badge.svg)](https://hebstr.github.io/quarto-hebstr-doc/)
+[![Release](https://img.shields.io/github/v/release/hebstr/quarto-hebstr-doc?label=release)](https://github.com/hebstr/quarto-hebstr-doc/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
 A Quarto extension providing a shared multi-format theme for HTML documents, Typst (PDF) reports, and Word (DOCX) documents.
 
-> **Status (v0.11.0)** — only the **HTML** format is operational. Typst and DOCX formats are planned but not yet shippable.
+> **Status (v0.12.0)** — only the **HTML** format is operational. Typst and DOCX formats are planned but not yet shippable.
 
 ## Installation
 
 ```bash
-quarto add hebstr/quarto-hebstr
+quarto add hebstr/quarto-hebstr-doc
 ```
 
 This will install the extension under the `_extensions` subdirectory.
@@ -16,23 +21,23 @@ If you are using version control, you will want to check in this directory.
 To pin a specific version:
 
 ```bash
-quarto add hebstr/quarto-hebstr@v0.11.0
+quarto add hebstr/quarto-hebstr-doc@v0.12.0
 ```
 
 ## Formats
 
 The extension targets three formats sharing a common set of defaults (numbered sections, TOC, cross-references, knitr chunk options):
 
-- **`hebstr-html`** *(operational)*: self-contained HTML with custom SCSS theme, Luciole and Fira Code fonts, lightbox figures, and a wide body/margin grid.
-- **`hebstr-typst`** *(planned)*: A4 PDF with Luciole as the main font and a Typst preamble styling headings, lists, tables, code blocks, and quotes.
-- **`hebstr-docx`** *(planned)*: Word document using a reference `.dotx` for styles.
+- **`hebstr-doc-html`** *(operational)*: self-contained HTML with custom SCSS theme, Luciole and Fira Code fonts, lightbox figures, and a wide body/margin grid.
+- **`hebstr-doc-typst`** *(planned)*: A4 PDF with Luciole as the main font and a Typst preamble styling headings, lists, tables, code blocks, and quotes.
+- **`hebstr-doc-docx`** *(planned)*: Word document using a reference `.dotx` for styles.
 
 ## Usage
 
 ```yaml
 ---
 title: "My Document"
-format: hebstr-html
+format: hebstr-doc-html
 ---
 ```
 
@@ -41,14 +46,14 @@ The Typst and DOCX formats below are declared but not yet ship-ready (no validat
 ```yaml
 ---
 title: "My Report"
-format: hebstr-typst   # planned
+format: hebstr-doc-typst   # planned
 ---
 ```
 
 ```yaml
 ---
 title: "My Document"
-format: hebstr-docx    # planned
+format: hebstr-doc-docx    # planned
 ---
 ```
 
@@ -59,9 +64,9 @@ The extension bundles the following open-licensed fonts:
 - [Luciole](https://luciole-vision.com/) — a sans-serif font designed for low-vision readers (CC-BY 4.0).
 - [Fira Code](https://github.com/tonsky/FiraCode) — a monospace font with programming ligatures (SIL OFL 1.1).
 
-Both are shipped as `.woff` and `.woff2` under `_extensions/hebstr/fonts/` and referenced via `@font-face` (HTML) and `font-paths` (Typst). Font Awesome 7 Solid is also bundled there as `fa-solid-900.woff2`. Licence texts are bundled alongside the font files (`Luciole.LICENSE`, `FiraCode.LICENSE`, `FontAwesome.LICENSE`).
+Both are shipped as `.woff` and `.woff2` under `_extensions/hebstr-doc/fonts/` and referenced via `@font-face` (HTML) and `font-paths` (Typst). Font Awesome 7 Solid is also bundled there as `fa-solid-900.woff2`. Licence texts are bundled alongside the font files (`Luciole.LICENSE`, `FiraCode.LICENSE`, `FontAwesome.LICENSE`).
 
-Callout icons are rendered with **Font Awesome 7 Solid**, shipped locally as `fa-solid-900.woff2` under `_extensions/hebstr/fonts/` and declared in the same `@font-face` block as Luciole and Fira Code. No render-time network access is required.
+Callout icons are rendered with **Font Awesome 7 Solid**, shipped locally as `fa-solid-900.woff2` under `_extensions/hebstr-doc/fonts/` and declared in the same `@font-face` block as Luciole and Fira Code. No render-time network access is required.
 
 ## Customisation
 
@@ -73,7 +78,7 @@ Most aesthetic choices ship as standard Quarto keys, so a consumer can override 
 ---
 title: "My Document"
 format:
-  hebstr-html:
+  hebstr-doc-html:
     mainfont: "Inter"
     monofont: "JetBrains Mono"
     fontsize: 1rem
@@ -121,9 +126,9 @@ Quarto wires `color.palette.primary` to Bootstrap's `$primary` (and `secondary` 
 
 For everything else (callout colours, code-window chrome, surface tints, callout mix knobs), the HTML theme is split across three SCSS files loaded as ordered pairs by Quarto's `theme:` key:
 
-- `_extensions/hebstr/theme-light.scss` — light-mode `scss:defaults` only.
-- `_extensions/hebstr/theme-dark.scss` — dark-mode `scss:defaults` only.
-- `_extensions/hebstr/theme-base.scss` — invariant defaults (typography, code-window chrome) + `:root` block exposing every SCSS variable as a CSS custom property + every `scss:rules`.
+- `_extensions/hebstr-doc/theme-light.scss` — light-mode `scss:defaults` only.
+- `_extensions/hebstr-doc/theme-dark.scss` — dark-mode `scss:defaults` only.
+- `_extensions/hebstr-doc/theme-base.scss` — invariant defaults (typography, code-window chrome) + `:root` block exposing every SCSS variable as a CSS custom property + every `scss:rules`.
 
 The active theme is selected by Quarto's color-scheme toggle (default in the title block).
 
@@ -148,7 +153,7 @@ To override in a consumer project, redeclare both halves of the theme key (overr
 
 ```yaml
 format:
-  hebstr-html:
+  hebstr-doc-html:
     theme:
       light: [theme-light.scss, theme-base.scss, custom.scss]
       dark:  [theme-dark.scss,  theme-base.scss, custom.scss]
@@ -166,8 +171,8 @@ To render locally:
 quarto render example.qmd
 ```
 
-This produces `index.html` covering headings, lists, figures, tables, code blocks, equations, callouts, and cross-references. Typst (`example.pdf`) and DOCX (`example.docx`) outputs are planned for a later release.
+This produces `example.html` covering headings, lists, figures, tables, code blocks, equations, callouts, and cross-references. Typst (`example.pdf`) and DOCX (`example.docx`) outputs are planned for a later release.
 
 ## Licence
 
-Code is released under the MIT Licence (see [LICENSE.md](LICENSE.md)). Bundled fonts retain their respective licences (see `_extensions/hebstr/fonts/`).
+Code is released under the MIT Licence (see [LICENSE.md](LICENSE.md)). Bundled fonts retain their respective licences (see `_extensions/hebstr-doc/fonts/`).

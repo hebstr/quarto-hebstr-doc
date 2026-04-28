@@ -59,7 +59,7 @@ inset: 8pt,
 #show math.equation: set text(font: "New Computer Modern Math")
 
 // Style des blocs de code
-#set raw(theme: "_extensions/hebstr/code.tmTheme")
+#set raw(theme: "_extensions/hebstr-doc/code.tmTheme")
 
 #show raw.where(block: true): block.with(
   fill: rgb("#291334"),
