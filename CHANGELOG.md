@@ -2,6 +2,42 @@
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-04-29
+
+First public stable release. The public API surface (formats, SCSS
+variables, CSS custom properties, frontmatter keys, shortcodes, bundled
+fonts, `quarto-required`) is now versioned per
+[CONTRIBUTING.md](CONTRIBUTING.md): MAJOR for breaking changes, MINOR for
+additions, PATCH for fixes.
+
+### Added
+
+- Public SCSS API for layout chrome, in preparation for downstream
+  `hebstr-book` and `hebstr-website` project templates: `$navbar-bg`,
+  `$navbar-fg`, `$navbar-hl`, `$sidebar-bg`, `$sidebar-fg`, `$sidebar-hl`,
+  `$footer-bg`, `$footer-fg` (defaults in `theme-light.scss` and
+  `theme-dark.scss`, derived from the existing palette via Sass `mix()`).
+  These variables are consumed by Quarto's Bootstrap layer at compile time
+  and only take effect in project layouts (book, website); single-document
+  renders are unaffected. No CSS custom property counterpart is exposed
+  because Quarto's Bootstrap calls `theme-contrast()` on them, which
+  requires Sass-resolvable colours.
+- [CONTRIBUTING.md](CONTRIBUTING.md): public API surface, SemVer policy,
+  release procedure, local validation, repo layout.
+- README sections covering the new layout-chrome variables and a
+  "Composing on top" guide for downstream project templates.
+
+### Changed
+
+- Bootstrap-Quarto couples `$navbar-bg` / `$navbar-fg` to the
+  `.quarto-title-banner` rules. Consumers using `title-block-banner: true`
+  on `hebstr-doc-html` will see their banner background switch from
+  Quarto's slate-blue default (`#517699`) to the new hebstr navbar-bg
+  (light tint of `$primary` in light theme; dark tint in dark theme).
+  Opt out by setting `title-block-banner: false`, by overriding
+  `.quarto-title-banner { background: ... }` in a custom SCSS layer, or by
+  overriding `$navbar-bg` itself.
+
 ## [0.12.0] - 2026-04-28
 
 ### Changed

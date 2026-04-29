@@ -7,7 +7,7 @@
 
 A shared Quarto theme for HTML, Typst (PDF), and Word (DOCX) output.
 
-> **Status (v0.12.0)**: only **HTML** ships. Typst and DOCX are declared but not yet ready.
+> **Status (v1.0.0)**: only **HTML** ships. Typst and DOCX are declared but not yet ready.
 
 ## Installation
 
@@ -20,7 +20,7 @@ The extension lands under `_extensions`. Check that directory in if you use vers
 To pin a version:
 
 ```bash
-quarto add hebstr/quarto-hebstr-doc@v0.12.0
+quarto add hebstr/quarto-hebstr-doc@v1.0.0
 ```
 
 ## Formats
@@ -127,7 +127,7 @@ For the rest (callout colours, code-window chrome, surface tints, callout mix kn
 
 - `_extensions/hebstr-doc/theme-light.scss`: light-mode `scss:defaults` only.
 - `_extensions/hebstr-doc/theme-dark.scss`: dark-mode `scss:defaults` only.
-- `_extensions/hebstr-doc/theme-base.scss`: invariant defaults (typography, code-window chrome) + `:root` block exposing every SCSS variable as a CSS custom property + every `scss:rules`.
+- `_extensions/hebstr-doc/theme-base.scss`: invariant defaults (typography, code-window chrome) + `:root` block exposing the runtime-themable SCSS variables as CSS custom properties + every `scss:rules`. Layout-chrome variables (navbar/sidebar/footer) are consumed by Quarto's own Bootstrap layer at compile time and therefore have no CSS custom property counterpart.
 
 Quarto's color-scheme toggle picks the active theme (default in the title block).
 
@@ -147,6 +147,7 @@ SCSS variables exposed with `!default` (override before the theme files load):
 - brand & body: `$primary`, `$secondary`, `$body-bg`, `$body-color`, `$primary-back`, `$primary-surface`, `$primary-dark`
 - surfaces, inline highlights, callouts: same names as the matching custom properties (drop the `--` prefix, replace with `$`)
 - code chrome (invariant across light/dark): `$code-foreground-color`, `$code-background-color`, `$code-comment-color`, `$code-window-{titlebar-bg,border,line-divider,muted,line-number}`
+- layout chrome (navbar / sidebar / footer, only active in project layouts like book and website): `$navbar-bg`, `$navbar-fg`, `$navbar-hl`, `$sidebar-bg`, `$sidebar-fg`, `$sidebar-hl`, `$footer-bg`, `$footer-fg`. These are consumed directly by Quarto's Bootstrap layer (which calls `theme-contrast()` on them), so override values must be SCSS-resolvable colors (hex, named, `mix(...)`) — not CSS `color-mix(...)`.
 
 To override in a consumer project, redeclare both halves of the theme key (overriding the whole `theme:` value drops the dark variant):
 
@@ -160,6 +161,21 @@ format:
 
 Put `custom.scss` **last**: Quarto layers SCSS files in the order given, and the **last** file's `scss:defaults` wins over the preceding ones. This is the opposite of the standard Bootstrap convention.
 
+## Composing on top
+
+`hebstr-doc` is the visual identity layer for the wider `hebstr-*` family of Quarto extensions (`hebstr-book` and `hebstr-website`, separate repos). Project templates that build on top of it ship as their own Quarto extension and reference `hebstr-doc-html` as the format, layering an `extras.scss` for project-specific chrome (sidebar tweaks for books, navbar/listing tweaks for websites):
+
+```yaml
+format:
+  hebstr-doc-html:
+    theme:
+      light: [theme-light.scss, theme-base.scss, book-extras.scss]
+      dark:  [theme-dark.scss,  theme-base.scss, book-extras.scss]
+  hebstr-doc-typst: default
+```
+
+The downstream extension installs alongside `hebstr-doc` (no `--embed`) so consumers can update each independently. Treat the SCSS variables listed under "Deeper SCSS overrides" as the public API: renaming or removing one is a MAJOR-version change, additions are MINOR.
+
 ## Example
 
 Source: [example.qmd](example.qmd).
@@ -171,6 +187,10 @@ quarto render example.qmd
 ```
 
 This produces `example.html` covering headings, lists, figures, tables, code blocks, equations, callouts, and cross-references. Typst (`example.pdf`) and DOCX (`example.docx`) come in a later release.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the public API surface, the SemVer policy, the release procedure, and the local validation workflow.
 
 ## Licence
 
