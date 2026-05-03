@@ -12,8 +12,7 @@ additions, PATCH for fixes.
 
 ### Added
 
-- Public SCSS API for layout chrome, in preparation for downstream
-  `hebstr-book` and `hebstr-website` project templates: `$navbar-bg`,
+- Public SCSS API for layout chrome: `$navbar-bg`,
   `$navbar-fg`, `$navbar-hl`, `$sidebar-bg`, `$sidebar-fg`, `$sidebar-hl`,
   `$footer-bg`, `$footer-fg` (defaults in `theme-light.scss` and
   `theme-dark.scss`, derived from the existing palette via Sass `mix()`).
@@ -24,8 +23,7 @@ additions, PATCH for fixes.
   requires Sass-resolvable colours.
 - [CONTRIBUTING.md](CONTRIBUTING.md): public API surface, SemVer policy,
   release procedure, local validation, repo layout.
-- README sections covering the new layout-chrome variables and a
-  "Composing on top" guide for downstream project templates.
+- README section covering the new layout-chrome variables.
 
 ### Changed
 
@@ -43,8 +41,7 @@ additions, PATCH for fixes.
 ### Changed
 
 - **Breaking**: extension renamed `hebstr` → `hebstr-doc` and repo renamed
-  `quarto-hebstr` → `quarto-hebstr-doc` to make room for upcoming
-  `hebstr-book` and `hebstr-website` project templates. Re-run
+  `quarto-hebstr` → `quarto-hebstr-doc` under the `hebstr-*` namespace. Re-run
   `quarto add hebstr/quarto-hebstr-doc` and update `format:` to
   `hebstr-doc-html` / `hebstr-doc-typst` / `hebstr-doc-docx`. Extension
   directory moved to `_extensions/hebstr-doc/`; the Typst raw-theme path in

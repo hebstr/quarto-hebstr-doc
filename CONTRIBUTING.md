@@ -7,8 +7,8 @@ This document covers the SemVer policy, the public API surface, and the release 
 A change is "API-affecting" only if it touches one of these surfaces:
 
 1. **Format names** declared in `_extension.yml`: `hebstr-doc-html`, `hebstr-doc-typst`, `hebstr-doc-docx`.
-2. **SCSS variables** with `!default` in `theme-light.scss`, `theme-dark.scss`, or `theme-base.scss`. Full list documented in [README.md → Deeper SCSS overrides](README.md#deeper-scss-overrides).
-3. **CSS custom properties** exposed under `:root` in `theme-base.scss`. Same list, dropping the `--` for `$` prefix on the SCSS side.
+2. **SCSS variables** with `!default` in `theme-light.scss`, `theme-dark.scss`, or `theme-base.scss`.
+3. **CSS custom properties** exposed under `:root` in `theme-base.scss`. Same names as the SCSS variables, prefixed with `--` instead of `$`.
 4. **Frontmatter keys** wired through `_extension.yml` (`mainfont`, `monofont`, `fontsize`, `linestretch`, `grid.*`, etc.).
 5. **Shortcodes** registered in `_extension.yml`: currently `{{< script path >}}`.
 6. **Bundled fonts** (Luciole, Fira Code, Font Awesome 7 Solid) — removing or replacing a font is API-affecting because consumer SCSS may reference the family name.
