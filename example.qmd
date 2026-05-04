@@ -188,7 +188,15 @@ $$
 \hat{\beta} = (X^\top X)^{-1} X^\top y
 $$ {#eq-ols}
 
-The HTML output uses `html-math-method: plain` (plain CSS rendering, no MathJax).
+Textual equations (@eq-text): 
+
+$$
+\frac
+  {\text{upper text}}
+  {\text{lower text}}
+\text{ beside text}
+$$ {#eq-text}
+
 
 # Callouts
 

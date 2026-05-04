@@ -95,6 +95,15 @@ body {
   font-style: italic;
 }
 
+.blockquote {
+  color: currentColor;
+  border-color: currentColor;
+}
+
+mjx-container {
+  color: var(--primary-dark);
+}
+
 .panel-tabset {
   --tab-surface: color-mix(in srgb, var(--primary), transparent 93%);
   .nav-tabs {
@@ -175,10 +184,17 @@ body {
 
 #quarto-margin-sidebar {
   text-align: left;
-  padding-left: 1.5rem;
+  padding: 1rem 1rem 0 1.5rem;
   background-color: var(--primary-back);
-  #toc-title {
-    display: none;
+  h2#toc-title {
+    font-size: 0.95rem;
+    color: var(--primary-dark);
+    margin: 0 0 0.3rem 0.2rem;
+  }
+  nav a#toc-title {
+    font-size: inherit;
+    color: inherit;
+    margin: 0;
   }
   .toc-active {
     > ul a {
