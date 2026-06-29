@@ -11,13 +11,16 @@ format:
 
 # Typography and headings
 
-This document exercises every capability declared in `_extension.yml`, so `quarto render example.qmd` validates the extension in one shot. Only `hebstr-doc-html` is declared on `main`; Typst and DOCX outputs land once those formats are validated.
+This document exercises every capability declared in `_extension.yml`, so `quarto render example.qmd` validates the extension in one shot.
+Only `hebstr-doc-html` is declared on `main`; Typst and DOCX outputs land once those formats are validated.
 
-The body font is **Luciole** (sans-serif, designed for low-vision readers). Inline `code()` uses **Fira Code** with programming ligatures.
+The body font is **Luciole** (sans-serif, designed for low-vision readers).
+Inline `code()` uses **Fira Code** with programming ligatures.
 
 ## Level 2 heading
 
-Headings are numbered down to level 4 (`number-depth: 4`). The cross-reference title delimiter is a literal dot (e.g. *Figure 1.1*).
+Headings are numbered down to level 4 (`number-depth: 4`).
+The cross-reference title delimiter is a literal dot (e.g. *Figure 1.1*).
 
 ### Level 3 heading
 
@@ -33,8 +36,8 @@ Unordered:
 
 - First item
 - Second item with a *nested* block:
-    - Nested bullet one
-    - Nested bullet two
+  - Nested bullet one
+  - Nested bullet two
 - Third item
 
 Ordered:
@@ -73,7 +76,8 @@ The HTML output wraps figures in lightbox; click the image to enlarge.
 
 # Table
 
-The chunk below is a simple aggregation rendered as a Markdown table. `tbl-cap-location: top` puts the caption above the table; `tbl-title: "Table"` is language-neutral.
+The chunk below is a simple aggregation rendered as a Markdown table.
+`tbl-cap-location: top` puts the caption above the table; `tbl-title: "Table"` is language-neutral.
 
 ```{r}
 #| echo: true
@@ -131,7 +135,10 @@ quarto render example.qmd
 
 # Injected script
 
-The block below is **not** an inline chunk. It holds the content of `scripts/demo_penguins.R`, injected via the `script` shortcode (in-tree `filters/add-code-files.lua`). The shortcode reads the file and emits the populated code block with the `cell-code` class, so Quarto's `code-fold` wraps it in a foldable `<details>` element (collapsed by default); clicking the filename header expands it. `filters/add-code-files.js` rewrites the `<summary>` text to the filename (derived from [`shafayetShafee/add-code-files`](https://github.com/shafayetShafee/add-code-files), MIT).
+The block below is **not** an inline chunk.
+It holds the content of `scripts/demo_penguins.R`, injected via the `script` shortcode (in-tree `filters/add-code-files.lua`).
+The shortcode reads the file and emits the populated code block with the `cell-code` class, so Quarto's `code-fold` wraps it in a foldable `<details>` element (collapsed by default); clicking the filename header expands it.
+`filters/add-code-files.js` rewrites the `<summary>` text to the filename (derived from [`shafayetShafee/add-code-files`](https://github.com/shafayetShafee/add-code-files), MIT).
 
 This is the canonical pattern for hebstr-doc: inline chunks render as `code-window`, externalised scripts render as foldable `script` blocks.
 
@@ -142,12 +149,12 @@ This is the canonical pattern for hebstr-doc: inline chunks render as `code-wind
 Tabs use the `.panel-tabset` div class; `tab-background` from `theme-light.scss` / `theme-dark.scss` sets the panel fill.
 
 ::: {.panel-tabset}
-
 ## Adelie
 
 ```{r}
 #| echo: true
 #| code-fold: false
+
 palmerpenguins::penguins |>
   dplyr::filter(species == "Adelie") |>
   dplyr::select(island, bill_length_mm, flipper_length_mm, body_mass_g) |>
@@ -159,6 +166,7 @@ palmerpenguins::penguins |>
 ```{r}
 #| echo: true
 #| code-fold: false
+
 palmerpenguins::penguins |>
   dplyr::filter(species == "Chinstrap") |>
   dplyr::select(island, bill_length_mm, flipper_length_mm, body_mass_g) |>
@@ -170,12 +178,12 @@ palmerpenguins::penguins |>
 ```{r}
 #| echo: true
 #| code-fold: false
+
 palmerpenguins::penguins |>
   dplyr::filter(species == "Gentoo") |>
   dplyr::select(island, bill_length_mm, flipper_length_mm, body_mass_g) |>
   head(5)
 ```
-
 :::
 
 # Equation
@@ -185,18 +193,17 @@ Inline math: $y = \beta_0 + \beta_1 x + \varepsilon$.
 Display math with a cross-reference target (@eq-ols):
 
 $$
-\hat{\beta} = (X^\top X)^{-1} X^\top y
+  \hat{\beta} = (X^\top X)^{-1} X^\top y
 $$ {#eq-ols}
 
-Textual equations (@eq-text): 
+Textual equations (@eq-text):
 
 $$
-\frac
-  {\text{upper text}}
-  {\text{lower text}}
-\text{ beside text}
+  \frac
+    {\text{upper text}}
+    {\text{lower text}}
+  \text{ beside text}
 $$ {#eq-text}
-
 
 # Callouts
 
@@ -210,35 +217,30 @@ Callouts use `callout-appearance: simple`.
 # Le note callout.
 
 {{< lipsum 1 >}}
-
 :::
 
 ::: {.callout-tip}
 # A tip callout.
 
 {{< lipsum 1 >}}
-
 :::
 
 ::: {.callout-caution}
 # A caution callout.
 
 {{< lipsum 1 >}}
-
 :::
 
 ::: {.callout-warning}
 # A warning callout.
 
 {{< lipsum 1 >}}
-
 :::
 
 ::: {.callout-important}
 # A important callout.
 
 {{< lipsum 1 >}}
-
 :::
 
 # Block quote
@@ -255,11 +257,12 @@ Callouts use `callout-appearance: simple`.
 
 \ 
 
-***
+--------------------------------------------------------------------------------
 
 # Session {.unnumbered .unlisted}
 
 ```{r}
 #| echo: true
+
 sessioninfo::session_info(pkgs = "attached")
 ```
