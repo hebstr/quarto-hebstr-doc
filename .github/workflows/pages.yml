@@ -35,8 +35,6 @@ jobs:
             any::sessioninfo
 
       - uses: quarto-dev/quarto-actions/setup@v2
-        with:
-          version: 1.9.37
 
       - name: Render and stage _site
         run: |
