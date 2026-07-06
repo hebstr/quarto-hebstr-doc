@@ -278,6 +278,14 @@ div.csl-right-inline {
   padding-bottom: 0.5em;
 }
 
+// LIGHTBOX --------------------------------------------------------------------
+
+.glightbox-container .gslide-image img[src^="data:image/svg+xml"] {
+  width: 90vw;
+  height: 90vh;
+  object-fit: contain;
+}
+
 // CODE ------------------------------------------------------------------------
 
 div.sourceCode {

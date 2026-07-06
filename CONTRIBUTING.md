@@ -11,7 +11,7 @@ A change is "API-affecting" only if it touches one of these surfaces:
 3. **CSS custom properties** exposed under `:root` in `theme-base.scss`. Same names as the SCSS variables, prefixed with `--` instead of `$`.
 4. **Frontmatter keys** wired through `_extension.yml` (`mainfont`, `monofont`, `fontsize`, `linestretch`, `grid.*`, etc.).
 5. **Shortcodes** registered in `_extension.yml`: currently `{{< script path >}}`.
-6. **Bundled fonts** (Luciole, Fira Code, Font Awesome 7 Solid) — removing or replacing a font is API-affecting because consumer SCSS may reference the family name.
+6. **Bundled fonts** (Luciole, Fira Code, Font Awesome 7 Solid): removing or replacing a font is API-affecting because consumer SCSS may reference the family name.
 7. **`quarto-required`** version constraint in `_extension.yml`.
 
 Changes to private internals (rule selectors, computed colour-mix knobs that are not exposed as variables, internal helpers, file reorganisation that does not move public resources) are **not** API-affecting.
@@ -39,7 +39,7 @@ Releases are git-tag-driven; the `release.yml` workflow turns each `v*` tag into
 5. Push commit and tag: `git push && git push --tags`.
 6. The `release.yml` workflow opens a GitHub Release; copy the relevant CHANGELOG section into the release body if the auto-generated notes are too terse.
 
-Consumers pin via `quarto add hebstr/quarto-hebstr-doc@vX.Y.Z`. Always tag — Quarto resolves `quarto add user/repo` to the latest release if any tag exists, otherwise to the default branch.
+Consumers pin via `quarto add hebstr/quarto-hebstr-doc@vX.Y.Z`. Always tag: Quarto resolves `quarto add user/repo` to the latest release if any tag exists, otherwise to the default branch.
 
 ## Local validation
 
@@ -53,8 +53,8 @@ Currently HTML only; once Typst and DOCX are validated (see [.claude/PLAN.md](.c
 
 ## Where things live
 
-- `_extensions/hebstr-doc/` — the extension itself (do not flatten).
-- `_extensions/hebstr-doc/_extensions/` — embedded third-party extensions (currently `mcanouil/code-window`).
-- `.claude/PLAN.md` — backlog toward v1.0.
-- `.claude/DEFERRED.md` — items intentionally postponed.
-- `.github/workflows/` — `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).
+- `_extensions/hebstr-doc/`: the extension itself (do not flatten).
+- `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (currently `mcanouil/code-window`).
+- `.claude/PLAN.md`: post-v1.0 backlog.
+- `.claude/DEFERRED.md`: items intentionally postponed.
+- `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).

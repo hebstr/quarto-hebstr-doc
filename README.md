@@ -7,7 +7,7 @@
 
 A Quarto theme for HTML, Typst (PDF), and Word (DOCX) output.
 
-> **Status (v1.0.0):** HTML is operational. Typst and DOCX are declared but not yet validated.
+> **Status (v1.1.0):** HTML is operational. Typst and DOCX are declared but not yet validated.
 
 ## Installation
 
@@ -43,6 +43,8 @@ format:
       margin-width: 300px
 ```
 
+HTML figures render as SVG (`fig-format: svg`) via R's built-in cairo device, so vector output needs no extra package. For selectable text and lighter files, opt into the `svglite` device (requires the `svglite` R package) with `knitr: { opts_chunk: { dev: svglite } }` in the document YAML. Render as raster instead with `fig-format: png`. Typst and DOCX are unaffected.
+
 ### Brand colors via `_brand.yml`
 
 ```yaml
@@ -70,7 +72,7 @@ All overridable variables are listed in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Example
 
-Source: [example.qmd](example.qmd) — live demo at [hebstr.github.io/quarto-hebstr-doc](https://hebstr.github.io/quarto-hebstr-doc/).
+Source: [example.qmd](example.qmd). Live demo at [hebstr.github.io/quarto-hebstr-doc](https://hebstr.github.io/quarto-hebstr-doc/).
 
 ```bash
 quarto render example.qmd

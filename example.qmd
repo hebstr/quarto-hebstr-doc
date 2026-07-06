@@ -53,8 +53,7 @@ Ordered:
 ```{r}
 #| label: fig-penguins
 #| fig-cap: "Bill length vs flipper length by species (palmerpenguins)."
-#| fig-width: 6
-#| fig-height: 4
+#| fig-height: 5
 
 library(ggplot2)
 
