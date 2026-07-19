@@ -7,6 +7,8 @@ format:
   hebstr-doc-html:
     code-tools:
       source: https://github.com/hebstr/quarto-hebstr-doc
+filters:
+  - _extensions/hebstr-doc/filters/adaptive-figure.lua
 ---
 
 # Typography and headings
@@ -54,8 +56,14 @@ Ordered:
 #| label: fig-penguins
 #| fig-cap: "Bill length vs flipper length by species (palmerpenguins)."
 #| fig-height: 5
+#| dev: svglite
+#| dev.args: !expr list(bg = "transparent")
 
 library(ggplot2)
+
+theme_hebstr <- function() {
+  theme_minimal(base_size = 12, ink = "#010101", paper = NA)
+}
 
 ggplot(
   palmerpenguins::penguins,
@@ -68,10 +76,10 @@ ggplot(
     y = "Bill length (mm)",
     colour = "Species"
   ) +
-  theme_minimal(base_size = 12)
+  theme_hebstr()
 ```
 
-The HTML output wraps figures in lightbox; click the image to enlarge.
+This figure renders as an inline SVG whose ink and gridlines follow the light/dark theme toggle; adaptive figures opt out of lightbox, since a static zoom modal cannot follow the runtime theme.
 
 # Table
 
@@ -198,10 +206,7 @@ $$ {#eq-ols}
 Textual equations (@eq-text):
 
 $$
-  \frac
-    {\text{upper text}}
-    {\text{lower text}}
-  \text{ beside text}
+  \frac{\text{upper text}}{\text{lower text}} \text{ beside text}
 $$ {#eq-text}
 
 # Callouts
