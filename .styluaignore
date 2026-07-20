@@ -1,0 +1,7 @@
+# Vendored / third-party Lua, not this project's code to format.
+.luals/
+_extensions/hebstr-doc/_extensions/
+tests/luaunit.lua
+
+# Test fixtures are read verbatim by the suite; formatting them shifts asserted bytes.
+tests/fixtures/

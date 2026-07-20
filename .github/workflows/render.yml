@@ -12,6 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Pre-commit hooks (prek)
+        uses: j178/prek-action@v2
+        with:
+          # prose-lint is a local system hook (personal dotfiles script), absent on the runner.
+          extra-args: --all-files --skip prose-lint
+
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
@@ -27,6 +33,15 @@ jobs:
             any::sessioninfo
 
       - uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Lua unit tests
+        run: quarto pandoc lua tests/run.lua
+
+      - name: Lua type check (lua-language-server)
+        run: |
+          curl -sSL -o luals.tar.gz https://github.com/LuaLS/lua-language-server/releases/download/3.18.2/lua-language-server-3.18.2-linux-x64.tar.gz
+          mkdir luals && tar -xzf luals.tar.gz -C luals
+          luals/bin/lua-language-server --check . --checklevel Warning
 
       - name: Render example.qmd (HTML)
         run: quarto render example.qmd --to hebstr-doc-html

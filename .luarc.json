@@ -1,0 +1,26 @@
+{
+  "_vendored": [
+    "Manually managed (no 'Generator' key), so Quarto will not overwrite it.",
+    "Library and plugin are vendored under .luals/ with repo-relative paths so the",
+    "editor, CI, and collaborators all resolve them without an absolute Quarto path.",
+    "Source: /opt/quarto/share/lua-types and /opt/quarto/share/lua-plugin, Quarto 1.9.38.",
+    "Re-sync with: cp -r /opt/quarto/share/lua-types/. .luals/types/ && cp /opt/quarto/share/lua-plugin/plugin.lua .luals/plugin.lua"
+  ],
+  "Lua.runtime.version": "Lua 5.3",
+  "Lua.workspace.checkThirdParty": false,
+  "Lua.workspace.library": [
+    ".luals/types"
+  ],
+  "Lua.runtime.plugin": ".luals/plugin.lua",
+  "Lua.workspace.ignoreDir": [
+    ".luals",
+    "_extensions/hebstr-doc/_extensions",
+    "tests/luaunit.lua"
+  ],
+  "Lua.completion.showWord": "Disable",
+  "Lua.completion.keywordSnippet": "Both",
+  "Lua.diagnostics.disable": [
+    "lowercase-global",
+    "trailing-space"
+  ]
+}
