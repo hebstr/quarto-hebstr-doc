@@ -4,6 +4,7 @@ $font-family-sans-serif: "Luciole", system-ui, sans-serif !default;
 $font-family-monospace: "Fira Code", ui-monospace, monospace !default;
 $toc-font-size: 0.825rem !default;
 $callout-icon-scale: -10% !default;
+$tab-surface: color-mix(in srgb, var(--primary), transparent 93%) !default;
 
 $code-foreground-color: #ffffff !default;
 $code-background-color: #262624 !default;
@@ -29,7 +30,7 @@ $code-window-line-number: #5a5955 !default;
   --figure-shadow: #{$figure-shadow};
   --str-color: #{$str-color};
   --dig-color: #{$dig-color};
-  --tab-background: #{$tab-background};
+  --tab-surface: #{$tab-surface};
   --code-foreground-color: #{$code-foreground-color};
   --code-background-color: #{$code-background-color};
   --code-comment-color: #{$code-comment-color};
@@ -105,7 +106,6 @@ mjx-container {
 }
 
 .panel-tabset {
-  --tab-surface: color-mix(in srgb, var(--primary), transparent 93%);
   .nav-tabs {
     margin-top: 2rem;
     --bs-nav-tabs-border-color: none;
