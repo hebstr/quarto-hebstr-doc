@@ -1,8 +1,3 @@
-# prek hooks for quarto-hebstr-doc.
-# Adapted subset of the ~/dotfiles/_meta/profiles/prek.toml scaffold: only the
-# hooks whose file types exist here (md/qmd, yml, R, typ, lua). Python and shell
-# hooks are dropped (no .py, no .sh in this repo).
-
 [[repos]]
 repo = "local"
 hooks = [

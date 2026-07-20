@@ -28,6 +28,8 @@ Versioning follows [Semantic Versioning 2.0.0](https://semver.org), applied to t
 
 When in doubt, ask: "Could a consumer's existing `_quarto.yml` or `custom.scss` stop working after this change?" If yes, it is at least MINOR (with a deprecation note) or MAJOR (without a fallback).
 
+**No-consumer clause.** The strict table above is a contract with installed consumers, and the extension currently has none. Until it has known consumers, a breaking change to the public API surface may ship under a MINOR release when flagged in the changelog, rather than forcing a MAJOR bump. The first MAJOR is reserved for the first break that would reach an actual installed consumer.
+
 ## Release procedure
 
 Releases are git-tag-driven; the `release.yml` workflow turns each `v*` tag into a GitHub Release with auto-generated notes.
