@@ -8,9 +8,9 @@ A change is "API-affecting" only if it touches one of these surfaces:
 
 1. **Format names** declared in `_extension.yml`: `hebstr-doc-html`, `hebstr-doc-typst`, `hebstr-doc-docx`.
 2. **SCSS variables** with `!default` in `theme-light.scss`, `theme-dark.scss`, or `theme-base.scss`.
-3. **CSS custom properties** exposed under `:root` in `theme-base.scss`. Same names as the SCSS variables, prefixed with `--` instead of `$`.
-4. **Frontmatter keys** wired through `_extension.yml` (`mainfont`, `monofont`, `fontsize`, `linestretch`, `grid.*`, etc.).
-5. **Shortcodes** registered in `_extension.yml`: currently `{{< script path >}}`.
+3. **CSS custom properties** exposed under `:root` in `theme-base.scss`, each named after the SCSS variable it mirrors with `--` instead of `$`. The mapping is partial: typography defaults, the layout-chrome variables, and `$body-bg` / `$body-color` are consumed at compile time and have no `:root` counterpart.
+4. **Frontmatter keys** wired through `_extension.yml` (`mainfont`, `monofont`, `linestretch`, `grid.*`, etc.).
+5. **Shortcodes** registered in `_extension.yml`: currently `{{< script path >}}` and `{{< filetree >}}`, including the `filetree.yml` sidecar schema the latter reads.
 6. **Bundled fonts** (Luciole, Fira Code, Font Awesome 7 Solid): removing or replacing a font is API-affecting because consumer SCSS may reference the family name.
 7. **`quarto-required`** version constraint in `_extension.yml`.
 
@@ -50,6 +50,18 @@ quarto render example.qmd --to hebstr-doc-html
 ```
 
 Currently HTML only; once Typst and DOCX are validated (see [.claude/PLAN.md](.claude/PLAN.md), P1), extend `example.qmd` to declare all three formats and render each.
+
+## Pre-commit hooks
+
+The repo ships a [`prek`](https://github.com/j178/prek) config (`prek.toml`): YAML/large-file/merge-conflict checks, secret scanning (gitleaks), R format/lint (air, jarl), Typst (typstyle), and Lua (StyLua).
+The same hooks run in CI (`render.yml`), so running them locally before pushing avoids a red build.
+
+```bash
+prek install                             # install the git hook (runs on commit)
+prek run --all-files --skip prose-lint   # run everything once against the whole tree
+```
+
+The `prose-lint` hook is a local-only tool; skip it as shown (CI skips it too).
 
 ## Where things live
 
