@@ -15,6 +15,12 @@ $code-window-line-divider: #383835 !default;
 $code-window-muted: #938e87 !default;
 $code-window-line-number: #5a5955 !default;
 
+$filetree-bg: $code-background-color !default;
+$filetree-fg: #d6d3cd !default;
+$filetree-muted: $code-window-muted !default;
+$filetree-highlight: $code-foreground-color !default;
+$filetree-guide: #7d7b76 !default;
+
 /*-- scss:rules --*/
 
 :root {
@@ -39,6 +45,11 @@ $code-window-line-number: #5a5955 !default;
   --code-window-line-divider: #{$code-window-line-divider};
   --code-window-muted: #{$code-window-muted};
   --code-window-line-number: #{$code-window-line-number};
+  --filetree-bg: #{$filetree-bg};
+  --filetree-fg: #{$filetree-fg};
+  --filetree-muted: #{$filetree-muted};
+  --filetree-highlight: #{$filetree-highlight};
+  --filetree-guide: #{$filetree-guide};
   --callout-note-color: #{$callout-note-color};
   --callout-tip-color: #{$callout-tip-color};
   --callout-caution-color: #{$callout-caution-color};
@@ -587,6 +598,102 @@ $callout-types: (
     }
     .callout-body {
       color: color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-text-mix) #{$body-dark});
+    }
+  }
+}
+
+.filetree {
+  font-family: $font-family-monospace;
+  font-size: 0.85rem;
+  line-height: 1.9;
+  margin-block: 1.5rem;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid var(--code-window-border);
+  border-radius: 0.4rem;
+  background-color: var(--filetree-bg);
+  color: var(--filetree-fg);
+
+  // Padding, border and background sit on the container, so a tree filtered down
+  // to nothing would still draw a card. The render warning names the cause.
+  &:has(> ul:empty) {
+    display: none;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  ul ul {
+    margin-left: 0.55rem;
+    padding-left: 0.95rem;
+    border-left: 1px solid var(--filetree-guide);
+  }
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.7rem;
+  }
+
+  li > ul {
+    flex-basis: 100%;
+  }
+
+  // `--ft-icon` is set per entry by the filter, which reads the SVG and inlines
+  // it. Overriding one icon means writing a `background-image` on the matching
+  // `.ft-i-<key>`, which ties this default on specificity and wins on load
+  // order, so the override layer must come last in the `theme:` list.
+  .ft-name::before {
+    content: "";
+    display: inline-block;
+    width: 1.1em;
+    height: 1.1em;
+    margin-right: 0.45rem;
+    vertical-align: -0.2em;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    background-image: var(--ft-icon);
+  }
+
+  .ft-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .ft-hl > .ft-name {
+    font-weight: 700;
+    color: var(--filetree-highlight);
+  }
+
+  .ft-more > .ft-name {
+    color: var(--filetree-muted);
+
+    &::before {
+      content: none;
+    }
+  }
+
+  .ft-desc {
+    font-family: $font-family-sans-serif;
+    font-size: 0.8rem;
+    color: var(--filetree-muted);
+
+    // `!important` answers the `!important` on `code:not(.sourceCode)`, which
+    // itself outranks Quarto's `p code:not(.sourceCode)`; specificity alone
+    // cannot win here.
+    code {
+      padding: 0 !important;
+      font-size: inherit;
+      color: inherit;
+      background: none !important;
     }
   }
 }
