@@ -31,6 +31,7 @@ jobs:
             any::rmarkdown
             any::dplyr
             any::ggplot2
+            any::svglite
             any::palmerpenguins
             any::sessioninfo
 

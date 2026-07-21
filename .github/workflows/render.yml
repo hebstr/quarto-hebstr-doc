@@ -29,6 +29,7 @@ jobs:
             any::rmarkdown
             any::dplyr
             any::ggplot2
+            any::svglite
             any::palmerpenguins
             any::sessioninfo
 
@@ -39,9 +40,9 @@ jobs:
 
       - name: Lua type check (lua-language-server)
         run: |
-          curl -sSL -o luals.tar.gz https://github.com/LuaLS/lua-language-server/releases/download/3.18.2/lua-language-server-3.18.2-linux-x64.tar.gz
-          mkdir luals && tar -xzf luals.tar.gz -C luals
-          luals/bin/lua-language-server --check . --checklevel Warning
+          curl -sSL -o "$RUNNER_TEMP/luals.tar.gz" https://github.com/LuaLS/lua-language-server/releases/download/3.18.2/lua-language-server-3.18.2-linux-x64.tar.gz
+          mkdir -p "$RUNNER_TEMP/luals" && tar -xzf "$RUNNER_TEMP/luals.tar.gz" -C "$RUNNER_TEMP/luals"
+          "$RUNNER_TEMP/luals/bin/lua-language-server" --check . --checklevel Warning
 
       - name: Render example.qmd (HTML)
         run: quarto render example.qmd --to hebstr-doc-html
