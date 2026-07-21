@@ -1,5 +1,5 @@
 ---
-title: "hebstr-doc : Example Document"
+title: "hebstr-doc"
 subtitle: "Multi-format Quarto extension"
 author: "hebstr"
 date: last-modified
@@ -11,11 +11,10 @@ format:
 
 # Typography and headings
 
-This document exercises every capability declared in `_extension.yml`, so `quarto render example.qmd` validates the extension in one shot.
-Only `hebstr-doc-html` is declared on `main`; Typst and DOCX outputs land once those formats are validated.
+Only `hebstr-doc-html` ships on `main`; Typst and DOCX land once validated.
 
-The body font is **Luciole** (sans-serif, designed for low-vision readers).
-Inline `code()` uses **Fira Code** with programming ligatures.
+Body text is [**Luciole**](https://luciole-vision.com) (sans-serif, low-vision).
+Inline `code()` is [**Fira Code**](https://github.com/tonsky/FiraCode) with ligatures.
 
 ## Level 2 heading
 
@@ -48,14 +47,15 @@ Ordered:
 
 # Figure {#sec-figure}
 
-@fig-penguins comes from **ggplot2** on the `palmerpenguins` dataset, with the shared knitr chunk options from `_extension.yml` (`echo: false`, `message: false`, `warning: false`).
+@fig-penguins is **ggplot2** on `palmerpenguins`, under the shared knitr options (`echo`, `message`, `warning` all off).
 
-It follows the light/dark toggle through Quarto's native `renderings` cell option: the chunk emits two plots, and Quarto tags them `.light-content` / `.dark-content` so the body class selects one at runtime.
-The cell carries no `label` or `fig-cap` because `renderings` is incompatible with cell-level crossref options; the fenced div supplies both.
-A transparent device background (`dev.args`) lets the page background show through, so only the ink needs a per-mode value.
+The chunk emits two plots; `renderings: [light, dark]` tags them `.light-content` / `.dark-content`, and the body class picks one at runtime.
+`renderings` rejects `fig-cap` and `fig-`-prefixed labels as cell options, so the fenced div carries the crossref id and caption.
+A transparent device background (`dev.args`) shows the page through, so only the ink varies per mode.
 
 ::: {#fig-penguins}
 ```{r}
+#| label: penguins-fig
 #| renderings: [light, dark]
 #| fig-height: 5
 #| dev: svglite
@@ -91,14 +91,15 @@ p + theme_hebstr(ink = "#e8e8e8", grid = "#4d4d4d")
 Bill length vs flipper length by species (palmerpenguins).
 :::
 
-Both renderings stay in the DOM, so switching modes costs no reload and the lightbox keeps working on the visible one.
+Both renderings stay in the DOM: mode switches need no reload, and the lightbox tracks the visible one.
 
 # Table
 
-The chunk below is a simple aggregation rendered as a Markdown table.
-`tbl-cap-location: top` puts the caption above the table; `tbl-title: "Table"` is language-neutral.
+A simple aggregation rendered as a Markdown table.
+`tbl-cap-location: top` puts the caption above the table; `tbl-title: "Table"` stays language-neutral.
 
 ```{r}
+#| label: penguins-count
 #| echo: true
 #| code-fold: false
 
@@ -111,9 +112,10 @@ palmerpenguins::penguins |>
 
 # Code block
 
-The chunk below sets `echo: true` (overriding the default) to exercise syntax highlighting, code folding, and the copy-on-hover button (HTML), plus the `code.tmTheme` TextMate theme that Typst applies via `#set raw(theme: …)` in `template.typ`.
+`echo: true` overrides the default to exercise highlighting, folding, and the copy-on-hover button (HTML), plus the `code.tmTheme` TextMate theme Typst applies via `#set raw(theme: …)` in `template.typ`.
 
 ```{r}
+#| label: penguins-summary
 #| echo: true
 #| eval: false
 
@@ -132,8 +134,8 @@ palmerpenguins::penguins |>
 
 # Code window
 
-The blocks below exercise the [`mcanouil/quarto-code-window`](https://github.com/mcanouil/quarto-code-window) filter, embedded in the extension and declared in `_extension.yml`.
-The extension sets `style: default` (plain filename header, no traffic lights or window chrome); with `auto-filename: true`, blocks without an explicit `filename=` show the language name as the header label.
+These blocks exercise the embedded [`mcanouil/quarto-code-window`](https://github.com/mcanouil/quarto-code-window) filter.
+The extension sets `style: default` (plain filename header, no window chrome); with `auto-filename: true`, blocks without a `filename=` show the language name as the label.
 
 ```python
 def greet(name: str) -> str:
@@ -152,24 +154,23 @@ quarto render example.qmd
 
 # Injected script
 
-The block below is **not** an inline chunk.
-It holds the content of `scripts/demo_penguins.R`, injected via the `script` shortcode (in-tree `filters/add-code-files.lua`).
-The shortcode reads the file and emits the populated code block with the `cell-code` class, so Quarto's `code-fold` wraps it in a foldable `<details>` element (collapsed by default); clicking the filename header expands it.
-`filters/add-code-files.js` rewrites the `<summary>` text to the filename (derived from [`shafayetShafee/add-code-files`](https://github.com/shafayetShafee/add-code-files), MIT).
+The `script` shortcode (in-tree `filters/add-code-files.lua`) injects `scripts/demo_penguins.R` verbatim.
+It emits a code block with the `cell-code` class, so `code-fold` wraps it in a collapsed `<details>`; the filename header expands it.
+`filters/add-code-files.js` rewrites the `<summary>` text to the filename (from [`shafayetShafee/add-code-files`](https://github.com/shafayetShafee/add-code-files), MIT).
 
-This is the canonical pattern for hebstr-doc: both inline chunks and externalised scripts render as `code-window`, the latter folded behind their filename.
+Inline chunks and externalised scripts both render as `code-window`, scripts folded behind their filename.
 
 {{< script scripts/demo_penguins.R >}}
 
 # Tabset {#sec-tabs}
 
-Tabs use the `.panel-tabset` div class; `tab-surface` from `theme-base.scss` sets the panel fill.
-It is a tint of `primary` rather than a per-mode colour, so one value covers both themes.
+Tabs use the `.panel-tabset` div class; `tab-surface` (`theme-base.scss`) sets the panel fill, a tint of `primary` that covers both modes with one value.
 
 ::: {.panel-tabset}
 ## Adelie
 
 ```{r}
+#| label: penguins-adelie
 #| echo: true
 #| code-fold: false
 
@@ -182,6 +183,7 @@ palmerpenguins::penguins |>
 ## Chinstrap
 
 ```{r}
+#| label: penguins-chinstrap
 #| echo: true
 #| code-fold: false
 
@@ -194,6 +196,7 @@ palmerpenguins::penguins |>
 ## Gentoo
 
 ```{r}
+#| label: penguins-gentoo
 #| echo: true
 #| code-fold: false
 
@@ -206,22 +209,19 @@ palmerpenguins::penguins |>
 
 # File tree
 
-The tree below is this repository, walked from disk at render time by the `filetree` shortcode (in-tree `filters/filetree.lua`), so it cannot drift from the project it documents.
-A `mode` attribute chooses the rendering.
-In `static`, the default, directories deeper than `depth` collapse to `…` rather than disappearing, which keeps the truncation visible.
-In `dynamic`, shown here, folders expand and collapse on click, and `depth` sets how deep the tree opens on load.
+The `filetree` shortcode (in-tree `filters/filetree.lua`) walks this repository from disk at render time.
+`mode` picks the rendering: `static` (default) collapses directories past `depth` to `…`; `dynamic` (here) expands and collapses folders on click, with `depth` setting the open depth on load.
 
-Descriptions come from the `filetree.yml` sidecar at the repository root, keyed by path.
-Splitting them out is the point of the shortcode: the filesystem supplies structure and never meaning, so the fast-moving half is generated and the slow-moving half is written once.
-A key that never appears in the rendered tree raises a render warning naming it, whether the path is absent from disk or merely dropped by `exclude`, `hidden` or `depth`.
+Descriptions come from the `filetree.yml` sidecar, keyed by path.
+An unused key raises a render warning naming it, whether the path is absent from disk or dropped by `exclude`, `hidden` or `depth`.
 
 {{< filetree mode=dynamic >}}
 
-The HTML rendering is a nested list styled by the `.filetree` rules in `theme-base.scss`.
-In `dynamic` mode each folder is a native `<details>` element, so it toggles without JavaScript, and its Material icon switches to the open-folder variant while expanded.
-The surface stays dark in both colour modes, on the same reasoning as the code windows: this is editor chrome, and a tree that switched surface would clash with the code blocks it sits among.
-Each entry takes a Material Icon Theme icon resolved from its exact filename, then its extension, then a generic fallback: `README.md` takes a readme icon on its name while `CHANGELOG.md` falls through to the generic Markdown one, and `example.qmd` takes a Quarto icon on its extension.
-Typst and DOCX receive a plain bullet list instead.
+HTML renders a nested list styled by the `.filetree` rules in `theme-base.scss`.
+In `dynamic` mode each folder is a native `<details>` that toggles without JavaScript, its Material icon switching to the open-folder variant while expanded.
+The surface stays dark in both colour modes, like the code windows.
+Each entry resolves a Material Icon Theme icon by exact filename, then extension, then a generic fallback: `README.md` matches on name, `CHANGELOG.md` falls through to the Markdown icon, `example.qmd` matches on extension.
+Typst and DOCX receive a plain bullet list.
 
 # Equation
 
@@ -241,7 +241,7 @@ $$ {#eq-text}
 
 # Footnote
 
-Footnotes collect at the end of the document, where Quarto renders them under a `.footnotes` section.[^footnote-demo]
+Footnotes collect at the document end under a `.footnotes` section.[^footnote-demo]
 
 [^footnote-demo]: The footnote body.
     Markdown works here: *emphasis*, `code()`, and [links](https://quarto.org).
@@ -249,10 +249,6 @@ Footnotes collect at the end of the document, where Quarto renders them under a 
 # Callouts
 
 Callouts use `callout-appearance: simple`.
-
-::: {.callout-note}
-# A note callout.
-:::
 
 ::: {.callout-note}
 # A note callout.
@@ -279,7 +275,7 @@ Callouts use `callout-appearance: simple`.
 :::
 
 ::: {.callout-important}
-# A important callout.
+# An important callout.
 
 {{< lipsum 1 >}}
 :::
@@ -298,11 +294,10 @@ Callouts use `callout-appearance: simple`.
 
 \ 
 
---------------------------------------------------------------------------------
-
 # Session {.unnumbered .unlisted}
 
 ```{r}
+#| label: session-info
 #| echo: true
 
 sessioninfo::session_info(pkgs = "attached")

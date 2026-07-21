@@ -7,7 +7,7 @@
 
 A Quarto theme for HTML, Typst (PDF), and Word (DOCX) output.
 
-> **Status (v1.1.0):** HTML is operational.
+> **Status (v1.2.0):** HTML is operational.
 > Typst and DOCX are declared but not yet validated.
 
 ## Installation
@@ -29,7 +29,7 @@ format: hebstr-doc-html
 
 ### `script`
 
-Injects an external file as a code block with the code-window chrome, so a script stays a real file on disk instead of a copy pasted into the document.
+Injects an external file as a code block with the code-window chrome, so the script stays a file on disk, not a copy in the document.
 
 ```markdown
 {{< script scripts/demo.R >}}
@@ -46,13 +46,13 @@ Injects an external file as a code block with the code-window chrome, so a scrip
 
 ### `filetree`
 
-Renders a directory tree read from disk at render time, so the structure cannot drift from the project.
+Renders a directory tree read from disk at render time.
 
 ```markdown
 {{< filetree >}}
 ```
 
-Everything the shortcode needs lives in a `filetree.yml` sidecar at the project root, so the call site stays a single tag and the exclusion list stays readable:
+Configuration lives in a `filetree.yml` sidecar at the project root:
 
 ```yaml
 filetree:
@@ -79,29 +79,28 @@ filetree:
   | `hidden`    | `false`  | Include dotfiles. `true`/`yes`/`on`/`1` and their negatives are all accepted, case-insensitively; anything else warns and falls back to `false`                                                                                  |
   | `paths`     | none     | Descriptions, keyed by path                                                                                                                                                                                                      |
 
-Every key except `paths` is also accepted as a shortcode attribute, which overrides the sidecar for that one call: `{{< filetree root="src" depth=1 >}}`.
-Attributes are the only call-site syntax: a positional argument is refused with a warning, as is an attribute the shortcode does not know.
+Every key except `paths` is also a shortcode attribute, overriding the sidecar for that one call: `{{< filetree root="src" depth=1 >}}`.
+Attributes are the only call-site syntax; a positional argument or an unknown attribute warns.
+As attributes, `exclude` and `highlight` take `|`-separated patterns with no escaping; a pattern matching a literal `|` belongs in the sidecar.
 Descriptions are read from the sidecar only.
-As an attribute, `exclude` and `highlight` take `|`-separated patterns, with no escape: a pattern that must match a literal `|` belongs in the sidecar, whose YAML list has no separator to collide with.
-The sidecar path itself is set with `annotations` (default `filetree.yml`), and must stay inside the project: an absolute path, a drive letter or a `..` climbing out is refused with a warning, and the call then runs with no configuration rather than silently falling back to the default.
-`root` and `annotations` are both resolved from the project root, not from the calling document, so a document in a subdirectory trees the project rather than its own folder, and one sidecar serves every document.
-Outside a project, a single-file render has no root to resolve against and both fall back to the document's own directory.
-Document frontmatter is never read: `exclude` and `highlight` hold Lua patterns, which Pandoc would silently corrupt by parsing metadata scalars as inline Markdown.
+`annotations` (default `filetree.yml`) sets the sidecar path and must stay inside the project: an absolute path, a drive letter, or a `..` climbing out warns, and the call runs unconfigured.
+`root` and `annotations` resolve from the project root, not the calling document, so one sidecar serves every document in the project.
+Outside a project, a single-file render falls back to the document's own directory for both.
+Document frontmatter is never read: `exclude` and `highlight` hold Lua patterns, which Pandoc would corrupt by parsing as inline Markdown.
 
-Descriptions carry the meaning the filesystem cannot supply, and they accept inline Markdown, so a path or a command can be set as code.
+Descriptions accept inline Markdown, so a path or a command can render as code.
 A trailing slash on a `paths` key is optional.
-Any key that never appears in the rendered tree raises a render warning naming it, whether the path is absent from disk or merely dropped by `exclude`, `hidden` or `depth`, which is what keeps the descriptions honest as the project moves.
-Quote every description: YAML reads a bare `no`, `yes`, `on`, `off`, `true`, `false` as a boolean, which is not text, and the shortcode then drops the annotation with a warning naming the key.
-A bare `~` reaches the shortcode as an empty string instead and is dropped silently.
+A `paths` key that never appears in the tree, whether absent from disk or dropped by `exclude`, `hidden` or `depth`, raises a render warning naming it.
+Quote every description: YAML reads a bare `no`, `yes`, `on`, `off`, `true` or `false` as a boolean, and the shortcode drops the annotation with a warning naming the key.
+A bare `~` reaches the shortcode as an empty string and is dropped silently.
 
-HTML output is a nested list styled through the `.filetree` rules in `theme-base.scss`, on a dark surface in both light and dark modes, so the tree matches the code windows it usually sits among.
-In `dynamic` mode each folder becomes a native `<details>` element, so it expands and collapses without JavaScript, and its Material folder icon switches to the open variant while expanded.
-Each entry carries a [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme) icon: a file resolves from its exact name, then its extension, then a generic document, and a directory from its name (only `.github` so far) then a generic folder.
-Those icons ship with the extension under `_extensions/hebstr-doc/icons/`; the shortcode reads the file and inlines it on the entry, so the page makes no outside request and only the icons actually used are embedded.
-Each entry also carries a `ft-i-<key>` class, which is the handle for replacing one icon: a `background-image` on `.ft-i-r > .ft-name::before` in a `custom.scss` replaces the default, which it ties on specificity and beats on load order as long as `custom.scss` comes last in the `theme:` list.
-Five invariant SCSS variables drive the surface and are overridable like the rest: `$filetree-bg`, `$filetree-fg`, `$filetree-muted`, `$filetree-highlight`, `$filetree-guide`.
-
-The icon is decorative and never the sole carrier of meaning: directories keep their trailing slash in the label, a highlighted entry is wrapped in `<strong>` rather than merely styled, and the `…` marker is hidden from assistive technology in favour of a spelled-out label.
+HTML renders a nested list on a dark surface in both light and dark modes, styled by the `.filetree` rules in `theme-base.scss`.
+In `dynamic` mode each folder is a native `<details>` element that expands without JavaScript, its Material folder icon switching to the open variant while expanded.
+Each entry carries a [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme) icon, resolved by exact name, then extension, then a generic document; a directory resolves by name (only `.github` so far), then a generic folder.
+Icons ship under `_extensions/hebstr-doc/icons/` and are inlined per entry, so the page makes no outside request and only the icons used are embedded.
+Override one with a `background-image` on `.ft-i-<key> > .ft-name::before` in a `custom.scss` placed last in `theme:`.
+Five invariant SCSS variables drive the surface: `$filetree-bg`, `$filetree-fg`, `$filetree-muted`, `$filetree-highlight`, `$filetree-guide`.
+Icons are decorative and never the sole carrier of meaning: directories keep their trailing slash, a highlighted entry is wrapped in `<strong>`, and the `…` marker carries a spelled-out label for assistive technology.
 
 Typst and DOCX fall back to a plain bullet list.
 
@@ -133,7 +132,7 @@ Typst and DOCX are unaffected.
 
 Use Quarto's `renderings` cell option: emit one plot per mode and Quarto tags them `.light-content` / `.dark-content`, which the body class selects at runtime.
 Give the device a transparent background so the page background shows through, and set the ink per mode.
-The cell cannot carry `label` or `fig-cap` (`renderings` is incompatible with cell-level crossref options), so wrap it in a fenced div:
+The cell may carry a plain `label` but no `fig-cap` or `fig-`-prefixed label (`renderings` is incompatible with cell-level crossref options), so wrap it in a fenced div that supplies the id and caption:
 
 ````markdown
 ::: {#fig-example}

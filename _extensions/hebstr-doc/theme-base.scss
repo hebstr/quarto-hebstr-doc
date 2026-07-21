@@ -289,6 +289,14 @@ div.csl-right-inline {
   padding-bottom: 0.5em;
 }
 
+// Quarto sets the appendix (footnotes, citations) background to `$body-bg`,
+// which is a plain white/black distinct from the page's tinted surface, so the
+// block reads as a mismatched box. Align it to the page background.
+#quarto-appendix.default {
+  background-color: var(--primary-surface);
+  border-top-color: var(--primary-back);
+}
+
 // LIGHTBOX --------------------------------------------------------------------
 
 .glightbox-container .gslide-image img[src^="data:image/svg+xml"] {
