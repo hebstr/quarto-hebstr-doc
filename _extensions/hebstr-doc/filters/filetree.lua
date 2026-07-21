@@ -6,6 +6,11 @@ local function warn(msg)
   end
 end
 
+-- Dynamic mode scans past `depth` so collapsed folders stay reachable ; this caps
+-- the recursion on a pathological tree or a symlink cycle, where `exclude` remains
+-- the real filter.
+local DYNAMIC_SCAN_MAX = 12
+
 local function kw(kwargs, name, default)
   local v = kwargs[name]
   if v == nil then
@@ -75,6 +80,8 @@ local icon_by_name = {
   ["LICENSE.md"] = "license",
   [".gitignore"] = "git",
   [".gitattributes"] = "git",
+  [".Rprofile"] = "r",
+  [".Renviron"] = "tune",
 }
 
 local icon_by_extension = {
@@ -85,6 +92,9 @@ local icon_by_extension = {
   typ = "typst",
   yml = "yaml",
   yaml = "yaml",
+  toml = "toml",
+  lock = "lock",
+  env = "tune",
   lua = "lua",
   scss = "sass",
   sass = "sass",
@@ -253,7 +263,7 @@ local root_problem = {
   unreadable = "cannot be read (permission denied)",
 }
 
-local raw_keys = { root = true, depth = true, hidden = true, exclude = true, highlight = true }
+local raw_keys = { root = true, depth = true, hidden = true, exclude = true, highlight = true, mode = true }
 
 local known_kwargs = {
   root = true,
@@ -262,6 +272,7 @@ local known_kwargs = {
   exclude = true,
   highlight = true,
   annotations = true,
+  mode = true,
 }
 
 -- Booleans reach here as raw text: the sidecar bypasses YAML through
@@ -284,6 +295,17 @@ local function to_bool(name, text, default)
     return value
   end
   warn(name .. " is not a boolean, using " .. tostring(default) .. ": " .. text)
+  return default
+end
+
+local modes = { static = true, dynamic = true }
+
+local function to_mode(text, default)
+  local value = text:lower()
+  if modes[value] then
+    return value
+  end
+  warn("mode is not static or dynamic, using " .. default .. ": " .. text)
   return default
 end
 
@@ -460,7 +482,8 @@ local function inlines_to_html(inlines)
   return (pandoc.write(doc, "html", { wrap_text = "none" }):gsub("%s+$", ""))
 end
 
-local function render_html(nodes, opts, buffer)
+local function render_html(nodes, opts, buffer, level)
+  level = level or 1
   buffer[#buffer + 1] = "<ul>"
   for _, node in ipairs(nodes) do
     local key = icon_key(node.name, node.dir)
@@ -470,7 +493,23 @@ local function render_html(nodes, opts, buffer)
     -- only carries the default, so a `background-image` rule in a consumer
     -- stylesheet still wins on the cascade.
     local uri = icon_uri(key)
-    local style = uri and (' style="--ft-icon:url(' .. uri .. ')"') or ""
+    -- A childless folder gets no `<details>` : the disclosure widget would imply
+    -- content it cannot reveal, so it renders flat like a file.
+    local expandable = node.truncated or (node.children and #node.children > 0)
+    local toggled = opts.dynamic and node.dir and expandable
+    local props = {}
+    if uri then
+      props[#props + 1] = "--ft-icon:url(" .. uri .. ")"
+    end
+    -- A toggled folder swaps to its `-open` variant on expand ; both URIs ride on
+    -- the same element so the CSS switch needs no second walk of the filesystem.
+    if toggled then
+      local open_uri = icon_uri(key .. "-open")
+      if open_uri then
+        props[#props + 1] = "--ft-icon-open:url(" .. open_uri .. ")"
+      end
+    end
+    local style = #props > 0 and (' style="' .. table.concat(props, ";") .. '"') or ""
     local highlighted = matches_any("highlight", node.relpath, opts.highlight)
     if highlighted then
       classes[#classes + 1] = "ft-hl"
@@ -484,12 +523,21 @@ local function render_html(nodes, opts, buffer)
     if highlighted then
       name = "<strong>" .. name .. "</strong>"
     end
-    buffer[#buffer + 1] = '<li class="' .. table.concat(classes, " ") .. '"' .. style .. ">"
-    buffer[#buffer + 1] = '<span class="ft-name">' .. name .. "</span>"
+    local head = '<span class="ft-name">' .. name .. "</span>"
 
     local desc = opts.annotations[node.relpath]
     if desc then
-      buffer[#buffer + 1] = '<span class="ft-desc">' .. inlines_to_html(desc) .. "</span>"
+      head = head .. '<span class="ft-desc">' .. inlines_to_html(desc) .. "</span>"
+    end
+
+    buffer[#buffer + 1] = '<li class="' .. table.concat(classes, " ") .. '"' .. style .. ">"
+    if toggled then
+      -- `depth` is the level open on load ; deeper folders stay in the DOM but
+      -- collapsed, and `<details>` carries the toggle without a script.
+      local open = level <= opts.depth and " open" or ""
+      buffer[#buffer + 1] = "<details" .. open .. "><summary>" .. head .. "</summary>"
+    else
+      buffer[#buffer + 1] = head
     end
 
     if node.truncated then
@@ -497,9 +545,12 @@ local function render_html(nodes, opts, buffer)
         .. '<span class="ft-name" aria-hidden="true">…</span>'
         .. '<span class="ft-sr-only">further entries not shown</span></li></ul>'
     elseif node.children and #node.children > 0 then
-      render_html(node.children, opts, buffer)
+      render_html(node.children, opts, buffer, level + 1)
     end
 
+    if toggled then
+      buffer[#buffer + 1] = "</details>"
+    end
     buffer[#buffer + 1] = "</li>"
   end
   buffer[#buffer + 1] = "</ul>"
@@ -606,6 +657,8 @@ return {
       exclude = patterns("exclude"),
       highlight = patterns("highlight"),
       hidden = to_bool("hidden", opt("hidden", "false"), false),
+      mode = to_mode(opt("mode", "static"), "static"),
+      depth = depth,
       annotations = read_annotations(config),
       rendered = {},
     }
@@ -616,17 +669,24 @@ return {
       return {}
     end
 
-    local nodes = scan(root_path, "", depth, opts)
+    -- The deep scan is gated on HTML, so a non-JS or non-HTML target keeps `depth`
+    -- as a hard cut and never inherits the dynamic tree's full walk.
+    local html = quarto.doc.is_format("html:js")
+    opts.dynamic = opts.mode == "dynamic" and html
+    local scan_depth = opts.dynamic and DYNAMIC_SCAN_MAX or depth
+
+    local nodes = scan(root_path, "", scan_depth, opts)
     report_dead_keys(opts.annotations, root_path, opts.rendered)
 
     if #nodes == 0 then
       warn("no entry to show under " .. root .. " ; check exclude, hidden and depth")
     end
 
-    if quarto.doc.is_format("html:js") then
+    if html then
       local buffer = {}
       render_html(nodes, opts, buffer)
-      return pandoc.Div({ pandoc.RawBlock("html", table.concat(buffer)) }, pandoc.Attr("", { "filetree" }))
+      local classes = opts.dynamic and { "filetree", "filetree-dynamic" } or { "filetree" }
+      return pandoc.Div({ pandoc.RawBlock("html", table.concat(buffer)) }, pandoc.Attr("", classes))
     end
 
     return pandoc.Div({ render_list(nodes, opts) }, pandoc.Attr("", { "filetree" }))

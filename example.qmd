@@ -207,15 +207,18 @@ palmerpenguins::penguins |>
 # File tree
 
 The tree below is this repository, walked from disk at render time by the `filetree` shortcode (in-tree `filters/filetree.lua`), so it cannot drift from the project it documents.
-Directories deeper than `depth` collapse to `…` rather than disappearing, which keeps the truncation visible.
+A `mode` attribute chooses the rendering.
+In `static`, the default, directories deeper than `depth` collapse to `…` rather than disappearing, which keeps the truncation visible.
+In `dynamic`, shown here, folders expand and collapse on click, and `depth` sets how deep the tree opens on load.
 
 Descriptions come from the `filetree.yml` sidecar at the repository root, keyed by path.
 Splitting them out is the point of the shortcode: the filesystem supplies structure and never meaning, so the fast-moving half is generated and the slow-moving half is written once.
 A key that never appears in the rendered tree raises a render warning naming it, whether the path is absent from disk or merely dropped by `exclude`, `hidden` or `depth`.
 
-{{< filetree >}}
+{{< filetree mode=dynamic >}}
 
-The HTML rendering is a nested `<ul>` styled by the `.filetree` rules in `theme-base.scss`.
+The HTML rendering is a nested list styled by the `.filetree` rules in `theme-base.scss`.
+In `dynamic` mode each folder is a native `<details>` element, so it toggles without JavaScript, and its Material icon switches to the open-folder variant while expanded.
 The surface stays dark in both colour modes, on the same reasoning as the code windows: this is editor chrome, and a tree that switched surface would clash with the code blocks it sits among.
 Each entry takes a Material Icon Theme icon resolved from its exact filename, then its extension, then a generic fallback: `README.md` takes a readme icon on its name while `CHANGELOG.md` falls through to the generic Markdown one, and `example.qmd` takes a Quarto icon on its extension.
 Typst and DOCX receive a plain bullet list instead.

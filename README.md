@@ -7,7 +7,8 @@
 
 A Quarto theme for HTML, Typst (PDF), and Word (DOCX) output.
 
-> **Status (v1.1.0):** HTML is operational. Typst and DOCX are declared but not yet validated.
+> **Status (v1.1.0):** HTML is operational.
+> Typst and DOCX are declared but not yet validated.
 
 ## Installation
 
@@ -34,14 +35,14 @@ Injects an external file as a code block with the code-window chrome, so a scrip
 {{< script scripts/demo.R >}}
 ```
 
-| Attribute | Default | Effect |
-|---|---|---|
-| `lang` | from the file extension | Highlighting language, and the label shown in the title bar. An extension the shortcode does not map yields no language and no title bar |
-| `filename` | the path | Label shown on the code-fold summary |
-| `suffix` | none | Appended to the summary label |
-| `numbers` | `true` | Line numbers |
-| `lines` | whole file | Range to include: `10-20`, `10-`, `-20`. A bare `12` is read as `12-` |
-| `dedent` | none | Leading spaces to strip, at most this many. A line indented by less is dedented as far as its own indentation allows; tabs are never touched |
+  | Attribute  | Default                 | Effect                                                                                                                                       |
+  | ---------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+  | `lang`     | from the file extension | Highlighting language, and the label shown in the title bar. An extension the shortcode does not map yields no language and no title bar     |
+  | `filename` | the path                | Label shown on the code-fold summary                                                                                                         |
+  | `suffix`   | none                    | Appended to the summary label                                                                                                                |
+  | `numbers`  | `true`                  | Line numbers                                                                                                                                 |
+  | `lines`    | whole file              | Range to include: `10-20`, `10-`, `-20`. A bare `12` is read as `12-`                                                                        |
+  | `dedent`   | none                    | Leading spaces to strip, at most this many. A line indented by less is dedented as far as its own indentation allows; tabs are never touched |
 
 ### `filetree`
 
@@ -68,22 +69,33 @@ filetree:
     "rproject.toml": "project dependencies"
 ```
 
-| Key | Default | Effect |
-|---|---|---|
-| `root` | `.` | Directory to walk, relative to the project root, wherever in the project the document sits |
-| `depth` | `2` | Levels to display; deeper directories collapse to `…` |
-| `exclude` | none | [Lua patterns](https://www.lua.org/manual/5.4/manual.html#6.4.1) matched against each path relative to `root`, directories included and without a trailing slash (`^output$`, not `^output/`). Escape literals with `%`, not `\` |
-| `highlight` | none | Lua patterns; matching entries render bold |
-| `hidden` | `false` | Include dotfiles. `true`/`yes`/`on`/`1` and their negatives are all accepted, case-insensitively; anything else warns and falls back to `false` |
-| `paths` | none | Descriptions, keyed by path |
+  | Key         | Default  | Effect                                                                                                                                                                                                                           |
+  | ----------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | `root`      | `.`      | Directory to walk, relative to the project root, wherever in the project the document sits                                                                                                                                       |
+  | `depth`     | `2`      | Levels shown without interaction. In `static`, deeper directories collapse to `…`; in `dynamic`, they become collapsed folders that expand on click                                                                              |
+  | `mode`      | `static` | `static` renders the full tree to `depth`; `dynamic` makes folders collapsible native `<details>` (no JavaScript), with `depth` as the level open on load                                                                        |
+  | `exclude`   | none     | [Lua patterns](https://www.lua.org/manual/5.4/manual.html#6.4.1) matched against each path relative to `root`, directories included and without a trailing slash (`^output$`, not `^output/`). Escape literals with `%`, not `\` |
+  | `highlight` | none     | Lua patterns; matching entries render bold                                                                                                                                                                                       |
+  | `hidden`    | `false`  | Include dotfiles. `true`/`yes`/`on`/`1` and their negatives are all accepted, case-insensitively; anything else warns and falls back to `false`                                                                                  |
+  | `paths`     | none     | Descriptions, keyed by path                                                                                                                                                                                                      |
 
-Every key except `paths` is also accepted as a shortcode attribute, which overrides the sidecar for that one call: `{{< filetree root="src" depth=1 >}}`. Attributes are the only call-site syntax: a positional argument is refused with a warning, as is an attribute the shortcode does not know. Descriptions are read from the sidecar only. As an attribute, `exclude` and `highlight` take `|`-separated patterns, with no escape: a pattern that must match a literal `|` belongs in the sidecar, whose YAML list has no separator to collide with. The sidecar path itself is set with `annotations` (default `filetree.yml`), and must stay inside the project: an absolute path, a drive letter or a `..` climbing out is refused with a warning, and the call then runs with no configuration rather than silently falling back to the default. `root` and `annotations` are both resolved from the project root, not from the calling document, so a document in a subdirectory trees the project rather than its own folder, and one sidecar serves every document. Outside a project, a single-file render has no root to resolve against and both fall back to the document's own directory. Document frontmatter is never read: `exclude` and `highlight` hold Lua patterns, which Pandoc would silently corrupt by parsing metadata scalars as inline Markdown.
+Every key except `paths` is also accepted as a shortcode attribute, which overrides the sidecar for that one call: `{{< filetree root="src" depth=1 >}}`.
+Attributes are the only call-site syntax: a positional argument is refused with a warning, as is an attribute the shortcode does not know.
+Descriptions are read from the sidecar only.
+As an attribute, `exclude` and `highlight` take `|`-separated patterns, with no escape: a pattern that must match a literal `|` belongs in the sidecar, whose YAML list has no separator to collide with.
+The sidecar path itself is set with `annotations` (default `filetree.yml`), and must stay inside the project: an absolute path, a drive letter or a `..` climbing out is refused with a warning, and the call then runs with no configuration rather than silently falling back to the default.
+`root` and `annotations` are both resolved from the project root, not from the calling document, so a document in a subdirectory trees the project rather than its own folder, and one sidecar serves every document.
+Outside a project, a single-file render has no root to resolve against and both fall back to the document's own directory.
+Document frontmatter is never read: `exclude` and `highlight` hold Lua patterns, which Pandoc would silently corrupt by parsing metadata scalars as inline Markdown.
 
 Descriptions carry the meaning the filesystem cannot supply, and they accept inline Markdown, so a path or a command can be set as code.
-A trailing slash on a `paths` key is optional. Any key that never appears in the rendered tree raises a render warning naming it, whether the path is absent from disk or merely dropped by `exclude`, `hidden` or `depth`, which is what keeps the descriptions honest as the project moves.
-Quote every description: YAML reads a bare `no`, `yes`, `on`, `off`, `true`, `false` as a boolean, which is not text, and the shortcode then drops the annotation with a warning naming the key. A bare `~` reaches the shortcode as an empty string instead and is dropped silently.
+A trailing slash on a `paths` key is optional.
+Any key that never appears in the rendered tree raises a render warning naming it, whether the path is absent from disk or merely dropped by `exclude`, `hidden` or `depth`, which is what keeps the descriptions honest as the project moves.
+Quote every description: YAML reads a bare `no`, `yes`, `on`, `off`, `true`, `false` as a boolean, which is not text, and the shortcode then drops the annotation with a warning naming the key.
+A bare `~` reaches the shortcode as an empty string instead and is dropped silently.
 
 HTML output is a nested list styled through the `.filetree` rules in `theme-base.scss`, on a dark surface in both light and dark modes, so the tree matches the code windows it usually sits among.
+In `dynamic` mode each folder becomes a native `<details>` element, so it expands and collapses without JavaScript, and its Material folder icon switches to the open variant while expanded.
 Each entry carries a [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme) icon: a file resolves from its exact name, then its extension, then a generic document, and a directory from its name (only `.github` so far) then a generic folder.
 Those icons ship with the extension under `_extensions/hebstr-doc/icons/`; the shortcode reads the file and inlines it on the entry, so the page makes no outside request and only the icons actually used are embedded.
 Each entry also carries a `ft-i-<key>` class, which is the handle for replacing one icon: a `background-image` on `.ft-i-r > .ft-name::before` in a `custom.scss` replaces the default, which it ties on specificity and beats on load order as long as `custom.scss` comes last in the `theme:` list.
@@ -112,7 +124,10 @@ format:
       margin-width: 300px
 ```
 
-HTML figures render as SVG (`fig-format: svg`) via R's built-in cairo device, so vector output needs no extra package. For selectable text and lighter files, opt into the `svglite` device (requires the `svglite` R package) with `knitr: { opts_chunk: { dev: svglite } }` in the document YAML. Render as raster instead with `fig-format: png`. Typst and DOCX are unaffected.
+HTML figures render as SVG (`fig-format: svg`) via R's built-in cairo device, so vector output needs no extra package.
+For selectable text and lighter files, opt into the `svglite` device (requires the `svglite` R package) with `knitr: { opts_chunk: { dev: svglite } }` in the document YAML.
+Render as raster instead with `fig-format: png`.
+Typst and DOCX are unaffected.
 
 ### Figures that follow the light/dark toggle
 
@@ -120,7 +135,7 @@ Use Quarto's `renderings` cell option: emit one plot per mode and Quarto tags th
 Give the device a transparent background so the page background shows through, and set the ink per mode.
 The cell cannot carry `label` or `fig-cap` (`renderings` is incompatible with cell-level crossref options), so wrap it in a fenced div:
 
-~~~~markdown
+````markdown
 ::: {#fig-example}
 
 ```{r}
@@ -134,10 +149,11 @@ p + theme_minimal(ink = "#e8e8e8")
 
 Caption goes here.
 :::
-~~~~
+````
 
 `ink` requires ggplot2 4.0 and does not reach tick labels or gridlines, which need explicit `axis.text`, `panel.grid` and `axis.ticks` colours.
-Both renderings stay in the DOM, so switching modes costs no reload and the lightbox keeps working. See the Figure section of [`example.qmd`](example.qmd).
+Both renderings stay in the DOM, so switching modes costs no reload and the lightbox keeps working.
+See the Figure section of [`example.qmd`](example.qmd).
 
 ### Brand colors via `_brand.yml`
 
@@ -166,7 +182,8 @@ The overridable variables are the `!default` declarations in `theme-light.scss`,
 
 ## Example
 
-Source: [example.qmd](example.qmd). Live demo at [hebstr.github.io/quarto-hebstr-doc](https://hebstr.github.io/quarto-hebstr-doc/).
+Source: [example.qmd](example.qmd).
+Live demo at [hebstr.github.io/quarto-hebstr-doc](https://hebstr.github.io/quarto-hebstr-doc/).
 
 ```bash
 quarto render example.qmd

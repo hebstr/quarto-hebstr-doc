@@ -697,3 +697,41 @@ $callout-types: (
     }
   }
 }
+
+// Dynamic mode (`mode: dynamic`) wraps each expandable folder in a
+// `<details>/<summary>`. Scoped to `.filetree-dynamic` so the static tree keeps
+// its rules untouched. The summary is realigned onto the file row so both share
+// one vertical rhythm, and the folder icon itself carries the open/closed state.
+.filetree-dynamic {
+  li:has(> details) {
+    display: block;
+  }
+
+  details {
+    margin: 0;
+  }
+
+  summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.7rem;
+    cursor: pointer;
+    list-style: none;
+    // Quarto's default `details > summary` colour is theme-dependent and matches
+    // the summary directly, so it outranks the inherited `--filetree-fg` that the
+    // file rows keep. Restore the invariant foreground on the dark box.
+    color: var(--filetree-fg);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  // The folder icon is the affordance : an expanded folder swaps to the `-open`
+  // Material variant carried by `--ft-icon-open`, so no chevron is needed and
+  // folder and file icons stay aligned on the same edge.
+  details[open] > summary .ft-name::before {
+    background-image: var(--ft-icon-open);
+  }
+}

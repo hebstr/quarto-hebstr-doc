@@ -14,6 +14,15 @@ Refresh procedure, one icon at a time:
 
 Update the tag recorded above whenever the subset is refreshed.
 
+The open-folder variants (`folder-base-open.svg`, `folder-github-open.svg`) are the
+exception: the theme generates them at build time, so they are absent from the git
+source and cannot be fetched the same way. They are vendored from the published npm
+package at the same version instead:
+
+    curl -s "https://cdn.jsdelivr.net/npm/material-icon-theme@<version>/icons/<name>.svg" > <name>.svg
+
+The package version tracks the same release as the git tag above.
+
 --------------------------------------------------------------------------------
 
 The MIT License (MIT)
