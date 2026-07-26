@@ -1,39 +1,47 @@
 /*-- scss:defaults --*/
 
-$primary: #0099FF !default;
+// Brand
+$primary: #09f !default;
 $primary-back: color-mix(in srgb, #{$primary}, white 95%) !default;
 $primary-surface: color-mix(in srgb, #{$primary}, white 98%) !default;
 $primary-dark: color-mix(in srgb, #{$primary}, black 50%) !default;
-$secondary: #FF0000 !default;
+$secondary: #f00 !default;
 
-$body-bg: #ffffff !default;
+// Body
+$body-bg: #fff !default;
 $body-color: #1a1a1a !default;
 
-$neutral: #555555 !default;
+// Surfaces
+$neutral: #555 !default;
 $em-background-color: #f8f8f8 !default;
-$surface-default: #ffffff !default;
-$caption-color: #111111 !default;
+$surface-default: #fff !default;
+$caption-color: #111 !default;
 $figure-shadow: #f5f5f5 !default;
 
-$str-color: #20794D !default;
-$dig-color: #AD0000 !default;
+// Inline highlights
+$str-color: #20794d !default;
+$dig-color: #ad0000 !default;
 
-$callout-note-color: #0099FF !default;
+// Callouts
+$callout-note-color: #09f !default;
 $callout-tip-color: #3fb618 !default;
 $callout-caution-color: #ffb300 !default;
 $callout-warning-color: #ff6a00 !default;
-$callout-important-color: #FF0000 !default;
+$callout-important-color: #f00 !default;
 $callout-mix-base: white !default;
 $callout-text-mix: black !default;
 $callout-bg-mix: 97% !default;
 
-$navbar-bg: mix($primary, white, 5%) !default;
-$navbar-fg: mix($primary, black, 50%) !default;
+// Layout chrome (project-only). Bootstrap's own `tint-color` / `shade-color`
+// rather than a CSS `color-mix()`: Quarto feeds these through
+// `theme-contrast()`, which needs a colour resolved at compile time. They also
+// keep the variable typed as a colour for Quarto's SCSS analysis, which a
+// namespaced `color.mix()` does not.
+$navbar-bg: tint-color($primary, 95%) !default;
+$navbar-fg: shade-color($primary, 50%) !default;
 $navbar-hl: $primary !default;
-
-$sidebar-bg: mix($primary, white, 5%) !default;
+$sidebar-bg: tint-color($primary, 95%) !default;
 $sidebar-fg: $body-color !default;
 $sidebar-hl: $primary !default;
-
-$footer-bg: mix($primary, white, 5%) !default;
-$footer-fg: mix($primary, black, 50%) !default;
+$footer-bg: tint-color($primary, 95%) !default;
+$footer-fg: shade-color($primary, 50%) !default;

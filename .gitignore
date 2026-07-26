@@ -10,3 +10,5 @@
 .RData
 .Ruserdata
 .Rproj.user/
+TODO.md
+node_modules/

@@ -1,23 +1,28 @@
 /*-- scss:defaults --*/
 
+// Brand
 $primary: #66c2ff !default;
 $primary-back: color-mix(in srgb, #{$primary}, black 82%) !default;
 $primary-surface: color-mix(in srgb, #{$primary}, black 84%) !default;
 $primary-dark: color-mix(in srgb, #{$primary}, white 35%) !default;
 $secondary: #ff5252 !default;
 
+// Body
 $body-bg: #161616 !default;
 $body-color: #e8e8e8 !default;
 
+// Surfaces
 $neutral: #b0b0b0 !default;
 $em-background-color: #232323 !default;
 $surface-default: #1d1d1d !default;
 $caption-color: #e8e8e8 !default;
 $figure-shadow: #0a0a0a !default;
 
+// Inline highlights
 $str-color: #6dca8a !default;
 $dig-color: #ff9090 !default;
 
+// Callouts
 $callout-note-color: #66c2ff !default;
 $callout-tip-color: #5fc06a !default;
 $callout-caution-color: #ffc870 !default;
@@ -27,13 +32,15 @@ $callout-mix-base: #161616 !default;
 $callout-text-mix: white !default;
 $callout-bg-mix: 88% !default;
 
-$navbar-bg: mix($primary, black, 16%) !default;
+// Layout chrome (project-only). Bootstrap's own `shade-color` rather than a CSS
+// `color-mix()`: Quarto feeds these through `theme-contrast()`, which needs a
+// colour resolved at compile time. It also keeps the variable typed as a colour
+// for Quarto's SCSS analysis, which a namespaced `color.mix()` does not.
+$navbar-bg: shade-color($primary, 84%) !default;
 $navbar-fg: $body-color !default;
 $navbar-hl: $primary !default;
-
-$sidebar-bg: mix($primary, black, 16%) !default;
+$sidebar-bg: shade-color($primary, 84%) !default;
 $sidebar-fg: $body-color !default;
 $sidebar-hl: $primary !default;
-
-$footer-bg: mix($primary, black, 16%) !default;
+$footer-bg: shade-color($primary, 84%) !default;
 $footer-fg: $body-color !default;

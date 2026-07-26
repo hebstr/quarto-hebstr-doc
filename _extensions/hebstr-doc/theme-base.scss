@@ -1,12 +1,16 @@
 /*-- scss:defaults --*/
 
+// Typography (invariant)
 $font-family-sans-serif: "Luciole", system-ui, sans-serif !default;
 $font-family-monospace: "Fira Code", ui-monospace, monospace !default;
 $toc-font-size: 0.825rem !default;
 $callout-icon-scale: -10% !default;
+
+// Tabsets (invariant)
 $tab-surface: color-mix(in srgb, var(--primary), transparent 93%) !default;
 
-$code-foreground-color: #ffffff !default;
+// Code chrome (invariant)
+$code-foreground-color: #fff !default;
 $code-background-color: #262624 !default;
 $code-comment-color: #6c675f !default;
 $code-window-titlebar-bg: #212120 !default;
@@ -15,6 +19,7 @@ $code-window-line-divider: #383835 !default;
 $code-window-muted: #938e87 !default;
 $code-window-line-number: #5a5955 !default;
 
+// Filetree (invariant)
 $filetree-bg: $code-background-color !default;
 $filetree-fg: #d6d3cd !default;
 $filetree-muted: $code-window-muted !default;
@@ -69,7 +74,9 @@ body {
   background-color: var(--primary-surface);
 }
 
-.cb1, .cb2, .nb {
+.cb1,
+.cb2,
+.nb {
   font-weight: bold;
 }
 
@@ -85,7 +92,9 @@ body {
   color: color-mix(in srgb, var(--neutral), white 30%);
 }
 
-.nc, .str, .dig {
+.nc,
+.str,
+.dig {
   background-color: var(--em-background-color);
   font-family: $font-family-monospace;
   font-size: 0.9rem;
@@ -108,8 +117,8 @@ body {
 }
 
 .blockquote {
-  color: currentColor;
-  border-color: currentColor;
+  color: currentcolor;
+  border-color: currentcolor;
 }
 
 mjx-container {
@@ -119,28 +128,33 @@ mjx-container {
 .panel-tabset {
   .nav-tabs {
     margin-top: 2rem;
+
     --bs-nav-tabs-border-color: none;
     --bs-nav-tabs-link-hover-border-color: var(--primary-back);
     --bs-nav-link-color: var(--primary-dark);
     --bs-nav-link-hover-color: var(--primary);
     --bs-nav-tabs-link-active-color: var(--primary);
     --bs-nav-tabs-link-active-bg: var(--tab-surface);
-    --bs-nav-tabs-link-active-border-color: var(--primary-back) var(--primary-back) var(--tab-surface);
+    --bs-nav-tabs-link-active-border-color: var(--primary-back)
+      var(--primary-back) var(--tab-surface);
   }
+
   .nav-link.active {
     border-bottom-color: var(--primary);
     border-radius: 10px 10px 0 0;
   }
+
   .nav-link:not(.active) {
     background-color: var(--primary-back);
     border-bottom-color: var(--tab-surface);
     border-radius: 10px 10px 0 0;
   }
+
   .tab-content {
     background-color: var(--tab-surface);
     border-color: var(--tab-surface);
     border-top: 1px solid var(--tab-surface);
-    border-radius: 0 10px 10px 10px;
+    border-radius: 0 10px 10px;
     margin-bottom: 2rem;
   }
 }
@@ -149,6 +163,7 @@ mjx-container {
   background-color: var(--primary-back);
   border-radius: 12px;
   padding: 1.5rem 2rem;
+
   .title {
     margin-top: 0.5rem;
     border-bottom: none;
@@ -158,22 +173,27 @@ mjx-container {
     align-items: center;
     gap: 1rem;
   }
+
   .subtitle {
     font-size: 24px;
     color: var(--primary-dark);
   }
+
   .quarto-title-meta-heading,
   .block-title {
     color: var(--primary-dark);
   }
+
   .quarto-title-block > div {
     gap: 1.5rem;
   }
+
   .quarto-color-scheme-toggle.hebstr-title-toggle {
     display: inline-flex;
     color: var(--primary-dark);
     font-size: 1.5rem;
     flex-shrink: 0;
+
     &:hover {
       color: var(--primary);
     }
@@ -183,11 +203,11 @@ mjx-container {
 .quarto-color-scheme-toggle {
   > i.bi::before {
     background-image: none !important;
-    font-family: "Font Awesome 7 Free" !important;
-    // font-weight: 900 !important;
+    font-family: "Font Awesome 7 Free", sans-serif !important;
     content: "\f185";
     color: inherit;
   }
+
   &.alternate > i.bi::before {
     content: "\f186";
   }
@@ -197,21 +217,25 @@ mjx-container {
   text-align: left;
   padding: 1rem 1rem 0 1.5rem;
   background-color: var(--primary-back);
+
   h2#toc-title {
     font-size: 0.95rem;
     color: var(--primary-dark);
     margin: 0 0 0.3rem 0.2rem;
   }
+
   nav a#toc-title {
     font-size: inherit;
     color: inherit;
     margin: 0;
   }
+
   .toc-active {
     > ul a {
       border-left: 2px solid var(--primary-surface);
       padding-bottom: 0.3rem;
     }
+
     :is(ul > li, ul > li > ul > li) > a.active {
       border-left: 2px solid var(--primary);
     }
@@ -223,12 +247,19 @@ mjx-container {
   font-weight: 700;
 }
 
-h2, h3, h4, h5 {
+h2,
+h3,
+h4,
+h5 {
   margin-top: 1.5em;
   margin-bottom: 1rem;
 }
 
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
   border-bottom: 3px solid var(--primary-back);
   padding-bottom: 0.3rem;
   font-weight: normal;
@@ -270,14 +301,17 @@ h5 {
     line-height: 1.5;
     color: var(--caption-color);
   }
+
   &-subcaption {
     font-weight: normal;
     font-size: 0.85rem;
     color: var(--neutral);
   }
+
   &-fig {
     padding-bottom: 1em;
   }
+
   &-tbl {
     margin-top: 2rem;
     text-align: center;
@@ -316,6 +350,7 @@ div.sourceCode {
   margin: 1em 0;
   font-weight: bold;
   line-height: 1.4;
+
   ::selection {
     background-color: var(--code-comment-color);
     color: var(--code-foreground-color);
@@ -333,31 +368,48 @@ code span {
   .va {
     color: var(--code-foreground-color);
   }
-  .dv, .fl {
+
+  .dv,
+  .fl {
     color: #ff7869;
   }
+
   .cn {
     color: #ffbc6a;
     font-weight: bold;
   }
-  .st, .ss {
+
+  .st,
+  .ss {
     color: #c5ff93;
   }
-  .op, .ot, .sc {
+
+  .op,
+  .ot,
+  .sc {
     color: #a2fff6;
     font-weight: normal;
   }
-  .kw, .cf, .im {
+
+  .kw,
+  .cf,
+  .im {
     color: #d08aff;
     font-weight: bold;
   }
-  .fu, .bu, .ex {
-    color: #90E1FF;
+
+  .fu,
+  .bu,
+  .ex {
+    color: #90e1ff;
   }
-  .co, .do {
+
+  .co,
+  .do {
     font-style: normal !important;
     color: var(--code-comment-color);
   }
+
   .at {
     color: var(--code-foreground-color);
   }
@@ -367,6 +419,7 @@ code span {
   margin: 1rem;
   border-radius: 5px;
   background-color: var(--code-background-color);
+
   &:hover {
     background-color: var(--code-comment-color);
   }
@@ -377,11 +430,13 @@ pre {
     > span {
       background-color: var(--code-background-color);
       color: var(--code-foreground-color);
+
       > a {
         color: var(--code-comment-color);
       }
     }
   }
+
   code:not(.sourceCode) {
     background-color: var(--code-background-color);
     color: var(--code-comment-color);
@@ -401,8 +456,9 @@ body details.code-fold {
     margin-bottom: 0;
     padding: 0.4rem 1rem;
     border-radius: 10px;
-    border: 2px solid currentColor;
+    border: 2px solid currentcolor;
   }
+
   &[open] > summary {
     border: 2px solid var(--code-window-titlebar-bg);
     background-color: var(--code-window-titlebar-bg);
@@ -424,12 +480,15 @@ body div[data-code-filename] {
     background-color: var(--code-window-titlebar-bg);
     border: 1px solid var(--code-window-border);
     border-top-left-radius: 0;
+
     .code-with-filename-file {
       display: none;
     }
+
     pre.numberSource {
       margin-left: 0;
       padding: 1rem;
+
       code > span {
         position: static;
         left: auto;
@@ -441,6 +500,7 @@ body div[data-code-filename] {
 .code-with-filename.code-window-default,
 .code-with-filename.code-window-auto {
   --code-window-titlebar-height: 2.5rem;
+
   position: relative;
   margin: 1.2em 0;
   background-color: var(--code-window-titlebar-bg);
@@ -453,6 +513,7 @@ body div[data-code-filename] {
     background-color: var(--code-window-titlebar-bg);
     border-bottom: 1px solid var(--code-window-border);
     gap: 0;
+
     pre {
       flex: 1;
       margin: 0;
@@ -535,6 +596,7 @@ body div[data-code-filename] {
 
 .callout {
   border-radius: 5px;
+
   .callout-title-container {
     font-size: 1rem;
     text-align: left;
@@ -543,9 +605,11 @@ body div[data-code-filename] {
     padding-left: 0.25rem;
     padding-right: 1.3rem;
   }
+
   &.callout-titled:has(.callout-body > *) .callout-title-container {
     margin-bottom: 0.4rem;
   }
+
   .callout-body {
     padding-right: 1.3rem;
   }
@@ -566,10 +630,11 @@ body div[data-code-filename] {
     background-size: 1.2rem;
     margin-top: 0.3rem;
   }
+
   .callout-icon::before {
     background-image: none !important;
     height: auto;
-    font-family: "Font Awesome 7 Free";
+    font-family: "Font Awesome 7 Free", sans-serif;
     font-style: normal;
     font-weight: 900;
     font-size: 1.1rem;
@@ -577,35 +642,51 @@ body div[data-code-filename] {
 }
 
 $callout-types: (
-  "note": ("\f05a", 40%, 0%, 20%),
-  "important": ("\f06a", 30%, 0%, 10%),
-  "tip": ("\f0eb", 60%, 0%, 25%),
-  "caution": ("\f06d", 25%, 10%, 30%),
-  "warning": ("\f071", 25%, 0%, 15%),
+  ("note", "\f05a", 40%, 0%, 20%),
+  ("important", "\f06a", 30%, 0%, 10%),
+  ("tip", "\f0eb", 60%, 0%, 25%),
+  ("caution", "\f06d", 25%, 10%, 30%),
+  ("warning", "\f071", 25%, 0%, 15%)
 );
 
-@each $type, $conf in $callout-types {
-  $icon: nth($conf, 1);
-  $border-light: nth($conf, 2);
-  $header-dark: nth($conf, 3);
-  $body-dark: nth($conf, 4);
-
+@each $type, $icon, $border-light, $header-dark, $body-dark in $callout-types {
   div.callout.callout-#{$type} {
-    border: 2px solid color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-mix-base) #{$border-light});
+    border: 2px
+      solid
+      color-mix(
+        in srgb,
+        var(--callout-#{$type}-color),
+        var(--callout-mix-base) #{$border-light}
+      );
     border-left: 5px solid var(--callout-#{$type}-color);
-    background-color: color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-mix-base) var(--callout-bg-mix));
+    background-color: color-mix(
+      in srgb,
+      var(--callout-#{$type}-color),
+      var(--callout-mix-base) var(--callout-bg-mix)
+    );
+
     .callout-icon::before {
       content: "#{$icon}";
     }
+
     .callout-header {
       @if $header-dark == 0% {
         color: var(--callout-#{$type}-color);
       } @else {
-        color: color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-text-mix) #{$header-dark});
+        color: color-mix(
+          in srgb,
+          var(--callout-#{$type}-color),
+          var(--callout-text-mix) #{$header-dark}
+        );
       }
     }
+
     .callout-body {
-      color: color-mix(in srgb, var(--callout-#{$type}-color), var(--callout-text-mix) #{$body-dark});
+      color: color-mix(
+        in srgb,
+        var(--callout-#{$type}-color),
+        var(--callout-text-mix) #{$body-dark}
+      );
     }
   }
 }
@@ -726,6 +807,7 @@ $callout-types: (
     column-gap: 0.7rem;
     cursor: pointer;
     list-style: none;
+
     // Quarto's default `details > summary` colour is theme-dependent and matches
     // the summary directly, so it outranks the inherited `--filetree-fg` that the
     // file rows keep. Restore the invariant foreground on the dark box.

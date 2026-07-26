@@ -12,6 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # The stylelint and prettier hooks resolve from node_modules/.bin, which the
+      # repo does not commit, so the gate toolchain has to be restored first.
+      - name: Install CSS gate toolchain
+        run: npm ci
+
       - name: Pre-commit hooks (prek)
         uses: j178/prek-action@v2
         with:

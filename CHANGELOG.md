@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added
+
+- CSS/SCSS commit gate: `stylelint --fix` then `prettier --write` as two `prek` hooks, with the toolchain pinned in `package.json` and restored by `npm ci` in CI.
+  The hooks exclude `_extensions/hebstr-doc/_extensions/`, whose contents are vendored upstream copies.
+- `{{< filetree >}}` resolves more file types to a specific icon: extensions `mjs`, `cjs`, `rmd`, `htm`, `jsonc`, `json5`, `ttf`, `otf`, `gif`, `webp`, `avif`, `doc`, `odt`, `rtf`, and the names `.Rhistory`, `.luacheckrc`, `typst.toml`.
+  Each reuses an icon already vendored and follows the Material Icon Theme mapping at the pinned v5.37.0, so no new SVG ships.
+  These file types previously fell through to the generic `ft-i-document`, so a consumer overriding that class no longer reaches them.
+
+### Changed
+
+- The three theme stylesheets and `fonts/fonts.css` brought to gate conformance.
+  The layout-chrome defaults move from Sass `mix()` to Bootstrap's `tint-color()` / `shade-color()`, which compute the same colours through a wrapper rather than the global built-in that `scss/no-global-function-names` rejects and Dart Sass 3.0.0 removes; `$callout-types` becomes a list of 5-tuples unpacked by `@each` destructuring, since the same rule rejects `nth()`; the two Font Awesome declarations gain a generic family; palette variables are grouped under `//` section headers.
+  No public SCSS variable, CSS custom property, or compiled colour changes.
+
 ## [1.2.0] - 2026-07-21
 
 ### Added

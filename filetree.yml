@@ -9,8 +9,12 @@ filetree:
     "CHANGELOG.md": "versioned public API surface"
     "CONTRIBUTING.md": "versioning policy and release process"
     "LICENSE.md": "MIT"
+    "package.json": "pinned CSS/SCSS gate toolchain (stylelint, prettier)"
+    "stylelint.config.mjs": "SCSS lint rules, tuned for Quarto region markers"
   highlight:
     - "^README%.md$"
   exclude:
     - "%.html$"
     - "_files$"
+    - "node_modules"
+    - "^TODO%.md$"
