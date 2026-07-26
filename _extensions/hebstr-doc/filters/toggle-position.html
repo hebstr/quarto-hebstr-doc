@@ -4,10 +4,24 @@
     var toggle = document.querySelector('.quarto-color-scheme-toggle');
     var titleEl = document.querySelector('#title-block-header h1.title');
     if (!toggle || !titleEl) return false;
-    if (toggle.parentNode === titleEl) return true;
+    var row = document.querySelector('#title-block-header .hebstr-title-row');
+    if (row && toggle.parentNode === row) return true;
+    // The toggle sits beside the heading, never inside it: a control nested in
+    // the h1 joins its accessible name and its heading-navigation target.
+    if (!row) {
+      row = document.createElement('div');
+      row.className = 'hebstr-title-row';
+      titleEl.parentNode.insertBefore(row, titleEl);
+      row.appendChild(titleEl);
+    }
+    // Quarto builds the toggle with no text and no label, so the glyph would be
+    // its only accessible name.
+    if (!toggle.hasAttribute('aria-label')) {
+      toggle.setAttribute('aria-label', 'Toggle light and dark mode');
+    }
     toggle.classList.remove('top-right');
     toggle.classList.add('hebstr-title-toggle');
-    titleEl.appendChild(toggle);
+    row.appendChild(toggle);
     return true;
   }
   function tryMove(retries) {

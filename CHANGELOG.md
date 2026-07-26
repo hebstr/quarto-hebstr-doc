@@ -6,15 +6,37 @@
 
 - CSS/SCSS commit gate: `stylelint --fix` then `prettier --write` as two `prek` hooks, with the toolchain pinned in `package.json` and restored by `npm ci` in CI.
   The hooks exclude `_extensions/hebstr-doc/_extensions/`, whose contents are vendored upstream copies.
+
 - `{{< filetree >}}` resolves more file types to a specific icon: extensions `mjs`, `cjs`, `rmd`, `htm`, `jsonc`, `json5`, `ttf`, `otf`, `gif`, `webp`, `avif`, `doc`, `odt`, `rtf`, and the names `.Rhistory`, `.luacheckrc`, `typst.toml`.
   Each reuses an icon already vendored and follows the Material Icon Theme mapping at the pinned v5.37.0, so no new SVG ships.
   These file types previously fell through to the generic `ft-i-document`, so a consumer overriding that class no longer reaches them.
+
+- `{{< script >}}` names a malformed call site instead of absorbing it: an extra positional argument, an unknown attribute, a `numbers` value that is not a boolean, a `lines` spec that is not a range or that ends before it starts, and a non-numeric `dedent` each raise a render warning and fall back to the documented default.
+  `numbers` accepts `true`/`yes`/`on`/`1` and their negatives, case-insensitively, matching `hidden` on `{{< filetree >}}`.
+
+- The color-scheme toggle and the callout icons carry alternative text.
+  The toggle sits beside the title in a `.hebstr-title-row` rather than inside the `h1`, so a control no longer joins the heading's accessible name or its heading-navigation target, and it gains an `aria-label` since Quarto builds it with no text.
+  The Font Awesome glyphs are private-use codepoints, so `content: "…" / ""` gives them empty alternative text where that syntax is understood; elsewhere the plain declaration stands and the glyph renders unchanged.
 
 ### Changed
 
 - The three theme stylesheets and `fonts/fonts.css` brought to gate conformance.
   The layout-chrome defaults move from Sass `mix()` to Bootstrap's `tint-color()` / `shade-color()`, which compute the same colours through a wrapper rather than the global built-in that `scss/no-global-function-names` rejects and Dart Sass 3.0.0 removes; `$callout-types` becomes a list of 5-tuples unpacked by `@each` destructuring, since the same rule rejects `nth()`; the two Font Awesome declarations gain a generic family; palette variables are grouped under `//` section headers.
   No public SCSS variable, CSS custom property, or compiled colour changes.
+
+- `template.typ` drops a `#set document()` that configured nothing and a `#show heading` rule that suppressed the indent of the paragraph following a title.
+  Typst's `first-line-indent` defaults to `all: false` and therefore only indents after another paragraph, so the rule was already redundant.
+
+### Fixed
+
+- `{{< script >}}`: the summary rewriter threw on the first code block rendered without `code-fold`, which has no `<summary>` to relabel.
+  The exception aborted the whole script, so no block on the page got its filename.
+
+- `{{< filetree >}}`: a `highlight` match on an expandable folder rendered without `$filetree-highlight` or its bold weight in `dynamic` mode.
+  `.ft-hl > .ft-name` assumed the static shape, where the name is a direct child of the `li`; a toggled folder nests it under `details > summary`, so the child combinator missed it and only the `<strong>` fallback showed.
+
+- `{{< filetree >}}`: a blank line or a `#` comment inside the `filetree:` block of the sidecar ended the sequence being read, so `exclude` and `highlight` silently lost every pattern written after one.
+  A key left empty also yielded a list where the readers of `root`, `depth`, `hidden` and `mode` expect a string; those four now fall through to their default.
 
 ## [1.2.0] - 2026-07-21
 
@@ -35,6 +57,15 @@
 
 - `$tab-background` renamed to `$tab-surface`, now exposed at `:root` so it is overridable from a `custom.scss`.
   The old variable drove no rule, so nothing regresses.
+
+- The `grid` defaults tighten: `body-width` from 1100px to 1000px and `margin-width` from 600px to 450px, `sidebar-width` and `gutter-width` unchanged.
+  Both remain frontmatter overrides, so the previous measure is one `grid:` block away.
+
+### Removed
+
+- `fontsize: 1.2rem` is no longer declared by `hebstr-doc-html`; body text falls back to the Bootstrap default Quarto ships.
+  `fontsize` is a stock Quarto key, not an extension invention, so a consumer wanting the previous measure declares it themselves.
+  Shipped under MINOR rather than MAJOR per the no-consumer clause in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Fixed
 

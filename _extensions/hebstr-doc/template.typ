@@ -1,6 +1,3 @@
-// Configuration générale du document
-#set document()
-
 // Configuration de la page avec en-têtes et pieds de page
 #set page(
   footer: align(center)[
@@ -32,11 +29,8 @@
   first-line-indent: 1em,
 )
 
-// Ne pas indenter après les titres
-#show heading: it => {
-  it
-  par(first-line-indent: 0pt)[#text(size: 0pt)[#h(0pt)]]
-}
+// Le paragraphe suivant un titre n'est pas indenté : `first-line-indent` vaut
+// `all: false` par défaut, et n'indente donc qu'après un autre paragraphe.
 
 // Style des listes
 #set list(indent: 1em)

@@ -1,7 +1,7 @@
 # Contributing to hebstr-doc
 
 This document covers the SemVer policy, the public API surface, and the release procedure for `hebstr-doc`.
-For architecture and SCSS layering, see [.claude/CLAUDE.md](.claude/CLAUDE.md) and [README.md](README.md).
+For the SCSS layering and the variables it exposes, see [README.md](README.md); the public API surface below defines what of it is versioned.
 
 ## Public API surface
 
@@ -59,7 +59,7 @@ After editing the theme:
 quarto render example.qmd --to hebstr-doc-html
 ```
 
-Currently HTML only; once Typst and DOCX are validated (see [.claude/PLAN.md](.claude/PLAN.md), P1), extend `example.qmd` to declare all three formats and render each.
+Currently HTML only: `hebstr-doc-typst` and `hebstr-doc-docx` are declared in `_extension.yml` but not yet validated, and `example.qmd` will declare all three once they are.
 
 The in-tree Lua filters carry a [luaunit](https://github.com/bluebird75/luaunit) suite under `tests/`, which CI runs as its own step:
 
@@ -93,7 +93,5 @@ Both CSS hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_ex
 - `_extensions/hebstr-doc/`: the extension itself (do not flatten).
 - `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (currently `mcanouil/code-window`).
 - `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua and prose gates.
-- `.claude/PLAN.md`: post-v1.0 backlog.
-- `.claude/DEFERRED.md`: items intentionally postponed.
 - `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).
 - `package.json` + `package-lock.json` + `stylelint.config.mjs`: the pinned CSS/SCSS gate toolchain and its rules; `node_modules/` is gitignored.

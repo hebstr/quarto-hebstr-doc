@@ -164,14 +164,26 @@ mjx-container {
   border-radius: 12px;
   padding: 1.5rem 2rem;
 
-  .title {
-    margin-top: 0.5rem;
-    border-bottom: none;
-    color: var(--primary);
+  // The row is built by `filters/toggle-position.html` ; without it the heading
+  // stays a plain block and the toggle keeps Quarto's floating position.
+  .hebstr-title-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
+    margin-top: 0.5rem;
+
+    // The offset moves to the row, or the heading's own margin would sit inside
+    // the centred box and push the toggle off the title's optical centre.
+    > .title {
+      margin-top: 0;
+    }
+  }
+
+  .title {
+    margin-top: 0.5rem;
+    border-bottom: none;
+    color: var(--primary);
   }
 
   .subtitle {
@@ -210,6 +222,18 @@ mjx-container {
 
   &.alternate > i.bi::before {
     content: "\f186";
+  }
+
+  // The toggle is a link whose only child is this glyph, so without alternative
+  // text the private-use codepoint becomes its entire accessible name.
+  @supports (content: "a" / "b") {
+    > i.bi::before {
+      content: "\f185" / "";
+    }
+
+    &.alternate > i.bi::before {
+      content: "\f186" / "";
+    }
   }
 }
 
@@ -669,6 +693,15 @@ $callout-types: (
       content: "#{$icon}";
     }
 
+    // Generated content counts toward the accessible name, so the private-use
+    // codepoint is given empty alternative text where that syntax is understood ;
+    // elsewhere the rule above stands and the glyph renders unchanged.
+    @supports (content: "a" / "b") {
+      .callout-icon::before {
+        content: "#{$icon}" / "";
+      }
+    }
+
     .callout-header {
       @if $header-dark == 0% {
         color: var(--callout-#{$type}-color);
@@ -757,7 +790,11 @@ $callout-types: (
     white-space: nowrap;
   }
 
-  .ft-hl > .ft-name {
+  // The second selector is the dynamic-mode shape: an expandable folder nests
+  // its name under `details > summary`, out of reach of the child combinator.
+  // A descendant selector would reach its children too and highlight the subtree.
+  .ft-hl > .ft-name,
+  .ft-hl > details > summary > .ft-name {
     font-weight: 700;
     color: var(--filetree-highlight);
   }

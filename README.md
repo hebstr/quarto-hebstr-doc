@@ -25,6 +25,16 @@ format: hebstr-doc-html
 ---
 ```
 
+The format targets the single self-contained document, so it sets `embed-resources: true` and every asset, fonts included, is inlined into the `.html`.
+A project layout renders fine but pays that cost per page: measured on a two-page website, 3.6 MB per page against 31 KB with the option off, and `site_libs/` is written either way, so the assets are duplicated rather than moved.
+Turn it off in the project config when the output is a website or a book:
+
+```yaml
+format:
+  hebstr-doc-html:
+    embed-resources: false
+```
+
 ## Shortcodes
 
 ### `script`
@@ -35,14 +45,16 @@ Injects an external file as a code block with the code-window chrome, so the scr
 {{< script scripts/demo.R >}}
 ```
 
-  | Attribute  | Default                 | Effect                                                                                                                                       |
-  | ---------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-  | `lang`     | from the file extension | Highlighting language, and the label shown in the title bar. An extension the shortcode does not map yields no language and no title bar     |
-  | `filename` | the path                | Label shown on the code-fold summary                                                                                                         |
-  | `suffix`   | none                    | Appended to the summary label                                                                                                                |
-  | `numbers`  | `true`                  | Line numbers                                                                                                                                 |
-  | `lines`    | whole file              | Range to include: `10-20`, `10-`, `-20`. A bare `12` is read as `12-`                                                                        |
-  | `dedent`   | none                    | Leading spaces to strip, at most this many. A line indented by less is dedented as far as its own indentation allows; tabs are never touched |
+  | Attribute  | Default                 | Effect                                                                                                                                                                                 |
+  | ---------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | `lang`     | from the file extension | Highlighting language, and the label shown in the title bar. An extension the shortcode does not map yields no language and no title bar                                               |
+  | `filename` | the path                | Label shown on the code-fold summary                                                                                                                                                   |
+  | `suffix`   | none                    | Appended to the summary label                                                                                                                                                          |
+  | `numbers`  | `true`                  | Line numbers. `true`/`yes`/`on`/`1` and their negatives are all accepted, case-insensitively; anything else warns and falls back to `true`                                             |
+  | `lines`    | whole file              | Range to include: `10-20`, `10-`, `-20`. A bare `12` is read as `12-`. A spec that is not a range, or one that ends before it starts, warns and reads the whole file                   |
+  | `dedent`   | none                    | Leading spaces to strip, at most this many. A line indented by less is dedented as far as its own indentation allows; tabs are never touched. A non-numeric value warns and is ignored |
+
+The path is the only positional argument; a second one warns and is ignored, as does an attribute outside the table above.
 
 ### `filetree`
 
@@ -72,8 +84,8 @@ filetree:
   | Key         | Default  | Effect                                                                                                                                                                                                                           |
   | ----------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
   | `root`      | `.`      | Directory to walk, relative to the project root, wherever in the project the document sits                                                                                                                                       |
-  | `depth`     | `2`      | Levels shown without interaction. In `static`, deeper directories collapse to `…`; in `dynamic`, they become collapsed folders that expand on click                                                                              |
-  | `mode`      | `static` | `static` renders the full tree to `depth`; `dynamic` makes folders collapsible native `<details>` (no JavaScript), with `depth` as the level open on load                                                                        |
+  | `depth`     | `2`      | Levels shown without interaction. In `static`, deeper directories collapse to `…`; in `dynamic`, they become collapsed folders that expand on click. A non-numeric value warns and falls back to `2`                             |
+  | `mode`      | `static` | `static` renders the full tree to `depth`; `dynamic` makes folders collapsible native `<details>` (no JavaScript), with `depth` as the level open on load. Any other value warns and falls back to `static`                      |
   | `exclude`   | none     | [Lua patterns](https://www.lua.org/manual/5.4/manual.html#6.4.1) matched against each path relative to `root`, directories included and without a trailing slash (`^output$`, not `^output/`). Escape literals with `%`, not `\` |
   | `highlight` | none     | Lua patterns; matching entries render bold                                                                                                                                                                                       |
   | `hidden`    | `false`  | Include dotfiles. `true`/`yes`/`on`/`1` and their negatives are all accepted, case-insensitively; anything else warns and falls back to `false`                                                                                  |
@@ -84,6 +96,7 @@ Attributes are the only call-site syntax; a positional argument or an unknown at
 As attributes, `exclude` and `highlight` take `|`-separated patterns with no escaping; a pattern matching a literal `|` belongs in the sidecar.
 Descriptions are read from the sidecar only.
 `annotations` (default `filetree.yml`) sets the sidecar path and must stay inside the project: an absolute path, a drive letter, or a `..` climbing out warns, and the call runs unconfigured.
+The constraint is deliberately not mirrored on `root`, which may point anywhere, including a sibling package in a monorepo: the sidecar is opened and read, whereas `root` is only listed, so it yields entry names and never file contents.
 `root` and `annotations` resolve from the project root, not the calling document, so one sidecar serves every document in the project.
 Outside a project, a single-file render falls back to the document's own directory for both.
 Document frontmatter is never read: `exclude` and `highlight` hold Lua patterns, which Pandoc would corrupt by parsing as inline Markdown.

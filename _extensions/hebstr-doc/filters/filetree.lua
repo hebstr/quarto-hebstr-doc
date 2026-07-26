@@ -282,6 +282,11 @@ local root_problem = {
 
 local raw_keys = { root = true, depth = true, hidden = true, exclude = true, highlight = true, mode = true }
 
+-- Only these two take a YAML sequence. An empty value on any other key is a null
+-- scalar, so it must fall through to the default rather than leave a table where
+-- the option readers expect a string.
+local list_keys = { exclude = true, highlight = true }
+
 local known_kwargs = {
   root = true,
   depth = true,
@@ -335,6 +340,9 @@ local function read_raw_config(text)
   for line in (text .. "\n"):gmatch("(.-)\n") do
     if line:match("^filetree%s*:%s*$") then
       inside = true
+    -- Blank and comment lines are YAML formatting: they neither close the block
+    -- nor end a sequence, and `pandoc.read` accepts them in the same file.
+    elseif inside and (line:match("^%s*$") or line:match("^%s*#")) then
     elseif inside and line:match("^%S") then
       break
     elseif inside then
@@ -346,11 +354,11 @@ local function read_raw_config(text)
         list = nil
         if key and raw_keys[unquote(key)] then
           key = unquote(key)
-          if value == "" then
+          if value ~= "" then
+            out[key] = unquote(value)
+          elseif list_keys[key] then
             out[key] = {}
             list = out[key]
-          else
-            out[key] = unquote(value)
           end
         end
       end
