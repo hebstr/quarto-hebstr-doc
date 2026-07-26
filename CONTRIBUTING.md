@@ -84,8 +84,11 @@ prek run --all-files --skip prose-lint   # run everything once against the whole
 ```
 
 The `prose-lint` hook is a local-only tool; skip it as shown (CI skips it too).
-The SCSS rules live in `stylelint.config.mjs`, which extends `stylelint-config-standard-scss`: that base ruleset is what enforces hex shortening, one selector per line, lowercase `currentcolor`, a generic family on every `font-family`, and `color.mix` over the global `mix`, so expect it to rewrite more than the three local rules describe.
-Those three deliberately disable `comment-whitespace-inside` (its autofix rewrites Quarto's `/*-- scss:defaults --*/` region markers, and Quarto then rejects the theme file), ban `@import` (removed in Dart Sass 3.0.0, and a Quarto render swallows the deprecation warning), and widen `selector-class-pattern` to accept the camelCase classes Pandoc emits (`.sourceCode`, `.numberSource`).
+The SCSS rules live in `stylelint.config.mjs`, which extends `stylelint-config-standard-scss`: that base ruleset is what enforces hex shortening, one selector per line, lowercase `currentcolor`, a generic family on every `font-family`, and a namespaced `color.mix` over the global `mix`, so expect it to rewrite more than the three local rules describe.
+Those three deliberately disable `comment-whitespace-inside` (its autofix rewrites Quarto's `/*-- scss:defaults --*/` region markers, and Quarto then rejects the theme file), ban both `@import` and `@use`, and widen `selector-class-pattern` to accept the camelCase classes Pandoc emits (`.sourceCode`, `.numberSource`).
+`@import` is removed in Dart Sass 3.0.0 and a Quarto render swallows the deprecation warning, so the gate is the only signal.
+`@use` is banned because Quarto concatenates user layers without deduplicating, so a consumer whose own `custom.scss` loads the same module fails the render on a duplicate namespace.
+That closes the migration path `scss/no-global-function-names` suggests: reach for Bootstrap's `tint-color()` / `shade-color()` wrappers instead of `color.mix`, which also keeps the value typed as a colour for Quarto's SCSS analysis.
 Both CSS hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_extensions/hebstr-doc/_extensions/`: the extensions embedded there are vendored upstream copies, and formatting them in place would drift from what `quarto add --embed` reinstalls.
 
 ## Where things live
