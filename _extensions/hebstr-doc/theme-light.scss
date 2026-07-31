@@ -3,7 +3,7 @@
 // Brand
 $primary: #09f !default;
 $primary-back: color-mix(in srgb, #{$primary}, white 95%) !default;
-$primary-surface: color-mix(in srgb, #{$primary}, white 98%) !default;
+$primary-surface: color-mix(in srgb, #{$primary}, white 100%) !default;
 $primary-dark: color-mix(in srgb, #{$primary}, black 50%) !default;
 $secondary: #f00 !default;
 
