@@ -13,8 +13,11 @@ A change is "API-affecting" only if it touches one of these surfaces:
    The mapping is partial: typography defaults, the layout-chrome variables, and `$body-bg` / `$body-color` are consumed at compile time and have no `:root` counterpart.
 4. **Frontmatter keys** wired through `_extension.yml` (`mainfont`, `monofont`, `linestretch`, `grid.*`, etc.).
 5. **Shortcodes** registered in `_extension.yml`: currently `{{< script path >}}` and `{{< filetree >}}`, including the `filetree.yml` sidecar schema the latter reads.
-6. **Bundled fonts** (Luciole, Fira Code, Font Awesome 7 Solid): removing or replacing a font is API-affecting because consumer SCSS may reference the family name.
+6. **Bundled fonts** (Luciole, Fira Code, Font Awesome 7 Free, shipped as its Solid face): removing or replacing a font is API-affecting because consumer SCSS may reference the family name.
 7. **`quarto-required`** version constraint in `_extension.yml`.
+8. **Render-time R packages** the format requires through `_extension.yml` (currently `svglite`, wired as the HTML `knitr.opts_chunk.dev`): adding one makes a previously-working consumer render fail until it is installed.
+9. **Shipped consumer-facing scripts**: currently `fonts/register.R`, which a project sources by path from its `.Rprofile` or a setup chunk.
+   Moving or renaming it breaks that call site.
 
 Changes to private internals (rule selectors, computed colour-mix knobs that are not exposed as variables, internal helpers, file reorganisation that does not move public resources) are **not** API-affecting.
 
@@ -23,11 +26,11 @@ Changes to private internals (rule selectors, computed colour-mix knobs that are
 Versioning follows [Semantic Versioning 2.0.0](https://semver.org), applied to the public API surface above.
 While the extension is on a `0.x.y` line, MINOR bumps may include breaking changes if explicitly flagged in the changelog; from `1.0.0` onward, the rules below are strict.
 
-  | Bump      | Triggers                                                                                                                                                                                                                                                                               |
-  | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | **MAJOR** | Renaming or removing a public SCSS variable, CSS custom property, format name, or shortcode. Removing a frontmatter key. Replacing a bundled font with one that has a different family name. Raising `quarto-required` to a version that drops support for previously-supported users. |
-  | **MINOR** | Adding a new public SCSS variable, CSS custom property, format, frontmatter key, or shortcode. Adding a bundled font. Lowering `quarto-required`. Visual changes that consumers can opt out of via existing variables.                                                                 |
-  | **PATCH** | Fix that does not alter the public API. Internal refactors. Documentation. Visual fixes that bring the rendered output closer to the documented behaviour.                                                                                                                             |
+  | Bump      | Triggers                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+  | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | **MAJOR** | Renaming or removing a public SCSS variable, CSS custom property, format name, or shortcode. Removing a frontmatter key. Replacing a bundled font with one that has a different family name. Raising `quarto-required` to a version that drops support for previously-supported users. Moving or renaming a shipped consumer-facing script. Adding a render-time R package requirement that no documented frontmatter override opts out of. |
+  | **MINOR** | Adding a new public SCSS variable, CSS custom property, format, frontmatter key, or shortcode. Adding a bundled font or a shipped consumer-facing script. Lowering `quarto-required`. Adding a render-time R package requirement that a documented frontmatter override opts out of. Visual changes that consumers can opt out of via existing variables.                                                                                   |
+  | **PATCH** | Fix that does not alter the public API. Internal refactors. Documentation. Visual fixes that bring the rendered output closer to the documented behaviour.                                                                                                                                                                                                                                                                                  |
 
 When in doubt, ask: "Could a consumer's existing `_quarto.yml` or `custom.scss` stop working after this change?"
 If yes, it is at least MINOR (with a deprecation note) or MAJOR (without a fallback).
@@ -58,6 +61,9 @@ After editing the theme:
 ```bash
 quarto render example.qmd --to hebstr-doc-html
 ```
+
+That render needs the `svglite` package, which the HTML format sets as the knitr device, plus what `example.qmd` itself loads (`ggplot2`, `dplyr`, `palmerpenguins`, `sessioninfo`).
+Its setup chunk sources `_extensions/hebstr-doc/fonts/register.R`, so the bundled faces are registered on a machine that lacks them and the figures do not fall back silently.
 
 Currently HTML only: `hebstr-doc-typst` and `hebstr-doc-docx` are declared in `_extension.yml` but not yet validated, and `example.qmd` will declare all three once they are.
 

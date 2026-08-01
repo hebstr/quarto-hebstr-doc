@@ -7,13 +7,31 @@
 
 A Quarto theme for HTML, Typst (PDF), and Word (DOCX) output.
 
-> **Status (v1.2.1):** HTML is operational.
+> **Status (v1.3.0):** HTML is operational.
 > Typst and DOCX are declared but not yet validated.
 
 ## Installation
 
 ```bash
 quarto add hebstr/quarto-hebstr-doc
+```
+
+The HTML format draws figures on the `svglite` device, which `quarto add` does not install:
+
+```r
+install.packages("svglite")
+```
+
+Any document running an R chunk needs it, whether or not that chunk draws.
+knitr resolves the device when it opens a chunk, so one that only prints a table fails the same way, on `there is no package called 'svglite'`.
+A document with no R chunk at all is unaffected.
+To stay on R's built-in cairo device instead, override both keys, the second dropping the `svglite`-only font arguments that `svg()` would reject:
+
+```yaml
+knitr:
+  opts_chunk:
+    dev: svg
+    dev.args: null
 ```
 
 ## Usage
@@ -136,10 +154,49 @@ format:
       margin-width: 300px
 ```
 
-HTML figures render as SVG (`fig-format: svg`) via R's built-in cairo device, so vector output needs no extra package.
-For selectable text and lighter files, opt into the `svglite` device (requires the `svglite` R package) with `knitr: { opts_chunk: { dev: svglite } }` in the document YAML.
-Render as raster instead with `fig-format: png`.
+HTML figures render as SVG (`fig-format: svg`) through the `svglite` device (`dev: svglite`), which **requires the `svglite` R package** in the rendering library.
+It writes figure labels as `<text>` elements, so they stay selectable and searchable and the file runs several times lighter, which compounds under `embed-resources: true`.
+Fall back to R's built-in cairo device, which needs no extra package but bakes every label into vector paths, with `knitr: { opts_chunk: { dev: svg, dev.args: null } }` in the document YAML.
+Render as raster with `knitr: { opts_chunk: { dev: png, dev.args: null } }` instead.
+`fig-format: png` on its own leaves the device on `svglite`, the format's explicit `dev` taking precedence over it.
 Typst and DOCX are unaffected.
+
+### Figure fonts
+
+A plotting device resolves R's own font families, not `mainfont`, so a figure would otherwise land beside Luciole body text on whatever the render machine resolves for the generic `sans`.
+The format aliases the two generics to the document fonts:
+
+```yaml
+dev.args:
+  system_fonts:
+    sans: "Luciole"
+    mono: "Fira Code"
+```
+
+The alias only decides what the **generic** `sans` and `mono` resolve to, which is what a plot that named no font receives.
+A plot that asks for a family explicitly (`par(family=)`, ggplot's `base_family=`) resolves through a different path and is left alone, so this changes the undecided case and overrides nothing.
+
+Two things to know:
+
+**A figure never reaches the page's webfonts.** Quarto inserts each SVG as `<img src="data:image/svg+xml;...">`, and an SVG loaded through `<img>` is an isolated document: the `@font-face` rules in `fonts.css` do not cross into it, whatever family name the figure carries.
+Figure text is therefore resolved against the **reader's** installed fonts, not against the webfonts the page downloads for its body text.
+A reader without Luciole sees a substitute in the figures while the prose around them renders correctly.
+
+`svglite` pins each string's width with `textLength` and `lengthAdjust='spacingAndGlyphs'`, so a substitution keeps the layout and changes only the glyph shapes.
+Embedding the font in the SVG itself is possible (`svglite::font_face(..., embed = TRUE)` passed through `web_fonts`) and is what would make figures self-contained, at a cost measured in hundreds of kilobytes per figure.
+
+**It also reads the render machine's installed fonts.** `svglite` writes the family it actually matched, never the one requested, so on a machine without Luciole the SVG names that machine's fallback and carries its metrics (`Noto Sans` on a typical desktop, `Liberation Sans` on a stock GitHub runner).
+The figure then claims a family nobody asked for, and even a reader who *has* Luciole sees the fallback.
+
+Naming the family in the plot (`par(family=)`, ggplot's `base_family=`) does **not** protect against this.
+It settles which family is asked for, not whether the machine can supply it: an explicit request for an absent font falls back exactly like the generic does.
+
+This bites hardest where the render machine is not the authoring one, a CI job or a server, since the substitution is silent and lands in the published artefact.
+Install Luciole and Fira Code there: the alias resolves through `systemfonts`, so the two families have to sit on whichever machine runs the render, not only on the one where the document is written.
+Measured on a fontconfig restricted to DejaVu, the alias writes `DejaVu Math TeX Gyre` into the SVG.
+
+**`dev.args` is replaced, not merged.** A chunk setting it for another purpose loses the alias entirely and falls back.
+Either repeat `system_fonts` in that call, or give the font in plot terms, which is what `example.qmd` does for its transparent-background figure.
 
 ### Figures that follow the light/dark toggle
 

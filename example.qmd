@@ -9,6 +9,13 @@ format:
       source: https://github.com/hebstr/quarto-hebstr-doc
 ---
 
+```{r}
+#| label: setup
+#| include: false
+
+source("_extensions/hebstr-doc/fonts/register.R")
+```
+
 # Typography and headings
 
 Only `hebstr-doc-html` ships on `main`; Typst and DOCX land once validated.
@@ -47,24 +54,29 @@ Ordered:
 
 # Figure {#sec-figure}
 
-@fig-penguins is **ggplot2** on `palmerpenguins`, under the shared knitr options (`echo`, `message`, `warning` all off).
+@fig-penguins is **ggplot2** on `palmerpenguins`, under the shared knitr options (`echo`, `message`, `warning` all off) and the HTML format's own `dev: svglite`, which Typst and DOCX do not carry.
 
 The chunk emits two plots; `renderings: [light, dark]` tags them `.light-content` / `.dark-content`, and the body class picks one at runtime.
 `renderings` rejects `fig-cap` and `fig-`-prefixed labels as cell options, so the fenced div carries the crossref id and caption.
 A transparent device background (`dev.args`) shows the page through, so only the ink varies per mode.
+Setting `dev.args` replaces the format's own value rather than extending it, which drops the `system_fonts` alias that would otherwise supply the document font, so the theme names `base_family` itself.
 
 ::: {#fig-penguins}
 ```{r}
 #| label: penguins-fig
 #| renderings: [light, dark]
 #| fig-height: 5
-#| dev: svglite
 #| dev.args: !expr list(bg = "transparent")
 
 library(ggplot2)
 
 theme_hebstr <- function(ink, grid) {
-  theme_minimal(base_size = 12, ink = ink, paper = NA) +
+  theme_minimal(
+    base_size = 12,
+    base_family = "Luciole",
+    ink = ink,
+    paper = NA
+  ) +
     theme(
       axis.text = element_text(colour = ink),
       panel.grid = element_line(colour = grid),

@@ -44,6 +44,13 @@ contributes:
       code-copy: always
       html-table-processing: none
       fig-format: svg
+      knitr:
+        opts_chunk:
+          dev: svglite
+          dev.args:
+            system_fonts:
+              sans: "Luciole"
+              mono: "Fira Code"
       theme:
         light: [theme-light.scss, theme-base.scss]
         dark: [theme-dark.scss, theme-base.scss]
