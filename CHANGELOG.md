@@ -2,6 +2,36 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-08-01
+
+### Added
+
+- `fonts/register.R` ships beside the font files and makes the bundled Luciole and Fira Code usable on a machine that has neither installed.
+  A project activates it with one `source()` from its `.Rprofile` or a setup chunk; the script locates its own directory while being sourced, so no font path leaks into the project.
+  It skips any family the system already provides, `systemfonts::register_font()` being an error on an installed one, and it covers both routes to the font: the plots that name their family, and the generic `system_fonts` alias below, which resolves through the same registry.
+  Without it, `svglite` writes the fallback family it matched, so the figure claims a family nobody asked for and carries the wrong metrics.
+  This settles the render side only: an SVG inserted as `<img>` never sees the page's `@font-face` rules, so which typeface a reader sees still depends on what that reader has installed.
+
+### Changed
+
+- HTML figures render through `svglite` (`dev: svglite`) instead of R's built-in cairo device.
+  Cairo bakes every figure label into vector paths; `svglite` writes them as `<text>`, so they stay selectable and searchable and the file runs several times lighter, which compounds under `embed-resources: true`.
+  **The `svglite` R package becomes a render-time requirement for the HTML format**, and it covers more than the documents that draw.
+  knitr resolves the device when it opens a chunk, so one that merely prints a table fails the same way, on `there is no package called 'svglite'`; only a document with no R chunk at all is spared.
+  A document returns to the cairo device with `knitr: { opts_chunk: { dev: svg, dev.args: null } }`, the second key being required because `svg()` rejects the `svglite`-only font arguments the format sets.
+  That override is the documented fallback, so the new requirement ships under MINOR rather than MAJOR; the no-consumer clause in [CONTRIBUTING.md](CONTRIBUTING.md) covers it either way.
+  Typst and DOCX are unaffected.
+
+- HTML figures alias the generic `sans` and `mono` families to `Luciole` and `Fira Code`, so a plot that names no font matches the document typography instead of landing on `Liberation Sans`.
+  Only the generics move: a plot asking for a family explicitly (`par(family=)`, ggplot's `base_family=`) resolves through another path and is untouched.
+  The alias reads the rendering machine's fonts and degrades silently to the fallback family where they are missing, unless `fonts/register.R` above has supplied them.
+  A chunk that sets `dev.args` for another purpose replaces the alias rather than extending it and falls back.
+
+### Fixed
+
+- The light theme's `$primary-surface` mixed 2% of `$primary` into what is meant to be the page white, tinting the body background, the appendix block and the blockquote border that fill from it.
+  Its default is plain white.
+
 ## [1.2.1] - 2026-07-26
 
 ### Added
