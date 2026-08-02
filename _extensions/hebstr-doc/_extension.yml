@@ -55,6 +55,8 @@ contributes:
         light: [theme-light.scss, theme-base.scss]
         dark: [theme-dark.scss, theme-base.scss]
       css: fonts/fonts.css
+      syntax-definitions:
+        - syntax/r.xml
       include-in-header:
         - text: |
             <script>
@@ -73,6 +75,8 @@ contributes:
           path: _extensions/mcanouil/code-window/main.lua
         - at: post-quarto
           path: _extensions/mcanouil/code-window/_modules/hotfix/typst-title-fix.lua
+        - at: post-quarto
+          path: filters/r-syntax.lua
       extensions:
         code-window:
           enabled: true
@@ -94,4 +98,9 @@ contributes:
           path: _extensions/mcanouil/code-window/_modules/hotfix/typst-title-fix.lua
     docx:
       reference-doc: template.dotx
+      syntax-definitions:
+        - syntax/r.xml
+      filters:
+        - at: post-quarto
+          path: filters/r-syntax.lua
       number-sections: false

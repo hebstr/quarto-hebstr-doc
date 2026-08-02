@@ -1,0 +1,13 @@
+---
+title: R syntax probe
+format: hebstr-doc-html
+---
+
+The fence below is deliberately not an executable chunk: the markdown engine handles it, so this probe renders without R.
+
+```r
+library(dplyr)
+out <- dplyr::filter(data, n > 1L)
+head(out, n = 3L)
+DT[, val := 2L]
+```

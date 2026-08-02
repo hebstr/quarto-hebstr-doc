@@ -2,19 +2,19 @@ filetree:
   depth: 2
   paths:
     "_extensions": "the extension itself, as `quarto add` installs it"
-    "_extensions/hebstr-doc": "formats, filters, SCSS themes and bundled fonts"
+    "_extensions/hebstr-doc": "formats, filters, SCSS themes, bundled fonts and the R syntax definition"
     "scripts": "R scripts the example injects with the `script` shortcode"
     "example.qmd": "feature showcase, rendered to example.html"
     "README.md": "installation, shortcodes and customization"
     "CHANGELOG.md": "versioned public API surface"
     "CONTRIBUTING.md": "versioning policy and release process"
-    "LICENSE.md": "MIT"
+    "LICENSE.md": "MIT, plus the licences of the bundled third-party assets"
     "package.json": "pinned CSS/SCSS gate toolchain (stylelint, prettier)"
     "stylelint.config.mjs": "SCSS lint rules, tuned for Quarto region markers"
   highlight:
     - "^README%.md$"
   exclude:
-    - "%.html$"
+    - "^[^/]*%.html$"
     - "_files$"
     - "node_modules"
     - "^TODO%.md$"

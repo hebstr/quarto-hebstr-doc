@@ -1,5 +1,6 @@
 /.quarto/
 **/*.quarto_ipynb
+/r-syntax-probe.qmd
 /*.typ
 /*.html
 /*.pdf

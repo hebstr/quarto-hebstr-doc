@@ -2,6 +2,40 @@
 
 ## [Unreleased]
 
+### Added
+
+- R code blocks colour the package name in front of `::` and `:::`, and read `library`/`require`/`requireNamespace` as keywords rather than as ordinary calls.
+  Pandoc's stock R definition emits no token for either, so no stylesheet could reach them: the package name arrived as unstyled normal text and `library` was indistinguishable from any other function call.
+  `syntax/r.xml` supplies both missing rules, `filters/r-syntax.lua` routes R blocks to it, and the theme colours the resulting `.im` token.
+  Applies to HTML and DOCX, the two formats Pandoc highlights itself; Typst re-emits a raw fence and highlights it through `code.tmTheme`, which is unchanged.
+  The definition derives from the KDE Kate module for R and is **GPL v2**, the extension's one copyleft component, attributed in `syntax/RSyntax.LICENSE` and listed in [LICENSE.md](LICENSE.md).
+  It is taken at upstream version 14 while Quarto bundles version 12, so the two rules above are not the whole of what changes: the `:=` entry below comes with that newer base, as does a `.dt` token on the `L` and `i` suffixes of an integer or complex literal, which the theme colours with the other numeric literals rather than leaving on Quarto's light fallback.
+
+### Changed
+
+- R code blocks colour their punctuation.
+  The argument separator and the `=` of a named argument take the operator colour; brackets of every shape, round, curly and square, take the namespace gold.
+  Upstream tokenises none of the three: the first two fall through to normal text and brackets map to `dsNormal`, which skylighting emits without a span at all, so no stylesheet could reach any of them.
+  Colouring brackets means borrowing a token style that nominally means something else, skylighting exposing a closed set of them; `dsRegionMarker` carries them, so `.re` is gold from now on wherever it appears, in any language.
+  The `=` rule also splits `n =` into two tokens where it used to be one, so an argument name keeps `.at` and only the `=` moves.
+
+- `.im` no longer shares the keyword colour.
+  It is now `#fad430` against `#d08aff` for `.kw`/`.cf`, which is what makes the package name legible as a namespace rather than as a keyword.
+  Languages other than R that emit `.im` are affected too: a Python `from x import y` now renders its `import` and `from` in the same gold.
+
+- Code blocks are no longer bold as a whole.
+  Weight is reserved for `.kw`, `.cf`, `.im` and `.cn`, so identifiers, strings, numbers and function calls render at normal weight.
+
+### Fixed
+
+- `:=` no longer renders its `=` as an error token in R code.
+  Quarto's bundled R definition predates the rule that reads the pair as a single operator, so `data.table`'s `DT[, x := 1]` and rlang's `!!name :=` arrived as a `.sc` colon followed by an `.er` equals.
+  The rule comes with the upstream base `syntax/r.xml` is taken at, rather than being one of the two added here.
+
+- Comment and line-number contrast inside code blocks, both of which failed WCAG AA against the code surface.
+  `$code-comment-color` moves from `#6c675f` to `#8d8d8d` (2.70:1 to 4.57:1) and `$code-window-line-number` from `#5a5955` to `#7b7a76` (2.16:1 to 3.53:1).
+  `$code-comment-color` also backs the code-block selection band and the copy-button hover, both of which lighten with it.
+
 ## [1.3.0] - 2026-08-01
 
 ### Added

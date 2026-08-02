@@ -1,8 +1,9 @@
--- Test helpers for the Quarto shortcodes under _extensions/hebstr-doc/filters.
--- These files are shortcode handlers (`return { name = function(args, kwargs, meta) end }`),
--- not Pandoc document filters, so they are invoked directly rather than through
--- pandoc.utils.run_lua_filter. They read the `quarto` global and PANDOC_SCRIPT_FILE
--- at load time, so both must be set before the file is loaded.
+-- Test helpers for the Quarto shortcodes and document filters under
+-- _extensions/hebstr-doc/filters. Both are invoked directly rather than through
+-- pandoc.utils.run_lua_filter: a shortcode handler takes its own arguments
+-- (`return { name = function(args, kwargs, meta) end }`), a filter takes one AST
+-- element at a time. They read the `quarto` global and PANDOC_SCRIPT_FILE at load
+-- time, so both must be set before the file is loaded.
 
 local M = { deps = {}, warnings = {} }
 
@@ -35,6 +36,12 @@ function M.load_shortcode(relpath, opts)
   _G.quarto = make_quarto(opts)
   PANDOC_SCRIPT_FILE = opts.script_file
   return dofile(relpath)
+end
+
+-- Same, for a document filter. A filter file returns a list of filter tables;
+-- the first is what a test calls directly, one AST element at a time.
+function M.load_filter(relpath, opts)
+  return M.load_shortcode(relpath, opts)[1]
 end
 
 -- Positional shortcode arguments: a list whose elements are Inlines, matching

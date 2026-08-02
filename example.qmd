@@ -230,7 +230,7 @@ An unused key raises a render warning naming it, whether the path is absent from
 {{< filetree mode=dynamic >}}
 
 HTML renders a nested list styled by the `.filetree` rules in `theme-base.scss`.
-In `dynamic` mode each folder is a native `<details>` that toggles without JavaScript, its Material icon switching to the open-folder variant while expanded.
+In `dynamic` mode each expandable folder is a native `<details>` that toggles without JavaScript, its Material icon switching to the open-folder variant while expanded; a childless folder renders flat.
 The surface stays dark in both colour modes, like the code windows.
 Each entry resolves a Material Icon Theme icon by exact filename, then extension, then a generic fallback: `README.md` matches on name, `CHANGELOG.md` falls through to the Markdown icon, `example.qmd` matches on extension.
 Typst and DOCX receive a plain bullet list.

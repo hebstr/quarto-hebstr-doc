@@ -20,6 +20,8 @@ A change is "API-affecting" only if it touches one of these surfaces:
    Moving or renaming it breaks that call site.
 
 Changes to private internals (rule selectors, computed colour-mix knobs that are not exposed as variables, internal helpers, file reorganisation that does not move public resources) are **not** API-affecting.
+The `rhebstr` class that `filters/r-syntax.lua` adds to R code blocks is one of these: it exists so Pandoc resolves the bundled R syntax definition, it sits alongside the `r` class rather than replacing it, and it carries no promise.
+The syntax colours themselves are internal for the same reason, being literals in `scss:rules` rather than `!default` variables; that is a gap rather than a decision, and closing it would add to surface 2.
 
 ## SemVer policy
 
@@ -75,10 +77,19 @@ quarto pandoc lua tests/run.lua
 
 A change to `filters/*.lua` is expected to keep that suite green and to add a fixture when it adds behaviour.
 
+A second CI step covers what that suite cannot reach, the R syntax definition actually winning over the one Quarto bundles:
+
+```bash
+bash tests/r-syntax-tokens.sh
+```
+
+It renders `tests/r-syntax-probe.qmd` through the extension and asserts seven tokens in the HTML, one per divergence from the definition Quarto bundles, so a Quarto upgrade that reordered syntax-definition resolution fails here rather than silently reverting R code blocks to Pandoc's stock colours.
+The probe is staged at the repo root for the render and removed afterwards.
+
 ## Pre-commit hooks
 
-The repo ships a [`prek`](https://github.com/j178/prek) config (`prek.toml`): YAML/large-file/merge-conflict checks, secret scanning (gitleaks), R format/lint (air, jarl), Typst (typstyle), Lua (StyLua), and CSS/SCSS lint plus format (stylelint, prettier).
-The same hooks run in CI (`render.yml`), alongside two gates that are not hooks: the Lua unit tests above and a `lua-language-server --check` type pass.
+The repo ships a [`prek`](https://github.com/j178/prek) config (`prek.toml`): YAML/large-file/merge-conflict checks, secret scanning (gitleaks), R format/lint (air, jarl), Typst (typstyle), Lua (StyLua), shell format/lint (shfmt, shellcheck), CSS/SCSS lint plus format (stylelint, prettier), and prose-lint.
+The same hooks run in CI (`render.yml`), alongside three gates that are not hooks: the two test steps above and a `lua-language-server --check` type pass.
 Running the hooks locally therefore avoids most of a red build, not all of it.
 
 The CSS/SCSS hooks resolve from `node_modules/.bin`, so install the pinned toolchain once before running them (stylelint 17 needs Node >= 20.19; CI pins 22):
@@ -101,6 +112,6 @@ Both CSS hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_ex
 
 - `_extensions/hebstr-doc/`: the extension itself (do not flatten).
 - `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (currently `mcanouil/code-window`).
-- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua and prose gates.
+- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus `r-syntax-tokens.sh` and the `r-syntax-probe.qmd` it renders; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
 - `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).
 - `package.json` + `package-lock.json` + `stylelint.config.mjs`: the pinned CSS/SCSS gate toolchain and its rules; `node_modules/` is gitignored.

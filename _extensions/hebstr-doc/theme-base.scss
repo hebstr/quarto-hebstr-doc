@@ -3,7 +3,8 @@
 // Typography (invariant)
 $font-family-sans-serif: "Luciole", system-ui, sans-serif !default;
 $font-family-monospace: "Fira Code", ui-monospace, monospace !default;
-$toc-font-size: 0.825rem !default;
+$font-size-root: 1rem !default;
+$toc-font-size: 0.8rem !default;
 $callout-icon-scale: -10% !default;
 
 // Tabsets (invariant)
@@ -12,12 +13,12 @@ $tab-surface: color-mix(in srgb, var(--primary), transparent 93%) !default;
 // Code chrome (invariant)
 $code-foreground-color: #fff !default;
 $code-background-color: #262624 !default;
-$code-comment-color: #6c675f !default;
+$code-comment-color: #8d8d8d !default;
 $code-window-titlebar-bg: #212120 !default;
 $code-window-border: #383835 !default;
 $code-window-line-divider: #383835 !default;
 $code-window-muted: #938e87 !default;
-$code-window-line-number: #5a5955 !default;
+$code-window-line-number: #7b7a76 !default;
 
 // Filetree (invariant)
 $filetree-bg: $code-background-color !default;
@@ -372,7 +373,6 @@ div.sourceCode {
   border-radius: 12px;
   padding: 1em;
   margin: 1em 0;
-  font-weight: bold;
   line-height: 1.4;
 
   ::selection {
@@ -394,7 +394,8 @@ code span {
   }
 
   .dv,
-  .fl {
+  .fl,
+  .dt {
     color: #ff7869;
   }
 
@@ -412,14 +413,27 @@ code span {
   .ot,
   .sc {
     color: #a2fff6;
-    font-weight: normal;
   }
 
   .kw,
-  .cf,
-  .im {
+  .cf {
     color: #d08aff;
     font-weight: bold;
+  }
+
+  .im,
+  .re {
+    color: #fad430;
+  }
+
+  .im {
+    font-weight: bold;
+  }
+
+  // Quarto's highlight style ships RegionMarker with a near-white background,
+  // which the brackets borrowing that class would otherwise carry.
+  .re {
+    background-color: transparent;
   }
 
   .fu,

@@ -54,6 +54,12 @@ jobs:
           mkdir -p "$RUNNER_TEMP/luals" && tar -xzf "$RUNNER_TEMP/luals.tar.gz" -C "$RUNNER_TEMP/luals"
           "$RUNNER_TEMP/luals/bin/lua-language-server" --check . --checklevel Warning
 
+      # Renders its own probe: the bundled R syntax definition only prevails
+      # through Quarto's last-wins ordering, which a Quarto upgrade could change
+      # without failing the Lua suite or the render below.
+      - name: R syntax token assertions
+        run: bash tests/r-syntax-tokens.sh
+
       - name: Render example.qmd (HTML)
         run: quarto render example.qmd --to hebstr-doc-html
 

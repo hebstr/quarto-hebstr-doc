@@ -11,5 +11,6 @@ package.path = here .. "/?.lua;" .. package.path
 local lu = require("luaunit")
 require("test_add_code_files")
 require("test_filetree")
+require("test_r_syntax")
 
 os.exit(lu.LuaUnit.run())

@@ -126,10 +126,13 @@ Quote every description: YAML reads a bare `no`, `yes`, `on`, `off`, `true` or `
 A bare `~` reaches the shortcode as an empty string and is dropped silently.
 
 HTML renders a nested list on a dark surface in both light and dark modes, styled by the `.filetree` rules in `theme-base.scss`.
-In `dynamic` mode each folder is a native `<details>` element that expands without JavaScript, its Material folder icon switching to the open variant while expanded.
+In `dynamic` mode each expandable folder is a native `<details>` element that expands without JavaScript, its Material folder icon switching to the open variant while expanded; a childless folder renders flat, the disclosure widget having nothing to reveal.
 Each entry carries a [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme) icon, resolved by exact name, then extension, then a generic document; a directory resolves by name (only `.github` so far), then a generic folder.
 Icons ship under `_extensions/hebstr-doc/icons/` and are inlined per entry, so the page makes no outside request and only the icons used are embedded.
-Override one with a `background-image` on `.ft-i-<key> > .ft-name::before` in a `custom.scss` placed last in `theme:`.
+Override one with a `background-image` on `.ft-i-<key> .ft-name::before` in a `custom.scss` placed last in `theme:`.
+The combinator has to be the descendant one: `ft-i-<key>` sits on the list item, and in `dynamic` mode the name is nested one `<details><summary>` deeper.
+An expanded folder swaps to the Material open variant through a rule scoped to `.filetree-dynamic`, so overriding a folder icon there takes a second declaration that carries the key class through: `.ft-i-<key> details[open] > summary .ft-name::before`.
+Dropping the key class loses on specificity whatever the `theme:` order, where the collapsed-state override above only ties and is settled by loading last.
 Five invariant SCSS variables drive the surface: `$filetree-bg`, `$filetree-fg`, `$filetree-muted`, `$filetree-highlight`, `$filetree-guide`.
 Icons are decorative and never the sole carrier of meaning: directories keep their trailing slash, a highlighted entry is wrapped in `<strong>`, and the `…` marker carries a spelled-out label for assistive technology.
 
@@ -249,6 +252,25 @@ format:
 
 The overridable variables are the `!default` declarations in `theme-light.scss`, `theme-dark.scss` and `theme-base.scss`; [CONTRIBUTING.md](CONTRIBUTING.md) defines that surface and the SemVer policy that protects it.
 
+### Code highlighting
+
+Code blocks use a dark surface in both light and dark modes, and R gets five tokens Pandoc's stock definition does not emit: the package name in front of `::` or `:::`, `library`/`require`/`requireNamespace` read as keywords rather than as ordinary calls, the argument separator, the `=` of a named argument, and brackets of every shape.
+This runs at render time in HTML and DOCX; Typst highlights through `code.tmTheme` instead and is unaffected.
+
+Brackets carry one caveat worth knowing before you restyle anything.
+Skylighting exposes a closed set of token types and maps brackets to one that emits no span at all, so reaching them means borrowing `.re`, which nominally marks region markers.
+That borrowing is not scoped to R: `.re` renders in the namespace gold in every language the theme touches.
+
+Token colours are not exposed as variables yet, so overriding one means a rule in your `custom.scss`:
+
+```scss
+code span .im {
+  color: #b58900;
+}
+```
+
+The classes are Pandoc's: `.im` (imports and namespaces), `.re` (brackets, borrowed), `.kw` / `.cf` (keywords), `.fu` (function calls), `.st` (strings), `.dv` / `.fl` (numbers), `.op` / `.ot` / `.sc` (operators and punctuation), `.co` (comments).
+
 ## Example
 
 Source: [example.qmd](example.qmd).
@@ -260,4 +282,5 @@ quarto render example.qmd
 
 ## License
 
-[MIT](LICENSE.md)
+[MIT](LICENSE.md), except `_extensions/hebstr-doc/syntax/r.xml`, which derives from the KDE Kate highlighting module for R and stays [GPL v2](_extensions/hebstr-doc/syntax/RSyntax.LICENSE).
+Bundled fonts and icons keep their own licences; [LICENSE.md](LICENSE.md) lists all of them.
