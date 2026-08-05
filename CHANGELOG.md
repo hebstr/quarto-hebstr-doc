@@ -36,6 +36,10 @@
   `$code-comment-color` moves from `#6c675f` to `#8d8d8d` (2.70:1 to 4.57:1) and `$code-window-line-number` from `#5a5955` to `#7b7a76` (2.16:1 to 3.53:1).
   `$code-comment-color` also backs the code-block selection band and the copy-button hover, both of which lighten with it.
 
+- `fonts/register.R` reads the `.woff` faces rather than the `.woff2` ones.
+  FreeType decodes WOFF with zlib, which every build carries, but WOFF2 only where brotli was compiled in, so the registration silently produced nothing on a build without it and the figure fell back to the system sans.
+  Both formats ship beside the script and carry identical metrics; `fonts.css` keeps WOFF2 for the browser, which needs no such caveat.
+
 ## [1.3.0] - 2026-08-01
 
 ### Added

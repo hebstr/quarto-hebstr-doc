@@ -24,18 +24,19 @@ local({
     }
   }
 
+  # WOFF over WOFF2: FreeType decodes WOFF with zlib, WOFF2 only where brotli is compiled in
   register_missing(
     "Luciole",
-    plain = face("Luciole-Regular.woff2"),
-    bold = face("Luciole-Bold.woff2"),
-    italic = face("Luciole-Italic.woff2"),
-    bolditalic = face("Luciole-BoldItalic.woff2")
+    plain = face("Luciole-Regular.woff"),
+    bold = face("Luciole-Bold.woff"),
+    italic = face("Luciole-Italic.woff"),
+    bolditalic = face("Luciole-BoldItalic.woff")
   )
 
   register_missing(
     "Fira Code",
-    plain = face("FiraCode-Medium.woff2"),
-    bold = face("FiraCode-Bold.woff2")
+    plain = face("FiraCode-Medium.woff"),
+    bold = face("FiraCode-Bold.woff")
   )
 
   invisible(NULL)
