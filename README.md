@@ -183,10 +183,14 @@ Two things to know:
 
 **A figure never reaches the page's webfonts.** Quarto inserts each SVG as `<img src="data:image/svg+xml;...">`, and an SVG loaded through `<img>` is an isolated document: the `@font-face` rules in `fonts.css` do not cross into it, whatever family name the figure carries.
 Figure text is therefore resolved against the **reader's** installed fonts, not against the webfonts the page downloads for its body text.
-A reader without Luciole sees a substitute in the figures while the prose around them renders correctly.
+A reader without Luciole sees a substitute in the figures while the prose around them renders correctly, unless the figure carries a face of its own, which `fonts/register.R` below supplies.
 
 `svglite` pins each string's width with `textLength` and `lengthAdjust='spacingAndGlyphs'`, so a substitution keeps the layout and changes only the glyph shapes.
-Embedding the font in the SVG itself is possible (`svglite::font_face(..., embed = TRUE)` passed through `web_fonts`) and is what would make figures self-contained, at a cost measured in hundreds of kilobytes per figure.
+
+The bundled `fonts/register.R` closes this gap: where it is sourced, it embeds the Luciole regular and bold faces into every svglite figure as `@font-face` blocks carrying a base64 WOFF2 `src:`, which an isolated SVG document *can* read since the data never leaves it.
+That costs roughly 114 KB per figure, and covers those two faces only: italic figure text, and anything monospaced that the `mono` alias sends to Fira Code, still resolves against the reader's fonts.
+The form to keep away from is `svglite::font_face(local = <family>, embed = TRUE)`: that one resolves the family through `systemfonts::font_info()` and embeds whichever file it lands on, a system TTF where one is installed, at many times the weight of the WOFF2.
+`embed = TRUE` alongside `woff2 = <path>` stays on the WOFF2 and is a shorter route to the same bytes; the script encodes the URI itself to keep the `;charset=utf-8` token that form adds out of a binary payload.
 
 **It also reads the render machine's installed fonts.** `svglite` writes the family it actually matched, never the one requested, so on a machine without Luciole the SVG names that machine's fallback and carries its metrics (`Noto Sans` on a typical desktop, `Liberation Sans` on a stock GitHub runner).
 The figure then claims a family nobody asked for, and even a reader who *has* Luciole sees the fallback.
@@ -200,6 +204,7 @@ Measured on a fontconfig restricted to DejaVu, the alias writes `DejaVu Math TeX
 
 **`dev.args` is replaced, not merged.** A chunk setting it for another purpose loses the alias entirely and falls back.
 Either repeat `system_fonts` in that call, or give the font in plot terms, which is what `example.qmd` does for its transparent-background figure.
+The embedded faces are not lost the same way: `fonts/register.R` adds them from a knitr option hook, which runs after the chunk's own value is resolved and merges into it.
 
 ### Figures that follow the light/dark toggle
 

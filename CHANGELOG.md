@@ -4,6 +4,18 @@
 
 ### Added
 
+- Figure SVGs carry the body font with them, so they no longer fall back to another face on a machine without Luciole installed.
+  An SVG lands in the page as `<img src="data:image/svg+xml;base64,…">`, and an SVG referenced by `<img>` is an isolated document: it never reaches the `@font-face` rules of `fonts/fonts.css`, so its `font-family` resolves against the reader's installed fonts alone.
+  Tables, being ordinary nodes of the parent document, were unaffected, which is what made the gap look like a figure-only quirk.
+  `fonts/register.R` now embeds the Luciole regular and bold faces into every svglite figure as `@font-face` blocks with a base64 WOFF2 `src:`, adding roughly 114 KB per figure.
+  Those two faces only: figure text set in italic, and anything monospaced, which the format's `mono` alias sends to Fira Code, still resolves against the reader's installed fonts.
+  It calls `svglite::font_face(woff2 = <data URI>)` and builds the URI itself, which keeps the `;charset=utf-8` token `embed = TRUE` adds off a binary payload; the form to avoid is `local = <family>` with `embed = TRUE`, which resolves the family through `systemfonts::font_info()` and embeds whichever file that yields, a system TTF where one is installed, at many times the weight.
+  The faces are built on first use rather than at source time, so an interactive session that never renders does not pay the encoding.
+  Injection goes through `knitr::opts_hooks$set(dev = )` rather than `opts_chunk$set()`: a hook runs after option resolution, so it survives both a chunk setting its own `dev.args` and the format applying its value after `.Rprofile` has run.
+  It merges, so a chunk keeps its own `bg`.
+  `!expr` in the format's `knitr.opts_chunk` was tried first and does not work: Quarto passes the tagged node through unevaluated and the render fails on `unused arguments (value = …, tag = "!expr")`.
+  That tag is a knitr chunk-option feature, not a Quarto metadata one.
+
 - R code blocks colour the package name in front of `::` and `:::`, and read `library`/`require`/`requireNamespace` as keywords rather than as ordinary calls.
   Pandoc's stock R definition emits no token for either, so no stylesheet could reach them: the package name arrived as unstyled normal text and `library` was indistinguishable from any other function call.
   `syntax/r.xml` supplies both missing rules, `filters/r-syntax.lua` routes R blocks to it, and the theme colours the resulting `.im` token.

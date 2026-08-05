@@ -18,6 +18,7 @@ A change is "API-affecting" only if it touches one of these surfaces:
 8. **Render-time R packages** the format requires through `_extension.yml` (currently `svglite`, wired as the HTML `knitr.opts_chunk.dev`): adding one makes a previously-working consumer render fail until it is installed.
 9. **Shipped consumer-facing scripts**: currently `fonts/register.R`, which a project sources by path from its `.Rprofile` or a setup chunk.
    Moving or renaming it breaks that call site.
+   It registers the bundled faces with `systemfonts` when the machine lacks them, and embeds Luciole regular and bold into svglite figures as web fonts through a `knitr::opts_hooks` entry; that second half is skipped when `knitr` or `svglite` is absent, and the script returns before either half when `systemfonts` is, so none of the three becomes a requirement beyond surface 8.
 
 Changes to private internals (rule selectors, computed colour-mix knobs that are not exposed as variables, internal helpers, file reorganisation that does not move public resources) are **not** API-affecting.
 The `rhebstr` class that `filters/r-syntax.lua` adds to R code blocks is one of these: it exists so Pandoc resolves the bundled R syntax definition, it sits alongside the `r` class rather than replacing it, and it carries no promise.
