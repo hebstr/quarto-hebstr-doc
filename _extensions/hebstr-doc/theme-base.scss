@@ -374,6 +374,7 @@ div.sourceCode {
   padding: 1em;
   margin: 1em 0;
   line-height: 1.4;
+  font-size: 0.9rem;
 
   ::selection {
     background-color: var(--code-comment-color);
@@ -385,7 +386,7 @@ code:not(.sourceCode) {
   color: var(--primary);
   background-color: var(--primary-back) !important;
   padding: 0.2rem 0.4rem !important;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 code span {
@@ -487,7 +488,7 @@ body details.code-fold {
   > summary {
     width: fit-content;
     font-family: $font-family-monospace;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     letter-spacing: 1px;
     color: var(--neutral);
     background-color: transparent;
