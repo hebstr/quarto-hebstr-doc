@@ -1,0 +1,29 @@
+---
+title: Annexe float probe
+format: hebstr-doc-html
+---
+
+The three authoring forms of an annexe, in the order they must share a counter.
+
+```{r}
+#| label: tbl-anx-demo
+#| tbl-cap: "A table annexe."
+
+data.frame(a = 1:2, b = c("x", "y"))
+```
+
+```{r}
+#| label: fig-anx-plot
+#| fig-cap: "A figure annexe."
+#| fig-height: 2
+
+plot(1:10)
+```
+
+::: {#anx-manual}
+Content that is neither a table nor a figure.
+
+A hand-written annexe.
+:::
+
+Reference: @anx-demo.

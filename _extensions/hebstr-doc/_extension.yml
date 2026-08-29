@@ -19,6 +19,12 @@ contributes:
       crossref:
         title-delim: "\\."
         tbl-title: "Table"
+        custom:
+          - kind: float
+            key: anx
+            reference-prefix: "Annexe"
+            caption-prefix: "Annexe"
+            caption-location: top
       tbl-cap-location: top
       fig-cap-location: bottom
       callout-appearance: simple
@@ -73,6 +79,8 @@ contributes:
       filters:
         - at: pre-quarto
           path: _extensions/mcanouil/code-window/main.lua
+        - at: pre-quarto
+          path: filters/crossref-anx.lua
         - at: post-quarto
           path: _extensions/mcanouil/code-window/_modules/hotfix/typst-title-fix.lua
         - at: post-quarto
@@ -94,6 +102,8 @@ contributes:
       filters:
         - at: pre-quarto
           path: _extensions/mcanouil/code-window/main.lua
+        - at: pre-quarto
+          path: filters/crossref-anx.lua
         - at: post-quarto
           path: _extensions/mcanouil/code-window/_modules/hotfix/typst-title-fix.lua
     docx:
@@ -101,6 +111,8 @@ contributes:
       syntax-definitions:
         - syntax/r.xml
       filters:
+        - at: pre-quarto
+          path: filters/crossref-anx.lua
         - at: post-quarto
           path: filters/r-syntax.lua
       number-sections: false

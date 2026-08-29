@@ -298,11 +298,59 @@ Callouts use `callout-appearance: simple`.
 >
 > --- author
 
+# Annexes
+
+Quarto ships no appendix prefix among its crossref types, so the extension declares a custom `anx` float (`crossref: custom:` in `_extension.yml`) and reaches it from a chunk through `filters/crossref-anx.lua`.
+The knitr engine builds a float only from a `fig-` or `tbl-` label, so an annexe is authored as `tbl-anx-…` or `fig-anx-…`, and the filter drops that carrier prefix at `pre-quarto`.
+What is left is a float referenced as `@anx-…` and captioned *Annexe n.*; the three forms below share one counter.
+
+```{r}
+#| label: tbl-anx-mass
+#| tbl-cap: "Mean body mass by species and island."
+#| echo: true
+#| code-fold: false
+
+palmerpenguins::penguins |>
+  dplyr::group_by(species, island) |>
+  dplyr::summarise(
+    n = dplyr::n(),
+    mean_mass_g = round(mean(body_mass_g, na.rm = TRUE)),
+    .groups = "drop"
+  )
+```
+
+The carrier also decides which caption key is read: `tbl-cap` above, `fig-cap` below.
+
+```{r}
+#| label: fig-anx-mass-spread
+#| fig-cap: "Body mass spread by species."
+#| fig-height: 3.5
+#| echo: true
+#| code-fold: false
+
+ggplot2::ggplot(
+  palmerpenguins::penguins,
+  ggplot2::aes(x = species, y = body_mass_g)
+) +
+  ggplot2::geom_boxplot(na.rm = TRUE) +
+  ggplot2::theme_minimal(base_size = 12)
+```
+
+A hand-written div carries no prefix to strip, so the filter leaves it alone and Quarto numbers it in the same sequence.
+It is the form for content that is neither a table nor a figure.
+
+::: {#anx-notes}
+Regression diagnostics, model assumptions and any other supporting material go here as ordinary blocks.
+
+Free-form annexe written as a fenced div.
+:::
+
 # Cross-references
 
 - Section reference: @sec-figure
 - Figure reference: @fig-penguins
 - Equation reference: @eq-ols
+- Annexe reference: @anx-notes
 
 \ 
 

@@ -19,6 +19,9 @@ A change is "API-affecting" only if it touches one of these surfaces:
 9. **Shipped consumer-facing scripts**: currently `fonts/register.R`, which a project sources by path from its `.Rprofile` or a setup chunk.
    Moving or renaming it breaks that call site.
    It registers the bundled faces with `systemfonts` when the machine lacks them, and embeds Luciole regular and bold into svglite figures as web fonts through a `knitr::opts_hooks` entry; that second half is skipped when `knitr` or `svglite` is absent, and the script returns before either half when `systemfonts` is, so none of the three becomes a requirement beyond surface 8.
+10. **Crossref types** declared under `crossref: custom:` in `_extension.yml`: currently `anx`, together with the `tbl-anx-` / `fig-anx-` carrier convention `filters/crossref-anx.lua` reads.
+    Renaming the key or the carrier breaks every `@anx-…` reference and every annexe label in a consumer document.
+    The `Annexe` prefix it ships is not part of the surface: a document overrides it by redeclaring the type.
 
 Changes to private internals (rule selectors, computed colour-mix knobs that are not exposed as variables, internal helpers, file reorganisation that does not move public resources) are **not** API-affecting.
 The `rhebstr` class that `filters/r-syntax.lua` adds to R code blocks is one of these: it exists so Pandoc resolves the bundled R syntax definition, it sits alongside the `r` class rather than replacing it, and it carries no promise.
@@ -31,8 +34,8 @@ While the extension is on a `0.x.y` line, MINOR bumps may include breaking chang
 
   | Bump      | Triggers                                                                                                                                                                                                                                                                                                                                                                                                                                    |
   | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | **MAJOR** | Renaming or removing a public SCSS variable, CSS custom property, format name, or shortcode. Removing a frontmatter key. Replacing a bundled font with one that has a different family name. Raising `quarto-required` to a version that drops support for previously-supported users. Moving or renaming a shipped consumer-facing script. Adding a render-time R package requirement that no documented frontmatter override opts out of. |
-  | **MINOR** | Adding a new public SCSS variable, CSS custom property, format, frontmatter key, or shortcode. Adding a bundled font or a shipped consumer-facing script. Lowering `quarto-required`. Adding a render-time R package requirement that a documented frontmatter override opts out of. Visual changes that consumers can opt out of via existing variables.                                                                                   |
+  | **MAJOR** | Renaming or removing a public SCSS variable, CSS custom property, format name, shortcode, or crossref type. Removing a frontmatter key. Replacing a bundled font with one that has a different family name. Raising `quarto-required` to a version that drops support for previously-supported users. Moving or renaming a shipped consumer-facing script. Adding a render-time R package requirement that no documented frontmatter override opts out of. |
+  | **MINOR** | Adding a new public SCSS variable, CSS custom property, format, frontmatter key, shortcode, or crossref type. Adding a bundled font or a shipped consumer-facing script. Lowering `quarto-required`. Adding a render-time R package requirement that a documented frontmatter override opts out of. Visual changes that consumers can opt out of via existing variables.                                                                                   |
   | **PATCH** | Fix that does not alter the public API. Internal refactors. Documentation. Visual fixes that bring the rendered output closer to the documented behaviour.                                                                                                                                                                                                                                                                                  |
 
 When in doubt, ask: "Could a consumer's existing `_quarto.yml` or `custom.scss` stop working after this change?"
@@ -90,10 +93,20 @@ bash tests/r-syntax-tokens.sh
 It renders `tests/r-syntax-probe.qmd` through the extension and asserts seven tokens in the HTML, one per divergence from the definition Quarto bundles, so a Quarto upgrade that reordered syntax-definition resolution fails here rather than silently reverting R code blocks to Pandoc's stock colours.
 The probe is staged at the repo root for the render and removed afterwards.
 
+A third step does the same for the `anx` crossref type:
+
+```bash
+bash tests/anx-float.sh
+```
+
+It renders `tests/anx-float-probe.qmd` and asserts the three authoring forms of an annexe against the HTML: the carrier prefix stripped, the custom float class applied, one counter shared by the three, and a `@anx-` reference resolved.
+A float that stopped reaching the type would lose its number and its caption while the render still exited 0, which is what the assertions exist to catch.
+This probe is staged and removed the same way.
+
 ## Pre-commit hooks
 
 The repo ships a [`prek`](https://github.com/j178/prek) config (`prek.toml`): YAML/large-file/merge-conflict checks, secret scanning (gitleaks), R format/lint (air, jarl), Typst (typstyle), Lua (StyLua), shell format/lint (shfmt, shellcheck), CSS/SCSS lint plus format (stylelint, prettier), and prose-lint.
-The same hooks run in CI (`render.yml`), alongside three gates that are not hooks: the two test steps above and a `lua-language-server --check` type pass.
+The same hooks run in CI (`render.yml`), alongside four gates that are not hooks: the three test steps above and a `lua-language-server --check` type pass.
 Running the hooks locally therefore avoids most of a red build, not all of it.
 
 The CSS/SCSS hooks resolve from `node_modules/.bin`, so install the pinned toolchain once before running them (stylelint 17 needs Node >= 20.19; CI pins 22):

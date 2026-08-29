@@ -138,6 +138,49 @@ Icons are decorative and never the sole carrier of meaning: directories keep the
 
 Typst and DOCX fall back to a plain bullet list.
 
+## Annexes
+
+Quarto numbers figures, tables, equations and listings, and has no appendix among them: `crossref: appendix-title` letters the chapters of a book project and reaches nothing else.
+The extension declares a custom `anx` crossref type, so an annexe is captioned *Annexe n.*, referenced as `@anx-...`, and counted in a sequence of its own.
+
+A chunk cannot carry that label directly: the knitr engine builds a float only from a label matching `^#?(fig|tbl)-` and drops any other before it reaches Pandoc.
+An annexe is therefore authored with one of those two as a carrier prefix, which `filters/crossref-anx.lua` strips once the float node exists.
+
+````markdown
+```{r}
+#| label: tbl-anx-vif
+#| tbl-cap: "Variance inflation factors."
+
+vif_table
+```
+
+See @anx-vif.
+````
+
+  | Form         | Label                   | Caption read from             |
+  | ------------ | ----------------------- | ----------------------------- |
+  | Table chunk  | `tbl-anx-<name>`        | `tbl-cap`                     |
+  | Figure chunk | `fig-anx-<name>`        | `fig-cap`                     |
+  | Fenced div   | `anx-<name>` on the div | the last paragraph inside it  |
+
+The three share one counter, and the reference always drops the carrier: `@anx-vif`, never `@tbl-anx-vif`.
+The carrier earns its place twice over: it decides which caption key is read, and it leaves the block an ordinary table or figure, still visible and still captioned, should the filter ever be removed.
+
+The prefix is French because the type was built for French documents; a document overrides it by redeclaring the type.
+A document-level `crossref:` block replaces the format's own rather than merging into it, so repeat the two keys that block also carries:
+
+```yaml
+crossref:
+  title-delim: "\\."
+  tbl-title: "Table"
+  custom:
+    - kind: float
+      key: anx
+      reference-prefix: "Appendix"
+      caption-prefix: "Appendix"
+      caption-location: top
+```
+
 ## Customization
 
 ### Frontmatter

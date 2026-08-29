@@ -4,6 +4,16 @@
 
 ### Added
 
+- Numbered annexes, through a custom `anx` crossref type declared in `_extension.yml` and reached by `filters/crossref-anx.lua`.
+  An annexe is captioned *Annexe n.*, referenced as `@anx-...`, and counted in a sequence of its own, shared by the three forms that can produce one.
+  Quarto has no appendix type of its own: the built-in list stops at fig/tbl/eq/sec/lst and the theorem family, and `crossref: appendix-title` letters the chapters of a book project and reaches nothing else.
+  A chunk cannot carry an `anx-` label either, the knitr engine building a float only from a label matching `^#?(fig|tbl)-` and dropping any other before it reaches Pandoc, so an annexe is authored as `tbl-anx-x` or `fig-anx-x` and the filter strips that carrier prefix at `pre-quarto`, the one stage where the float node is built and still mutable.
+  The carrier earns its place twice over: it decides whether `tbl-cap` or `fig-cap` is read, and it leaves the block an ordinary table or figure, still visible and still captioned, should the filter ever stop running.
+  A hand-written `::: {#anx-x}` div carries no prefix and joins the same counter.
+  `theme-base.scss` extends the rule that centres a float caption to the new type, which has no styling of its own.
+  Declared for all three formats and asserted in HTML by `tests/anx-float.sh`, which renders its own probe: a float that stopped reaching the type would lose its number and caption without failing the render.
+  Numbering is in digits: `anx-labels` does not exist, the `crossref` schema being closed, and lettering would mean pinning five other `*-labels` keys back to arabic in every document for a cosmetic effect on one type.
+
 - Figure SVGs carry the body font with them, so they no longer fall back to another face on a machine without Luciole installed.
   An SVG lands in the page as `<img src="data:image/svg+xml;base64,…">`, and an SVG referenced by `<img>` is an isolated document: it never reaches the `@font-face` rules of `fonts/fonts.css`, so its `font-family` resolves against the reader's installed fonts alone.
   Tables, being ordinary nodes of the parent document, were unaffected, which is what made the gap look like a figure-only quirk.
@@ -37,6 +47,9 @@
 
 - Code blocks are no longer bold as a whole.
   Weight is reserved for `.kw`, `.cf`, `.im` and `.cn`, so identifiers, strings, numbers and function calls render at normal weight.
+
+- Code type sizes are harmonised.
+  A code block and an inline `code()` span outside one both sit at `0.9rem`, and the code-fold summary label drops to `0.8rem` so a filename header reads as chrome rather than as content.
 
 ### Fixed
 

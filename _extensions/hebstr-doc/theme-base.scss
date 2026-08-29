@@ -337,7 +337,10 @@ h5 {
     padding-bottom: 1em;
   }
 
-  &-tbl {
+  // The `anx` custom float carries no built-in styling, and this rule is the
+  // only thing that centres a float caption: without the key it renders left.
+  &-tbl,
+  &-anx {
     margin-top: 2rem;
     text-align: center;
   }

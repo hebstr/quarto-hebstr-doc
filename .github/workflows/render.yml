@@ -60,6 +60,11 @@ jobs:
       - name: R syntax token assertions
         run: bash tests/r-syntax-tokens.sh
 
+      # Renders its own probe too: a float that stops reaching the custom
+      # crossref type loses its number and caption without failing the render.
+      - name: Annexe float assertions
+        run: bash tests/anx-float.sh
+
       - name: Render example.qmd (HTML)
         run: quarto render example.qmd --to hebstr-doc-html
 
