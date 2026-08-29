@@ -129,6 +129,6 @@ Both CSS hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_ex
 
 - `_extensions/hebstr-doc/`: the extension itself (do not flatten).
 - `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (currently `mcanouil/code-window`).
-- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus `r-syntax-tokens.sh` and the `r-syntax-probe.qmd` it renders; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
+- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus the two render probes `r-syntax-tokens.sh` and `anx-float.sh` with the `.qmd` each renders; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
 - `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).
 - `package.json` + `package-lock.json` + `stylelint.config.mjs`: the pinned CSS/SCSS gate toolchain and its rules; `node_modules/` is gitignored.

@@ -6,7 +6,7 @@
     "Source: /opt/quarto/share/lua-types and /opt/quarto/share/lua-plugin, Quarto 1.9.38.",
     "Re-sync with: cp -r /opt/quarto/share/lua-types/. .luals/types/ && cp /opt/quarto/share/lua-plugin/plugin.lua .luals/plugin.lua"
   ],
-  "Lua.runtime.version": "Lua 5.3",
+  "Lua.runtime.version": "Lua 5.4",
   "Lua.workspace.checkThirdParty": false,
   "Lua.workspace.library": [
     ".luals/types"
