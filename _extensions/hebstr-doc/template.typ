@@ -53,6 +53,10 @@
 #show math.equation: set text(font: "New Computer Modern Math")
 
 // Style des blocs de code
+// Resolved against the .typ Quarto generates at the project root, not against
+// this file. The extension's depth varies by install route: `quarto add
+// hebstr/quarto-hebstr-doc` inserts an <owner> level and this literal misses.
+// No project-relative prefix is correct across routes; only a derived one is.
 #set raw(theme: "_extensions/hebstr-doc/code.tmTheme")
 
 #show raw.where(block: true): block.with(
