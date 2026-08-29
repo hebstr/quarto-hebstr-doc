@@ -53,8 +53,11 @@ Releases are git-tag-driven; the `release.yml` workflow turns each `v*` tag into
 5. Push commit and tag: `git push && git push --tags`.
 6. The `release.yml` workflow opens a GitHub Release; copy the relevant CHANGELOG section into the release body if the auto-generated notes are too terse.
 
-Consumers pin via `quarto add hebstr/quarto-hebstr-doc@vX.Y.Z`.
-Always tag: Quarto resolves `quarto add user/repo` to the latest release if any tag exists, otherwise to the default branch.
+Consumers pin via `quarto add hebstr/quarto-hebstr-doc@vX.Y.Z`, and the tag alone is what makes that form resolvable: GitHub serves a source archive for every tag, and Quarto downloads `archive/refs/tags/vX.Y.Z.tar.gz` from it.
+Without a modifier, `quarto add hebstr/quarto-hebstr-doc` takes `archive/refs/heads/main.tar.gz`, so an unpinned consumer tracks `main` and receives every push whether it is tagged or not.
+The literal `@latest` resolves the same way as the bare form, not to the last published version (`githubLatestUrlProvider` in Quarto's bundle; verified against Quarto 1.10.18).
+The GitHub Release that `release.yml` opens is therefore for readers, not for the installer: Quarto queries GitHub's releases API for TinyTeX and for nothing else.
+Tag anyway, and tag before telling a consumer to pin: it is the only thing that makes an install reproducible.
 
 ## Local validation
 
