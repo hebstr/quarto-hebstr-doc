@@ -7,7 +7,7 @@
 
 A Quarto theme for HTML, Typst (PDF), and Word (DOCX) output.
 
-> **Status (v1.3.0):** HTML is operational.
+> **Status (v1.4.0):** HTML is operational.
 > Typst and DOCX are declared but not yet validated.
 
 ## Installation

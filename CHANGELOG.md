@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-08-29
+
 ### Added
 
 - Numbered annexes, through a custom `anx` crossref type declared in `_extension.yml` and reached by `filters/crossref-anx.lua`.
@@ -33,6 +35,10 @@
   The definition derives from the KDE Kate module for R and is **GPL v2**, the extension's one copyleft component, attributed in `syntax/RSyntax.LICENSE` and listed in [LICENSE.md](LICENSE.md).
   It is taken at upstream version 14 while Quarto bundles version 12, so the two rules above are not the whole of what changes: the `:=` entry below comes with that newer base, as does a `.dt` token on the `L` and `i` suffixes of an integer or complex literal, which the theme colours with the other numeric literals rather than leaving on Quarto's light fallback.
 
+- `$font-size-root` joins the public SCSS variables, at `1rem`.
+  Quarto declares it at `17px` in its own Bootstrap layer, and a theme layer is applied first, so the document now takes the reader's browser root size instead.
+  It reaches the page as `--bs-root-font-size` on `html`, which every `rem`-derived size, padding and margin in the document scales against, so overriding it rescales the whole document from one knob.
+
 ### Changed
 
 - R code blocks colour their punctuation.
@@ -50,6 +56,8 @@
 
 - Code type sizes are harmonised.
   A code block and an inline `code()` span outside one both sit at `0.9rem`, and the code-fold summary label drops to `0.8rem` so a filename header reads as chrome rather than as content.
+
+- `$toc-font-size` drops from `0.825rem` to `0.8rem`, which settles the table of contents on the same step as the code-fold label.
 
 ### Fixed
 
