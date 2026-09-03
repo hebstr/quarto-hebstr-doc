@@ -165,22 +165,6 @@ mjx-container {
   border-radius: 12px;
   padding: 1.5rem 2rem;
 
-  // The row is built by `filters/toggle-position.html` ; without it the heading
-  // stays a plain block and the toggle keeps Quarto's floating position.
-  .hebstr-title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 0.5rem;
-
-    // The offset moves to the row, or the heading's own margin would sit inside
-    // the centred box and push the toggle off the title's optical centre.
-    > .title {
-      margin-top: 0;
-    }
-  }
-
   .title {
     margin-top: 0.5rem;
     border-bottom: none;
@@ -199,17 +183,6 @@ mjx-container {
 
   .quarto-title-block > div {
     gap: 1.5rem;
-  }
-
-  .quarto-color-scheme-toggle.hebstr-title-toggle {
-    display: inline-flex;
-    color: var(--primary-dark);
-    font-size: 1.5rem;
-    flex-shrink: 0;
-
-    &:hover {
-      color: var(--primary);
-    }
   }
 }
 
@@ -242,6 +215,27 @@ mjx-container {
   text-align: left;
   padding: 1rem 1rem 0 1.5rem;
   background-color: var(--primary-back);
+
+  // The row is built by `filters/toggle-position.html` ; without it the toggle
+  // keeps Quarto's floating position.
+  .hebstr-toggle-row {
+    display: flex;
+    justify-content: center;
+
+    // Cancels the panel's asymmetric padding, or the toggle centres on the toc
+    // column rather than on the panel.
+    margin: 0 -1rem 0.75rem -1.5rem;
+  }
+
+  .quarto-color-scheme-toggle.hebstr-sidebar-toggle {
+    display: inline-flex;
+    color: var(--primary-dark);
+    font-size: 1.5rem;
+
+    &:hover {
+      color: var(--primary);
+    }
+  }
 
   h2#toc-title {
     font-size: 0.95rem;

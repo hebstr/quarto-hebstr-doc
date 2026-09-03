@@ -1,38 +1,68 @@
 <script>
-(function () {
-  function moveToggle() {
-    var toggle = document.querySelector('.quarto-color-scheme-toggle');
-    var titleEl = document.querySelector('#title-block-header h1.title');
-    if (!toggle || !titleEl) return false;
-    var row = document.querySelector('#title-block-header .hebstr-title-row');
-    if (row && toggle.parentNode === row) return true;
-    // The toggle sits beside the heading, never inside it: a control nested in
-    // the h1 joins its accessible name and its heading-navigation target.
-    if (!row) {
-      row = document.createElement('div');
-      row.className = 'hebstr-title-row';
-      titleEl.parentNode.insertBefore(row, titleEl);
-      row.appendChild(titleEl);
+  (function () {
+    var home = null;
+
+    function moveToggle() {
+      var toggle = document.querySelector(".quarto-color-scheme-toggle");
+      if (!toggle) return false;
+      if (!home) {
+        home = {
+          parent: toggle.parentNode,
+          next: toggle.nextSibling,
+          floating: toggle.classList.contains("top-right"),
+        };
+      }
+      // Quarto builds the toggle with no text and no label, so the glyph would be
+      // its only accessible name.
+      if (!toggle.hasAttribute("aria-label")) {
+        toggle.setAttribute("aria-label", "Toggle light and dark mode");
+      }
+      var sidebar = document.getElementById("quarto-margin-sidebar");
+      // Below Quarto's breakpoint the sidebar is dropped from the layout, and a
+      // toggle parked inside it would go with it.
+      if (!sidebar || sidebar.getClientRects().length === 0) {
+        if (home.parent && toggle.parentNode !== home.parent) {
+          toggle.classList.remove("hebstr-sidebar-toggle");
+          if (home.floating) toggle.classList.add("top-right");
+          home.parent.insertBefore(toggle, home.next);
+        }
+        return true;
+      }
+      var row = sidebar.querySelector(".hebstr-toggle-row");
+      if (!row) {
+        row = document.createElement("div");
+        row.className = "hebstr-toggle-row";
+        sidebar.insertBefore(row, sidebar.firstChild);
+      }
+      if (toggle.parentNode !== row) {
+        toggle.classList.remove("top-right");
+        toggle.classList.add("hebstr-sidebar-toggle");
+        row.appendChild(toggle);
+      }
+      return true;
     }
-    // Quarto builds the toggle with no text and no label, so the glyph would be
-    // its only accessible name.
-    if (!toggle.hasAttribute('aria-label')) {
-      toggle.setAttribute('aria-label', 'Toggle light and dark mode');
+    function tryMove(retries) {
+      if (moveToggle()) return;
+      if (retries <= 0) return;
+      requestAnimationFrame(function () {
+        tryMove(retries - 1);
+      });
     }
-    toggle.classList.remove('top-right');
-    toggle.classList.add('hebstr-title-toggle');
-    row.appendChild(toggle);
-    return true;
-  }
-  function tryMove(retries) {
-    if (moveToggle()) return;
-    if (retries <= 0) return;
-    requestAnimationFrame(function () { tryMove(retries - 1); });
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { tryMove(20); });
-  } else {
-    tryMove(20);
-  }
-})();
+    var pending = false;
+    window.addEventListener("resize", function () {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(function () {
+        pending = false;
+        moveToggle();
+      });
+    });
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function () {
+        tryMove(20);
+      });
+    } else {
+      tryMove(20);
+    }
+  })();
 </script>

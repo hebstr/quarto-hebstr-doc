@@ -1,7 +1,7 @@
 {
   "name": "quarto-hebstr-doc-css-gate",
   "private": true,
-  "description": "Pinned CSS/SCSS gate toolchain for this extension's stylesheets (see CONTRIBUTING.md)",
+  "description": "Pinned lint/format toolchain for this extension's stylesheets and shipped HTML/JS (see CONTRIBUTING.md)",
   "devDependencies": {
     "prettier": "3.9.6",
     "stylelint": "17.14.1",

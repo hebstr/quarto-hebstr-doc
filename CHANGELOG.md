@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Changed
+
+- The light/dark toggle now sits at the top of the TOC sidebar, above the table of contents and centred on that panel, instead of beside the document title.
+  `filters/toggle-position.html` inserts a `.hebstr-toggle-row` as the first child of `#quarto-margin-sidebar` and moves the control into it ; the `.hebstr-title-row` it used to build around the `h1` is gone, and so are its two theme rules.
+  The margin sidebar leaves the layout below Quarto's breakpoint, and a toggle parked inside it would leave with it, so the same function hands the control back to the parent it was found in, floating `top-right` again, and a frame-throttled `resize` listener re-runs it on both sides of that threshold.
+  The `aria-label` the control gained in 1.2.1 is unchanged.
+
+- The `prettier` hook of `prek.toml` widens from the stylesheets to the HTML and JS the extension ships (`filters/toggle-position.html`, `filters/add-code-files.js`), which held no format gate until now, and skips `tests/fixtures/` so the verbatim test inputs stay byte-identical.
+  `filters/toggle-position.html` is reformatted to that gate ; no rendered output, public SCSS variable or CSS custom property changes.
+
 ## [1.4.0] - 2026-08-29
 
 ### Added

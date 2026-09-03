@@ -32,11 +32,11 @@ The syntax colours themselves are internal for the same reason, being literals i
 Versioning follows [Semantic Versioning 2.0.0](https://semver.org), applied to the public API surface above.
 While the extension is on a `0.x.y` line, MINOR bumps may include breaking changes if explicitly flagged in the changelog; from `1.0.0` onward, the rules below are strict.
 
-  | Bump      | Triggers                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-  | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Bump      | Triggers                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+  | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
   | **MAJOR** | Renaming or removing a public SCSS variable, CSS custom property, format name, shortcode, or crossref type. Removing a frontmatter key. Replacing a bundled font with one that has a different family name. Raising `quarto-required` to a version that drops support for previously-supported users. Moving or renaming a shipped consumer-facing script. Adding a render-time R package requirement that no documented frontmatter override opts out of. |
   | **MINOR** | Adding a new public SCSS variable, CSS custom property, format, frontmatter key, shortcode, or crossref type. Adding a bundled font or a shipped consumer-facing script. Lowering `quarto-required`. Adding a render-time R package requirement that a documented frontmatter override opts out of. Visual changes that consumers can opt out of via existing variables.                                                                                   |
-  | **PATCH** | Fix that does not alter the public API. Internal refactors. Documentation. Visual fixes that bring the rendered output closer to the documented behaviour.                                                                                                                                                                                                                                                                                  |
+  | **PATCH** | Fix that does not alter the public API. Internal refactors. Documentation. Visual fixes that bring the rendered output closer to the documented behaviour.                                                                                                                                                                                                                                                                                                 |
 
 When in doubt, ask: "Could a consumer's existing `_quarto.yml` or `custom.scss` stop working after this change?"
 If yes, it is at least MINOR (with a deprecation note) or MAJOR (without a fallback).
@@ -105,11 +105,11 @@ This probe is staged and removed the same way.
 
 ## Pre-commit hooks
 
-The repo ships a [`prek`](https://github.com/j178/prek) config (`prek.toml`): YAML/large-file/merge-conflict checks, secret scanning (gitleaks), R format/lint (air, jarl), Typst (typstyle), Lua (StyLua), shell format/lint (shfmt, shellcheck), CSS/SCSS lint plus format (stylelint, prettier), and prose-lint.
+The repo ships a [`prek`](https://github.com/j178/prek) config (`prek.toml`): YAML/large-file/merge-conflict checks, secret scanning (gitleaks), R format/lint (air, jarl), Typst (typstyle), Lua (StyLua), shell format/lint (shfmt, shellcheck), CSS/SCSS lint (stylelint), format of the CSS/SCSS plus the HTML and JS the extension ships (prettier), and prose-lint.
 The same hooks run in CI (`render.yml`), alongside four gates that are not hooks: the three test steps above and a `lua-language-server --check` type pass.
 Running the hooks locally therefore avoids most of a red build, not all of it.
 
-The CSS/SCSS hooks resolve from `node_modules/.bin`, so install the pinned toolchain once before running them (stylelint 17 needs Node >= 20.19; CI pins 22):
+Both hooks resolve from `node_modules/.bin`, so install the pinned toolchain once before running them (stylelint 17 needs Node >= 20.19; CI pins 22):
 
 ```bash
 npm ci                                   # restores the versions in package-lock.json
@@ -123,7 +123,8 @@ Those three deliberately disable `comment-whitespace-inside` (its autofix rewrit
 `@import` is removed in Dart Sass 3.0.0 and a Quarto render swallows the deprecation warning, so the gate is the only signal.
 `@use` is banned because Quarto concatenates user layers without deduplicating, so a consumer whose own `custom.scss` loads the same module fails the render on a duplicate namespace.
 That closes the migration path `scss/no-global-function-names` suggests: reach for Bootstrap's `tint-color()` / `shade-color()` wrappers instead of `color.mix`, which also keeps the value typed as a colour for Quarto's SCSS analysis.
-Both CSS hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_extensions/hebstr-doc/_extensions/`: the extensions embedded there are vendored upstream copies, and formatting them in place would drift from what `quarto add --embed` reinstalls.
+Both hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_extensions/hebstr-doc/_extensions/`: the extensions embedded there are vendored upstream copies, and formatting them in place would drift from what `quarto add --embed` reinstalls.
+`stylelint` stops at `.css` and `.scss`, having nothing to say about the rest; `prettier` also matches `.html` and `.js`/`.mjs`/`.cjs`, which is what covers the JS the extension ships (`filters/toggle-position.html` as an inline fragment, `filters/add-code-files.js` as a dependency), and it skips `tests/fixtures/` on top, those sources being verbatim inputs like the ones the R and Lua hooks already leave alone.
 
 ## Where things live
 
@@ -131,4 +132,4 @@ Both CSS hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_ex
 - `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (currently `mcanouil/code-window`).
 - `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus the two render probes `r-syntax-tokens.sh` and `anx-float.sh` with the `.qmd` each renders; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
 - `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).
-- `package.json` + `package-lock.json` + `stylelint.config.mjs`: the pinned CSS/SCSS gate toolchain and its rules; `node_modules/` is gitignored.
+- `package.json` + `package-lock.json` + `stylelint.config.mjs`: the pinned stylelint/prettier toolchain and the SCSS rules it enforces; `node_modules/` is gitignored.
