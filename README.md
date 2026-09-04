@@ -157,11 +157,11 @@ vif_table
 See @anx-vif.
 ````
 
-  | Form         | Label                   | Caption read from             |
-  | ------------ | ----------------------- | ----------------------------- |
-  | Table chunk  | `tbl-anx-<name>`        | `tbl-cap`                     |
-  | Figure chunk | `fig-anx-<name>`        | `fig-cap`                     |
-  | Fenced div   | `anx-<name>` on the div | the last paragraph inside it  |
+  | Form         | Label                   | Caption read from            |
+  | ------------ | ----------------------- | ---------------------------- |
+  | Table chunk  | `tbl-anx-<name>`        | `tbl-cap`                    |
+  | Figure chunk | `fig-anx-<name>`        | `fig-cap`                    |
+  | Fenced div   | `anx-<name>` on the div | the last paragraph inside it |
 
 The three share one counter, and the reference always drops the carrier: `@anx-vif`, never `@tbl-anx-vif`.
 The carrier earns its place twice over: it decides which caption key is read, and it leaves the block an ordinary table or figure, still visible and still captioned, should the filter ever be removed.
@@ -274,6 +274,19 @@ Caption goes here.
 `ink` requires ggplot2 4.0 and does not reach tick labels or gridlines, which need explicit `axis.text`, `panel.grid` and `axis.ticks` colours.
 Both renderings stay in the DOM, so switching modes costs no reload and the lightbox keeps working.
 See the Figure section of [`example.qmd`](example.qmd).
+
+### Tables that follow the light/dark toggle
+
+`gt` tables need nothing: the theme restyles them in dark mode on its own.
+A `gt` table resolves its palette in R and writes it into a `<style>` block scoped by the table's own generated id, so left alone it renders as a light card on a dark page, and no ordinary stylesheet rule can outrank an id-weighted selector.
+The dark theme therefore carries a marked override, and it is deliberately one-sided: in light a table keeps whatever palette its R code chose.
+
+Four variables move it.
+Text and the rules that structure the table follow `$body-color`, the table surface takes `$surface-default`, the headings, striped rows and footnotes take `$em-background-color`, and the hairlines between cells are drawn from `$neutral`.
+Re-tinting a table in dark mode means overriding those in your own `custom.scss` rather than styling the table in R: a colour passed to `gt::tab_options()` is what the override replaces.
+`gt` will not take a CSS variable either, validating every colour option through `html_color()` and rejecting `var()`, `currentColor` and `inherit`.
+
+A table drawn by another package is not covered, and does not need to be if its colours are ordinary CSS: `reactable`, for one, passes its theme strings through untouched, so `reactableTheme(color = "var(--bs-body-color)")` follows the toggle from the R side.
 
 ### Brand colors via `_brand.yml`
 

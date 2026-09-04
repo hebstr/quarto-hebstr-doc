@@ -44,3 +44,107 @@ $sidebar-fg: $body-color !default;
 $sidebar-hl: $primary !default;
 $footer-bg: shade-color($primary, 84%) !default;
 $footer-fg: $body-color !default;
+
+/*-- scss:rules --*/
+
+// GT TABLES -------------------------------------------------------------------
+
+// `gt` resolves its palette in R and writes it into a `<style>` block scoped by
+// the table's own generated id, so the colours are fixed before the page knows
+// which scheme it renders in, and every selector carries that id: no id-free
+// rule can outrank one, whatever its class count, which is what the marker on
+// each declaration below buys. A CSS custom property cannot go the other way
+// either, `gt` validating each colour option through `html_color()` and
+// rejecting `var()`, `currentColor` and `inherit` alike.
+
+// This is the one rules region outside `theme-base.scss`, and it is here rather
+// than there because it must exist in a single scheme: in light a table's own
+// palette is already right, and overriding it would replace a deliberate choice
+// by a second one. Being compiled into the dark bundle alone is also what scopes
+// it, with no dependency on the `body.quarto-dark` class Quarto's toggle script
+// adds after the sheet is already live.
+
+// Four colours cover the whole block a table emits. Text and the rules that
+// carry weight follow the body, the table surface and the raised surfaces
+// (headings, striped rows, footnotes) take the two page surfaces, and the
+// hairlines `gt` draws on an unstyled table are translated as a dim line on a
+// dark ground rather than kept as the light grey they are.
+
+.gt_table,
+.gt_heading,
+.gt_bottom_border,
+.gt_col_headings,
+.gt_col_heading,
+.gt_group_heading,
+.gt_empty_group_heading,
+.gt_row,
+.gt_stub,
+.gt_stub_row_group,
+.gt_first_summary_row,
+.gt_last_summary_row,
+.gt_first_grand_summary_row,
+.gt_last_grand_summary_row_top,
+.gt_footnotes,
+.gt_sourcenotes {
+  border-color: color-mix(in srgb, var(--neutral), transparent 70%) !important;
+}
+
+.gt_table,
+.gt_title,
+.gt_subtitle,
+.gt_col_heading,
+.gt_column_spanner_outer,
+.gt_group_heading,
+.gt_empty_group_heading,
+.gt_stub,
+.gt_stub_row_group,
+.gt_summary_row,
+.gt_grand_summary_row,
+.gt_footnotes,
+.gt_sourcenotes {
+  color: var(--bs-body-color) !important;
+}
+
+.gt_table,
+.gt_group_heading,
+.gt_empty_group_heading,
+.gt_stub,
+.gt_stub_row_group,
+.gt_summary_row,
+.gt_grand_summary_row,
+.gt_sourcenotes {
+  background-color: var(--surface-default) !important;
+}
+
+.gt_heading,
+.gt_col_heading,
+.gt_column_spanner_outer,
+.gt_striped,
+.gt_footnotes {
+  background-color: var(--em-background-color) !important;
+}
+
+// A heading separator drawn in the table's own surface colour is invisible by
+// design; keeping it on the surface preserves that, where the hairline group
+// above would have made it appear.
+.gt_heading,
+.gt_title {
+  border-bottom-color: var(--surface-default) !important;
+}
+
+.gt_subtitle {
+  border-top-color: var(--surface-default) !important;
+}
+
+// The rules that structure the table, against the hairlines that only
+// separate cells. Longhands, and after the shorthand above, so the two
+// borders `gt` weights differently stay distinguishable.
+.gt_col_headings,
+.gt_column_spanner {
+  border-bottom-color: var(--bs-body-color) !important;
+}
+
+.gt_table_body {
+  border-top-color: var(--bs-body-color) !important;
+  border-bottom-color: var(--bs-body-color) !important;
+}

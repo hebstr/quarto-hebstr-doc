@@ -4,6 +4,15 @@
 
 ### Changed
 
+- `gt` tables follow the dark scheme instead of staying on the light palette their R code resolved.
+  A `gt` table writes its own colours into a `<style>` block scoped by the table's generated id, so the page renders a light card on a dark ground, and nothing in a stylesheet could reach it: every selector in that block carries an id, which no id-free rule can outrank whatever its class count.
+  Quarto ships its own `table.gt_table { color: var(--quarto-body-color); background-color: transparent }` and loses for exactly that reason.
+  The rules therefore carry `!important`, and they are the one `scss:rules` region outside `theme-base.scss`: they must exist in a single scheme, the light palette being already right, and being compiled into the dark bundle alone is what scopes them, with no dependency on the `body.quarto-dark` class the toggle script adds after the sheet is live.
+  Text and the rules that structure the table follow `var(--bs-body-color)`, Bootstrap's own mirror of `$body-color`, which the theme exposes no `:root` counterpart for; the table surface takes `$surface-default`, the raised surfaces (headings, striped rows, footnotes) take `$em-background-color` and the hairlines between cells are drawn from `$neutral`, so those are what a consumer re-tints to move a table.
+  `$surface-default` gains its first consumer here, having been exposed with none.
+  Going the other way is not available: `gt` validates each colour option through `html_color()` and rejects `var()`, `currentColor` and `inherit`, so no theme token can be handed to `gt::tab_options()` in the first place.
+  Measured on a probe rendering a plain `gt` table and one carrying the palette `hebstr::theme_gt()` writes; the light bundle carries no rule from this change, so light output is untouched.
+
 - The light/dark toggle now sits at the top of the TOC sidebar, above the table of contents and centred on that panel, instead of beside the document title.
   `filters/toggle-position.html` inserts a `.hebstr-toggle-row` as the first child of `#quarto-margin-sidebar` and moves the control into it ; the `.hebstr-title-row` it used to build around the `h1` is gone, and so are its two theme rules.
   The margin sidebar leaves the layout below Quarto's breakpoint, and a toggle parked inside it would leave with it, so the same function hands the control back to the parent it was found in, floating `top-right` again, and a frame-throttled `resize` listener re-runs it on both sides of that threshold.
@@ -11,6 +20,11 @@
 
 - The `prettier` hook of `prek.toml` widens from the stylesheets to the HTML and JS the extension ships (`filters/toggle-position.html`, `filters/add-code-files.js`), which held no format gate until now, and skips `tests/fixtures/` so the verbatim test inputs stay byte-identical.
   `filters/toggle-position.html` is reformatted to that gate ; no rendered output, public SCSS variable or CSS custom property changes.
+
+### Fixed
+
+- A `gt` table wider than the body column compresses its columns instead of hiding them behind a horizontal scrollbar.
+  `gt` declares the table width in pixels and wraps the table in a scrolling container, so anything past the column edge was reachable only by scrolling ; `table.gt_table` now caps at `max-width: 100%`, which leaves the declared width alone wherever it fits.
 
 ## [1.4.0] - 2026-08-29
 
