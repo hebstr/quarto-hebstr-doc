@@ -340,6 +340,14 @@ h5 {
   }
 }
 
+// `gt` declares its table width in pixels and wraps the table in a scrolling
+// container, so a table wider than the body column is truncated behind a
+// horizontal scrollbar. The cap keeps the declared width wherever it fits and
+// compresses the columns instead of scrolling where it does not.
+table.gt_table {
+  max-width: 100%;
+}
+
 div.csl-right-inline {
   padding-left: 0;
   padding-bottom: 0.5em;
