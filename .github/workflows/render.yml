@@ -38,6 +38,7 @@ jobs:
             any::knitr
             any::rmarkdown
             any::dplyr
+            any::gt
             any::ggplot2
             any::svglite
             any::palmerpenguins

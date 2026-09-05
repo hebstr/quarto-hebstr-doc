@@ -2,14 +2,24 @@
 
 ## [Unreleased]
 
+### Added
+
+- `example.qmd` renders a `gt` table under `# Table`, beside the Markdown one, which is where the dark override recorded under Changed becomes observable in this repo.
+  The table asks for a deliberate light palette through `tab_options()`, the pale blue ground with white striped rows the house reports use (`#F0FAFF`, a step off the `#F2FAFF` `primary-back` compiles to in light), so dark shows the override winning over colours the chunk wrote rather than over `gt` defaults.
+  Its shape follows those reports too: a flat body so the striping alternates uninterrupted, a spanner, bold column labels over a rule, no vertical hairlines, and a source note.
+  The caption is a Quarto `tbl-cap` rather than a `gt` header, which is what those tables do and what makes the float centring rule apply.
+  No render probe comes with it: an uncovered `gt` class paints a light card on a dark ground, which the published demo shows at a glance, where `tests/r-syntax-tokens.sh` and `tests/anx-float.sh` exist for defects that leave the render green.
+  `gt` becomes a render-time requirement of the demo document, added to both workflows; it pulls `juicyjuice` and `V8`, the heaviest dependency `example.qmd` carries.
+
 ### Changed
 
 - `gt` tables follow the dark scheme instead of staying on the light palette their R code resolved.
   A `gt` table writes its own colours into a `<style>` block scoped by the table's generated id, so the page renders a light card on a dark ground, and nothing in a stylesheet could reach it: every selector in that block carries an id, which no id-free rule can outrank whatever its class count.
   Quarto ships its own `table.gt_table { color: var(--quarto-body-color); background-color: transparent }` and loses for exactly that reason.
   The rules therefore carry `!important`, and they are the one `scss:rules` region outside `theme-base.scss`: they must exist in a single scheme, the light palette being already right, and being compiled into the dark bundle alone is what scopes them, with no dependency on the `body.quarto-dark` class the toggle script adds after the sheet is live.
-  Text and the rules that structure the table follow `var(--bs-body-color)`, Bootstrap's own mirror of `$body-color`, which the theme exposes no `:root` counterpart for; the table surface takes `$surface-default`, the raised surfaces (headings, striped rows, footnotes) take `$em-background-color` and the hairlines between cells are drawn from `$neutral`, so those are what a consumer re-tints to move a table.
-  `$surface-default` gains its first consumer here, having been exposed with none.
+  Text and the rules that structure the table follow `var(--bs-body-color)`, Bootstrap's own mirror of `$body-color`, which the theme exposes no `:root` counterpart for, and the hairlines between cells are drawn from `$neutral`, so those are what a consumer re-tints to move a table.
+  The two surfaces are the page's own pair rather than a neutral grey, which is what keeps a dark table the counterpart of the light one instead of a second design: the blocks a light table leaves on the page background (column labels, striped rows, footnotes) take `$primary-surface`, the colour the page carries, and the table ground takes `$primary-back`, the tint the TOC sidebar is painted with, which is the pairing a light house table already lands on.
+  Per channel the two sit (2, 4, 5) apart in dark against (13, 5, 0) in light, which reads as a wider gap than it is: in CIE lightness they measure 1.86 and 2.18, so the striping is about as faint in either scheme, sRGB's curve giving a small step near black more lightness than a larger one near white.
   Going the other way is not available: `gt` validates each colour option through `html_color()` and rejects `var()`, `currentColor` and `inherit`, so no theme token can be handed to `gt::tab_options()` in the first place.
   Measured on a probe rendering a plain `gt` table and one carrying the palette `hebstr::theme_gt()` writes; the light bundle carries no rule from this change, so light output is untouched.
 
@@ -20,6 +30,14 @@
 
 - The `prettier` hook of `prek.toml` widens from the stylesheets to the HTML and JS the extension ships (`filters/toggle-position.html`, `filters/add-code-files.js`), which held no format gate until now, and skips `tests/fixtures/` so the verbatim test inputs stay byte-identical.
   `filters/toggle-position.html` is reformatted to that gate ; no rendered output, public SCSS variable or CSS custom property changes.
+
+### Removed
+
+- `$surface-default` and `$figure-shadow`, two public SCSS variables that nothing consumed, together with their `--surface-default` and `--figure-shadow` counterparts under `:root`.
+  Both were declared with `!default` in each scheme file and mirrored in `theme-base.scss`, so surfaces 2 and 3 of `CONTRIBUTING.md` promised a consumer that overriding them moved something; neither was read by a single rule, so an override compiled clean and changed nothing.
+  `var(--figure-shadow)` never appeared in any commit of this repository; `var(--surface-default)` lost its last consumer when the `gt` override above moved to the page's own surface pair.
+  `$surface-default` carried a second cost: its name announces the theme's default surface where the real ones are `$primary-surface` and `$primary-back`, which is the confusion the first pass at that override fell into.
+  Breaking under the strict table, shipped under MINOR rather than MAJOR per the no-consumer clause in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Fixed
 

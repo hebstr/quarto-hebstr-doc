@@ -107,8 +107,12 @@ Both renderings stay in the DOM: mode switches need no reload, and the lightbox 
 
 # Table
 
+`tbl-cap-location: top` puts a caption above its table; `tbl-title: "Table"` stays language-neutral.
+Only the `gt` table below carries one.
+
+## Markdown table
+
 A simple aggregation rendered as a Markdown table.
-`tbl-cap-location: top` puts the caption above the table; `tbl-title: "Table"` stays language-neutral.
 
 ```{r}
 #| label: penguins-count
@@ -120,6 +124,62 @@ library(dplyr)
 palmerpenguins::penguins |>
   count(species) |>
   rename(Sp = species)
+```
+
+## gt
+
+`gt` resolves a table's palette in R and writes it into a `<style>` block scoped by the table's generated id, so a table renders on the colours its code resolved whatever scheme the page is in.
+@tbl-penguins-gt asks for a deliberate light palette: a pale blue table ground with white striped rows, bold column labels over a rule, and no vertical hairlines.
+The blue is `#F0FAFF`, a step off the `#F2FAFF` that `primary-back` compiles to in light.
+
+Dark is where the one scheme-specific `scss:rules` region of `theme-dark.scss` takes over and replaces it wholesale.
+No colour written into that `<style>` block survives, and the two surfaces it replaces them with are the page's own pair: what the light table leaves on the page background (column labels, striped rows, the source note) lands on `primary-surface`, and the table ground on `primary-back`.
+
+```{r}
+#| label: tbl-penguins-gt
+#| tbl-cap: "Bill length and body mass by species and island."
+#| echo: true
+#| code-fold: false
+
+palmerpenguins::penguins |>
+  filter(!is.na(body_mass_g)) |>
+  group_by(species, island) |>
+  summarise(
+    n = n(),
+    bill = round(mean(bill_length_mm, na.rm = TRUE), 1),
+    mass = round(mean(body_mass_g)),
+    .groups = "drop"
+  ) |>
+  gt::gt() |>
+  gt::cols_label(
+    species = "Species",
+    island = "Island",
+    n = "n",
+    bill = "Bill length (mm)",
+    mass = "Body mass (g)"
+  ) |>
+  gt::tab_spanner(label = "Mean", columns = c(bill, mass)) |>
+  gt::cols_align(align = "left", columns = c(species, island)) |>
+  gt::cols_align(align = "center", columns = c(n, bill, mass)) |>
+  gt::tab_source_note("palmerpenguins, records with a body mass.") |>
+  gt::tab_options(
+    table.width = gt::pct(80),
+    table.background.color = "#F0FAFF",
+    row.striping.include_table_body = TRUE,
+    row.striping.background_color = "white",
+    column_labels.background.color = "white",
+    column_labels.font.weight = "bold",
+    column_labels.border.top.style = "none",
+    column_labels.border.bottom.color = "#333333",
+    source_notes.background.color = "white",
+    table.font.color = "#333333",
+    table.border.top.style = "none",
+    table.border.bottom.style = "none",
+    table_body.border.top.color = "#333333",
+    table_body.border.bottom.color = "#333333",
+    table_body.hlines.style = "none",
+    data_row.padding = gt::px(8)
+  )
 ```
 
 # Code block

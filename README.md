@@ -282,9 +282,11 @@ A `gt` table resolves its palette in R and writes it into a `<style>` block scop
 The dark theme therefore carries a marked override, and it is deliberately one-sided: in light a table keeps whatever palette its R code chose.
 
 Four variables move it.
-Text and the rules that structure the table follow `$body-color`, the table surface takes `$surface-default`, the headings, striped rows and footnotes take `$em-background-color`, and the hairlines between cells are drawn from `$neutral`.
+Text and the rules that structure the table follow `$body-color`, and the hairlines between cells are drawn from `$neutral`.
+The two surfaces are the page's own pair, so a table reads in dark as it does in light: whatever a light table leaves on the page background (column labels, striped rows, footnotes) takes `$primary-surface`, the colour the page itself is painted with, and the table ground takes `$primary-back`, the tint the TOC sidebar is painted with.
 Re-tinting a table in dark mode means overriding those in your own `custom.scss` rather than styling the table in R: a colour passed to `gt::tab_options()` is what the override replaces.
 `gt` will not take a CSS variable either, validating every colour option through `html_color()` and rejecting `var()`, `currentColor` and `inherit`.
+See the `gt` section of [`example.qmd`](example.qmd), which asks for a light palette in R and lets the dark bundle replace it.
 
 A table drawn by another package is not covered, and does not need to be if its colours are ordinary CSS: `reactable`, for one, passes its theme strings through untouched, so `reactableTheme(color = "var(--bs-body-color)")` follows the toggle from the R side.
 

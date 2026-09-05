@@ -14,9 +14,7 @@ $body-color: #e8e8e8 !default;
 // Surfaces
 $neutral: #b0b0b0 !default;
 $em-background-color: #232323 !default;
-$surface-default: #1d1d1d !default;
 $caption-color: #e8e8e8 !default;
-$figure-shadow: #0a0a0a !default;
 
 // Inline highlights
 $str-color: #6dca8a !default;
@@ -65,10 +63,24 @@ $footer-fg: $body-color !default;
 // adds after the sheet is already live.
 
 // Four colours cover the whole block a table emits. Text and the rules that
-// carry weight follow the body, the table surface and the raised surfaces
-// (headings, striped rows, footnotes) take the two page surfaces, and the
-// hairlines `gt` draws on an unstyled table are translated as a dim line on a
-// dark ground rather than kept as the light grey they are.
+// carry weight follow the body, and the hairlines `gt` draws on an unstyled
+// table are translated as a dim line on a dark ground rather than kept as the
+// light grey they are.
+
+// The two surfaces are the page's own pair rather than a neutral grey, so a
+// table reads here as it does in light: the blocks a light table leaves on the
+// page background (column labels, striped rows, footnotes) take
+// `--primary-surface`, which is what the page itself is painted with, and the
+// table ground takes `--primary-back`, the tint the TOC sidebar is painted
+// with. A house table sets those same two roles in R, a pale blue ground with
+// white striped rows, so the dark output is that table rather than a grey one.
+
+// Per channel the pair sits (2, 4, 5) apart here against (13, 5, 0) in light,
+// which reads as a wider gap than it is: in CIE lightness the two measure 1.86
+// and 2.18, so the striping is about as faint in either scheme. sRGB's curve
+// closes the distance, giving a small step near black more lightness than a
+// larger one near white. The alignment on the sidebar tint is what the value
+// answers to, not a separation target.
 
 .gt_table,
 .gt_heading,
@@ -111,29 +123,29 @@ $footer-fg: $body-color !default;
 .gt_stub,
 .gt_stub_row_group,
 .gt_summary_row,
-.gt_grand_summary_row,
-.gt_sourcenotes {
-  background-color: var(--surface-default) !important;
+.gt_grand_summary_row {
+  background-color: var(--primary-back) !important;
 }
 
 .gt_heading,
 .gt_col_heading,
 .gt_column_spanner_outer,
 .gt_striped,
-.gt_footnotes {
-  background-color: var(--em-background-color) !important;
+.gt_footnotes,
+.gt_sourcenotes {
+  background-color: var(--primary-surface) !important;
 }
 
-// A heading separator drawn in the table's own surface colour is invisible by
-// design; keeping it on the surface preserves that, where the hairline group
-// above would have made it appear.
+// A heading separator drawn in the colour of the block it sits on is invisible
+// by design; keeping it on that block's own background preserves it, where the
+// hairline group above would have made it appear.
 .gt_heading,
 .gt_title {
-  border-bottom-color: var(--surface-default) !important;
+  border-bottom-color: var(--primary-surface) !important;
 }
 
 .gt_subtitle {
-  border-top-color: var(--surface-default) !important;
+  border-top-color: var(--primary-surface) !important;
 }
 
 // The rules that structure the table, against the hairlines that only
