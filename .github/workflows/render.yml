@@ -39,6 +39,7 @@ jobs:
             any::rmarkdown
             any::dplyr
             any::gt
+            any::reactable
             any::ggplot2
             any::svglite
             any::palmerpenguins

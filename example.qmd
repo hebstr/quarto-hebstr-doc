@@ -182,6 +182,37 @@ palmerpenguins::penguins |>
   )
 ```
 
+## reactable
+
+`reactable` accepts a CSS variable where `gt` rejects one, so the widget below names the theme's own tokens from R and needs no override to follow the toggle.
+It lands on the theme's two page surfaces from one declaration, `primary-surface` for the ground and `primary-back` for the striped rows, in both schemes.
+The six colours `reactableTheme()` names directly are the whole of that route; its search box and column filters are reachable only through style lists, so the dark theme dresses those itself.
+
+A widget left unthemed is covered too, taking the same two surfaces, and any `reactableTheme()` at all opts out of that half.
+
+```{r}
+#| label: penguins-reactable
+#| echo: true
+#| code-fold: false
+
+palmerpenguins::penguins |>
+  filter(!is.na(body_mass_g)) |>
+  select(species, island, bill_length_mm, body_mass_g) |>
+  reactable::reactable(
+    searchable = TRUE,
+    filterable = TRUE,
+    striped = TRUE,
+    highlight = TRUE,
+    defaultPageSize = 5,
+    theme = reactable::reactableTheme(
+      color = "var(--bs-body-color)",
+      backgroundColor = "var(--primary-surface)",
+      stripedColor = "var(--primary-back)",
+      borderColor = "color-mix(in srgb, var(--neutral), transparent 70%)"
+    )
+  )
+```
+
 # Code block
 
 `echo: true` overrides the default to exercise highlighting, folding, and the copy-on-hover button (HTML), plus the `code.tmTheme` TextMate theme Typst applies via `#set raw(theme: …)` in `template.typ`.

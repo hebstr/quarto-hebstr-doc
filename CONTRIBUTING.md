@@ -71,7 +71,7 @@ After editing the theme:
 quarto render example.qmd --to hebstr-doc-html
 ```
 
-That render needs the `svglite` package, which the HTML format sets as the knitr device, plus what `example.qmd` itself loads (`ggplot2`, `dplyr`, `gt`, `palmerpenguins`, `sessioninfo`).
+That render needs the `svglite` package, which the HTML format sets as the knitr device, plus what `example.qmd` itself loads (`ggplot2`, `dplyr`, `gt`, `reactable`, `palmerpenguins`, `sessioninfo`).
 Its setup chunk sources `_extensions/hebstr-doc/fonts/register.R`, so the bundled faces are registered on a machine that lacks them and the figures do not fall back silently.
 
 Currently HTML only: `hebstr-doc-typst` and `hebstr-doc-docx` are declared in `_extension.yml` but not yet validated, and `example.qmd` will declare all three once they are.

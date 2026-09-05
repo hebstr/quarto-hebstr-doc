@@ -4,12 +4,23 @@
 
 ### Added
 
+- `reactable` tables follow the dark scheme where their author left them unthemed.
+  The widget ships its own stylesheet, which Quarto loads after the theme bundle, so the rules carry the weight that settles source order rather than a marker.
+  An untouched widget takes the theme's two page surfaces, `$primary-surface` for the ground, the search box and the column filters, `$primary-back` for the striped rows, with `$neutral` on its borders.
+  That is the reverse of the pairing a `gt` table lands on, where the tint carries the ground and the striping is the page colour, `gt` reading its own palette from R while a widget here has none to read.
+  A widget carrying any `reactableTheme()` keeps the palette its R code set, which is the route to prefer: `reactable` accepts a CSS variable where `gt` rejects one, so an author can follow the toggle from R with no override at all.
+  That opt-out is a class guard rather than a weighing of selectors, Emotion emitting a theme at a weight that varies by property: matched on the striped rows, outranked on the table border, so specificity alone would have overridden half of an author's palette.
+  It covers the six colours `reactableTheme()` names directly and stops there: the search box, the column filters and the page controls are reachable from R through style lists alone, which arrive as inline styles and outrank any stylesheet, so those are dressed whether the widget is themed or not.
+
 - `example.qmd` renders a `gt` table under `# Table`, beside the Markdown one, which is where the dark override recorded under Changed becomes observable in this repo.
   The table asks for a deliberate light palette through `tab_options()`, the pale blue ground with white striped rows the house reports use (`#F0FAFF`, a step off the `#F2FAFF` `primary-back` compiles to in light), so dark shows the override winning over colours the chunk wrote rather than over `gt` defaults.
   Its shape follows those reports too: a flat body so the striping alternates uninterrupted, a spanner, bold column labels over a rule, no vertical hairlines, and a source note.
   The caption is a Quarto `tbl-cap` rather than a `gt` header, which is what those tables do and what makes the float centring rule apply.
   No render probe comes with it: an uncovered `gt` class paints a light card on a dark ground, which the published demo shows at a glance, where `tests/r-syntax-tokens.sh` and `tests/anx-float.sh` exist for defects that leave the render green.
   `gt` becomes a render-time requirement of the demo document, added to both workflows; it pulls `juicyjuice` and `V8`, the heaviest dependency `example.qmd` carries.
+
+- `example.qmd` renders a `reactable` widget beside that table, naming the theme's own tokens through `reactableTheme()`, so it lands on the pairing the theme gives an untouched widget, `$primary-surface` on the ground and `$primary-back` on the striped rows, in both schemes from one declaration, and demonstrates the route the documentation recommends.
+  `reactable` joins the workflows as its own entry rather than riding on `gt`, which imports it, so no install is added; the cost is page weight, the widget's bundle taking `example.html` from 4.20 MB to 4.66 MB under `embed-resources: true`.
 
 ### Changed
 

@@ -160,3 +160,55 @@ $footer-fg: $body-color !default;
   border-top-color: var(--bs-body-color) !important;
   border-bottom-color: var(--bs-body-color) !important;
 }
+
+// REACTABLE TABLES ------------------------------------------------------------
+
+// `reactable` paints its default surfaces from a stylesheet the widget ships,
+// which Quarto loads after the theme bundle, so an equally weighted rule here
+// would lose on source order alone. Both groups below carry the extra weight
+// that settles it.
+
+// The first group covers a widget left unthemed, and steps aside for one that
+// is. A theme passed from R is the route worth taking: unlike `gt`, `reactable`
+// accepts a CSS variable, so an author can follow the toggle from R, and the
+// six colours `reactableTheme()` names directly are exactly the ones here. The
+// class prefix is what separates the two cases, Emotion emitting a theme at a
+// weight that varies by property: matched on the striped rows, outranked on the
+// table border, so specificity alone would override half of an author's palette.
+
+.Reactable:not([class*="reactable-"]) {
+  background-color: var(--primary-surface);
+
+  .rt-tr-striped,
+  .rt-tr-striped-sticky {
+    background-color: var(--primary-back);
+  }
+
+  .rt-tr-highlight:hover,
+  .rt-tr-highlight-sticky:hover {
+    background-color: color-mix(in srgb, var(--primary), transparent 88%);
+  }
+
+  .rt-table,
+  .rt-th-group::after {
+    border-color: color-mix(in srgb, var(--neutral), transparent 70%);
+  }
+}
+
+// The second group is unguarded, and the same reasoning is what lifts the guard
+// rather than an exception to it. `reactableTheme()` reaches these surfaces
+// through its style lists alone, never through one of its six colours, and a
+// style list arrives as an inline style, which outranks any rule a stylesheet
+// can write. An author who dresses them still wins, so there is nothing here to
+// step aside for, and a themed widget would otherwise carry white input boxes
+// on a dark page.
+
+.Reactable {
+  .rt-search,
+  .rt-filter,
+  .rt-page-jump,
+  .rt-page-size-select {
+    background-color: var(--primary-surface);
+    border-color: color-mix(in srgb, var(--neutral), transparent 70%);
+  }
+}

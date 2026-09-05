@@ -288,7 +288,15 @@ Re-tinting a table in dark mode means overriding those in your own `custom.scss`
 `gt` will not take a CSS variable either, validating every colour option through `html_color()` and rejecting `var()`, `currentColor` and `inherit`.
 See the `gt` section of [`example.qmd`](example.qmd), which asks for a light palette in R and lets the dark bundle replace it.
 
-A table drawn by another package is not covered, and does not need to be if its colours are ordinary CSS: `reactable`, for one, passes its theme strings through untouched, so `reactableTheme(color = "var(--bs-body-color)")` follows the toggle from the R side.
+A `reactable` table is covered too, on the same one-sided terms, and only where its author left it alone.
+A widget with no `theme` argument takes the two page surfaces, `$primary-surface` for the ground and `$primary-back` for the striped rows, plus the theme's hairlines on its borders, search box and column filters.
+A widget carrying any `reactableTheme()` keeps every colour that theme sets, and that is the route worth taking: unlike `gt`, `reactable` passes its theme strings through untouched, so `reactableTheme(color = "var(--bs-body-color)", backgroundColor = "var(--primary-surface)", stripedColor = "var(--primary-back)")` follows the toggle from the R side and needs no override at all.
+Left on the hex colours `reactableTheme()` is usually given, a widget renders its own light palette on a dark page.
+
+That opt-out covers the six colours `reactableTheme()` names directly (`color`, `backgroundColor`, `borderColor`, `borderWidth`, `stripedColor`, `highlightColor`) and stops there.
+The search box, the column filters and the page controls are reachable from R through style lists alone, which arrive as inline styles and outrank any stylesheet, so the dark theme dresses them whether the widget is themed or not.
+
+A table drawn by any other package is not covered.
 
 ### Brand colors via `_brand.yml`
 
