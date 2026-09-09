@@ -9,6 +9,7 @@ contributes:
     - filters/filetree.lua
   formats:
     common:
+      lang: en
       number-sections: true
       number-depth: 4
       toc: true
@@ -108,6 +109,7 @@ contributes:
           path: _extensions/mcanouil/code-window/_modules/hotfix/typst-title-fix.lua
     docx:
       reference-doc: template.dotx
+      link-citations: true
       syntax-definitions:
         - syntax/r.xml
       filters:

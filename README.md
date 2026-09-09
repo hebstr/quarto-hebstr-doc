@@ -323,6 +323,33 @@ format:
 
 The overridable variables are the `!default` declarations in `theme-light.scss`, `theme-dark.scss` and `theme-base.scss`; [CONTRIBUTING.md](CONTRIBUTING.md) defines that surface and the SemVer policy that protects it.
 
+### Text alignment
+
+Body paragraphs are justified, which matches what the Typst and DOCX sides of the extension already did, and hyphenated (`hyphens: auto`).
+The two go together: a justified line makes its right edge flush by widening the spaces between its words, and hyphenation is what lets it break a word instead, so the spaces stay close to their natural width.
+Hyphenation follows the document language and the reader's browser, which is where the dictionary lives; without one the text still justifies, on wider spaces.
+Prose dense in inline code is where this shows most, a `<code>` span being both long and unbreakable.
+
+Content in the margin column is left alone: a `.column-margin` block, an `.aside` and a footnote under `reference-location: margin` all stay ragged-right, justification having no measure to work with at that width.
+
+The rule is `#quarto-document-content p`, and an override has to repeat that id:
+
+```scss
+#quarto-document-content p {
+  text-align: left;
+}
+```
+
+A bare `p { text-align: left }` does not work, in a `custom.scss` or in a document `<style>` alike.
+The id weighs (1,0,1) against (0,0,1), and load order settles only a tie, so the shorter form loses wherever it is placed.
+This is the same specificity trap the `gt` section above describes, seen from the other side: there the id belongs to the table, here it belongs to the theme.
+
+### Figure captions
+
+A figure carrying a cross-reference label is a Quarto float, and its caption sits at the bottom, left-aligned.
+A figure without one is not a float, and its caption takes the same typography (0.95rem, bold, `var(--caption-color)`) but is centred, as is any float caption the document moves to the top with `fig-cap-location: top`.
+Table and annexe captions are centred for the same reason, their caption being on top by default.
+
 ### Code highlighting
 
 Code blocks use a dark surface in both light and dark modes, and R gets five tokens Pandoc's stock definition does not emit: the package name in front of `::` or `:::`, `library`/`require`/`requireNamespace` read as keywords rather than as ordinary calls, the argument separator, the `=` of a named argument, and brackets of every shape.

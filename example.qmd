@@ -2,7 +2,6 @@
 title: "hebstr-doc"
 subtitle: "Multi-format Quarto extension"
 author: "hebstr"
-date: last-modified
 format:
   hebstr-doc-html:
     code-tools:

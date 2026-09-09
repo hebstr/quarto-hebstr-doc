@@ -26,6 +26,8 @@ A change is "API-affecting" only if it touches one of these surfaces:
 Changes to private internals (rule selectors, computed colour-mix knobs that are not exposed as variables, internal helpers, file reorganisation that does not move public resources) are **not** API-affecting.
 The `rhebstr` class that `filters/r-syntax.lua` adds to R code blocks is one of these: it exists so Pandoc resolves the bundled R syntax definition, it sits alongside the `r` class rather than replacing it, and it carries no promise.
 The syntax colours themselves are internal for the same reason, being literals in `scss:rules` rather than `!default` variables; that is a gap rather than a decision, and closing it would add to surface 2.
+Body text alignment and figure-caption alignment sit in that same gap, and one of them is sharper than a missing variable: `#quarto-document-content p` is id-weighted, so a consumer's existing `p { text-align: left }` is outranked rather than merely unsupported, and the override has to repeat the id.
+A rule that can silently defeat a consumer's own stylesheet is not covered by "rule selectors" above, whatever its file; it is why the justification default ships as MINOR under the row below rather than as a PATCH-class internal, and why README documents the override form.
 
 ## SemVer policy
 
@@ -75,6 +77,11 @@ That render needs the `svglite` package, which the HTML format sets as the knitr
 Its setup chunk sources `_extensions/hebstr-doc/fonts/register.R`, so the bundled faces are registered on a machine that lacks them and the figures do not fall back silently.
 
 Currently HTML only: `hebstr-doc-typst` and `hebstr-doc-docx` are declared in `_extension.yml` but not yet validated, and `example.qmd` will declare all three once they are.
+That gap now hides a rendering key as well as a format: `link-citations: true` sits in the `docx:` block, so no local render and no CI step exercises it.
+
+The document does not instantiate every selector the theme ships, and a clean render is therefore not proof that a rule applies.
+It holds no figure without a cross-reference label and no `.column-margin` content, so the caption rules for a non-float figure and the margin exemption on justified prose are compiled but never matched.
+A rule whose DOM shape is missing from this document has to be checked against a throwaway `.qmd` rendered beside it, and the computed style read rather than the selector eyeballed: a rule can compile, reach the page and still lose on specificity.
 
 The in-tree Lua filters carry a [luaunit](https://github.com/bluebird75/luaunit) suite under `tests/`, which CI runs as its own step:
 

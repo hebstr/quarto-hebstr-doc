@@ -73,6 +73,18 @@ body {
   background-color: var(--primary-surface);
 }
 
+// Hyphenation is what keeps justification from stretching word spaces. It
+// engages wherever the reader's browser carries a dictionary for the document
+// language, and falls back to wider spaces where none is installed.
+#quarto-document-content p {
+  text-align: justify;
+  hyphens: auto;
+}
+
+#quarto-document-content .column-margin p {
+  text-align: left;
+}
+
 .cb1,
 .cb2,
 .nb {
@@ -311,14 +323,17 @@ h5 {
   margin-bottom: 0.8rem;
 }
 
-.quarto-float {
-  &-caption {
-    font-size: 0.95rem;
-    font-weight: bold;
-    line-height: 1.5;
-    color: var(--caption-color);
-  }
+// A figure with no cross-reference label is not a float and carries no
+// `.quarto-float-caption`, so the two selectors never meet on one element.
+.quarto-float-caption,
+figure.figure > figcaption:not(.quarto-float-caption) {
+  font-size: 0.95rem;
+  font-weight: bold;
+  line-height: 1.5;
+  color: var(--caption-color);
+}
 
+.quarto-float {
   &-subcaption {
     font-weight: normal;
     font-size: 0.85rem;
@@ -329,11 +344,24 @@ h5 {
     padding-bottom: 1em;
   }
 
-  // The `anx` custom float carries no built-in styling, and this rule is the
-  // only thing that centres a float caption: without the key it renders left.
+  // The `anx` custom float carries no built-in styling. Keyed on the float
+  // type, this rule is the one that survives a document moving the caption,
+  // where the position-keyed rule below stops applying.
   &-tbl,
   &-anx {
     margin-top: 2rem;
+    text-align: center;
+  }
+}
+
+figure.figure > figcaption {
+  &:not(.quarto-float-caption) {
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  &:not(.quarto-float-caption),
+  &.quarto-float-caption-top {
     text-align: center;
   }
 }

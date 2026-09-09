@@ -22,6 +22,24 @@
 - `example.qmd` renders a `reactable` widget beside that table, naming the theme's own tokens through `reactableTheme()`, so it lands on the pairing the theme gives an untouched widget, `$primary-surface` on the ground and `$primary-back` on the striped rows, in both schemes from one declaration, and demonstrates the route the documentation recommends.
   `reactable` joins the workflows as its own entry rather than riding on `gt`, which imports it, so no install is added; the cost is page weight, the widget's bundle taking `example.html` from 4.20 MB to 4.66 MB under `embed-resources: true`.
 
+- Body prose is justified in HTML, which the two other formats already did and the theme left to each document.
+  `template.typ` sets `justify: true` on `par`, and the `Normal` style of `template.dotx` carries `w:jc w:val="both"`, so HTML was the odd one of the three rather than the second to fall in line.
+  The rule is anchored on `#quarto-document-content` rather than written as a bare `p`: the id keeps the TOC sidebar out, and carries the weight a document-level `<style>` used to take from source order alone.
+  The margin column is not kept out by that id, Quarto emitting it inside the same container, so a rule of its own hands `.column-margin` back to `left` : justification needs a measure the 450 px margin column does not have, and a document mixing the two columns opens its rivers there first.
+  That one class covers the three shapes margin content takes, a `.column-margin` div, an `.aside` and a footnote under `reference-location: margin` all rendering as the same container, and it repeats the id to outweigh the rule above rather than relying on source order.
+  `hyphens: auto` rides along on the same rule, and it is what makes the justification affordable rather than a decoration: a line absorbs its leftover width by breaking a word, instead of pushing all of it into the spaces between the few words it holds.
+  The difference is measurable on this document, whose prose is dense in inline code, and inline code is the worst case for justification twice over, being unbreakable and long: a `<code>` that does not fit moves whole to the next line and leaves the gap behind it, on a line that holds fewer words to share it.
+  Word spaces measured across the body of `example.qmd`, at 1000 px: a median of 5.7 px ragged-right against 7.6 px justified, and a worst line at 18.3 px, 3.2 times the natural space.
+  A document that wants otherwise overrides it in three lines, and those three lines have to repeat the id : a bare `p { text-align: left }` loses whatever its position, source order settling only a tie, so the override reads `#quarto-document-content p` in a `custom.scss` or in a document `<style>` alike.
+
+- A figure with no cross-reference label takes the float caption's typography and is centred, alongside the top-located float caption.
+  Such a figure carries no `.quarto-float-caption`, so it fell outside the `.quarto-float` block and rendered as body prose, which shows on any document mixing labelled and unlabelled figures.
+  Centring is where the two stop agreeing, and deliberately so : a labelled figure keeps its caption at the bottom and reads left, the position Quarto defaults it to, while an unlabelled one carries no number to hang that line on and is centred with the top-located captions.
+
+- `link-citations: true` on the Word format, so a citation hyperlinks to its bibliography entry instead of printing a dead marker.
+  Pandoc defaults the key to `false` and it reaches `docx` and PDF only: the HTML writer anchors citations on its own, and the Typst format hands `@key` to Typst's bibliography engine rather than to citeproc, so `docx` is the single format here that consumes it.
+  The link lands styled rather than dangling, which is not a given for this template: Pandoc resolves a style by its `w:name` and not by its identifier, so the `Hyperlink` it asks for reaches `template.dotx`'s `Lienhypertexte`, and the bibliography it anchors into reaches `Bibliographie` the same way (measured on a probe carrying one citation, whose run comes back as `<w:rStyle w:val="Lienhypertexte"/>`).
+
 ### Changed
 
 - `gt` tables follow the dark scheme instead of staying on the light palette their R code resolved.
