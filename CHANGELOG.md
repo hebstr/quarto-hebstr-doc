@@ -42,6 +42,15 @@
 
 ### Changed
 
+- The `{{< script >}}` shortcode renders in HTML only and emits nothing in Typst and DOCX.
+  What it builds is chrome that JavaScript assembles: the code-fold summary, the code-window title bar, and the `<summary>` rewriter shipped as `filters/add-code-files.js`.
+  None of the three reaches a Typst or Word output, so what the call left there was the file's contents as a plain code block, which is not what a document asks for by injecting a script it keeps on disk.
+  The guard is `quarto.doc.is_format("html:js")` at the head of the handler, ahead of the file read and of the JavaScript dependency, so the call stops doing the work rather than only hiding its result.
+  `filters/filetree.lua` carries the same guard and degrades to a bullet list, a form a file listing has no equivalent of, the chrome being the whole point of injecting one.
+  Emitting a `.content-visible when-format="html"` div around the output was the other route and is not equivalent: it reads the file in every format, it adds a div level the hand-off to code-window has to survive, and it makes the result depend on an ordering between Quarto's own filters that no test here pins.
+  A document that wants the file printed in every format holds a plain code fence instead, which the shortcode does not replace.
+  Verified on a Typst render of a probe carrying the call: the output holds neither the listing nor the literal shortcode text, and the prose around it is untouched.
+
 - `gt` tables follow the dark scheme instead of staying on the light palette their R code resolved.
   A `gt` table writes its own colours into a `<style>` block scoped by the table's generated id, so the page renders a light card on a dark ground, and nothing in a stylesheet could reach it: every selector in that block carries an id, which no id-free rule can outrank whatever its class count.
   Quarto ships its own `table.gt_table { color: var(--quarto-body-color); background-color: transparent }` and loses for exactly that reason.

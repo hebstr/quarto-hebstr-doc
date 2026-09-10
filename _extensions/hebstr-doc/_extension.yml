@@ -71,7 +71,7 @@ contributes:
             </script>
       include-after-body:
         - filters/toggle-position.html
-      lightbox: true
+      lightbox: false
       grid:
         sidebar-width: 0px
         body-width: 1000px

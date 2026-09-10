@@ -74,6 +74,10 @@ Injects an external file as a code block with the code-window chrome, so the scr
 
 The path is the only positional argument; a second one warns and is ignored, as does an attribute outside the table above.
 
+Typst and DOCX render nothing at all.
+The block is built from code folding, the code-window title bar and a JavaScript summary rewriter, none of which those formats carry, so the call drops instead of degrading to a bare listing; the surrounding prose is untouched.
+A document that wants the file printed in every format holds a plain code fence, which the shortcode does not replace.
+
 ### `filetree`
 
 Renders a directory tree read from disk at render time.

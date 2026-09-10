@@ -48,8 +48,6 @@ local known_kwargs = {
   dedent = true,
 }
 
--- Attributes reach here as raw text, so a value that misses the documented form
--- would otherwise be absorbed silently: a rejected one is named instead.
 local booleans = {
   ["true"] = true,
   yes = true,
@@ -138,6 +136,10 @@ end
 
 return {
   ["script"] = function(args, kwargs)
+    if not quarto.doc.is_format("html:js") then
+      return {}
+    end
+
     if #args < 1 then
       error("script shortcode: a path is required, e.g. {{< script path/to/file.R >}}")
     end
