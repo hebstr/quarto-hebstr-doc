@@ -1,10 +1,12 @@
 /.quarto/
 **/*.quarto_ipynb
 /anx-float-probe.qmd
+/docx-cell-probe.qmd
 /r-syntax-probe.qmd
 /*.typ
 /*.html
 /*.pdf
+/*.docx
 /*_files/
 /_site/
 /.claude/

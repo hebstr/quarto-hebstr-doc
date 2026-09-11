@@ -67,6 +67,12 @@ jobs:
       - name: Annexe float assertions
         run: bash tests/anx-float.sh
 
+      # The only DOCX render of this workflow, and the only assertion no render
+      # can make on its own: LibreOffice converts a document Word refuses, so a
+      # cell left open by a raw OOXML table shows nowhere else.
+      - name: DOCX cell assertions
+        run: bash tests/docx-cell.sh
+
       - name: Render example.qmd (HTML)
         run: quarto render example.qmd --to hebstr-doc-html
 

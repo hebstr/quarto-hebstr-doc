@@ -117,4 +117,6 @@ contributes:
           path: filters/crossref-anx.lua
         - at: post-quarto
           path: filters/r-syntax.lua
+        - at: post-quarto
+          path: filters/docx-cell-paragraph.lua
       number-sections: false

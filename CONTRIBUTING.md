@@ -77,7 +77,9 @@ That render needs the `svglite` package, which the HTML format sets as the knitr
 Its setup chunk sources `_extensions/hebstr-doc/fonts/register.R`, so the bundled faces are registered on a machine that lacks them and the figures do not fall back silently.
 
 Currently HTML only: `hebstr-doc-typst` and `hebstr-doc-docx` are declared in `_extension.yml` but not yet validated, and `example.qmd` will declare all three once they are.
-That gap now hides a rendering key as well as a format: `link-citations: true` sits in the `docx:` block, so no local render and no CI step exercises it.
+That gap hides a rendering key as well as a format: `link-citations: true` sits in the `docx:` block, and no local render and no CI step exercises it.
+The other key of that block, the `filters/docx-cell-paragraph.lua` filter, is the exception: `tests/docx-cell.sh` renders its own DOCX probe and asserts the cells it closes, because its unit tests cover the AST edit alone and would stay green if the wiring stopped resolving.
+What the probe cannot reach is the outcome itself, Word opening the file: LibreOffice converts the invalid document without complaint, so that half is owed to a real Word install.
 
 The document does not instantiate every selector the theme ships, and a clean render is therefore not proof that a rule applies.
 It holds no figure without a cross-reference label and no `.column-margin` content, so the caption rules for a non-float figure and the margin exemption on justified prose are compiled but never matched.
@@ -110,6 +112,17 @@ It renders `tests/anx-float-probe.qmd` and asserts the three authoring forms of 
 A float that stopped reaching the type would lose its number and its caption while the render still exited 0, which is what the assertions exist to catch.
 This probe is staged and removed the same way.
 
+A fourth step is the workflow's only DOCX render, and it asserts the one property no render reports on its own:
+
+```bash
+bash tests/docx-cell.sh
+```
+
+It renders `tests/docx-cell-probe.qmd`, a `gt` table inside a cross-referenced float, and counts the table cells whose last block-level element is not a `w:p`, which must be none.
+Word refuses to open a document holding one and names no usable location, while LibreOffice converts the same file without complaint, so the breach is invisible to every tool on a Linux machine.
+The assertion is structural rather than lexical, read off the parsed `word/document.xml` through the `python3` that GitHub's runner ships preinstalled.
+This probe is staged and removed like the other two.
+
 ## Pre-commit hooks
 
 The repo ships a [`prek`](https://github.com/j178/prek) config (`prek.toml`): YAML/large-file/merge-conflict checks, secret scanning (gitleaks), R format/lint (air, jarl), Typst (typstyle), Lua (StyLua), shell format/lint (shfmt, shellcheck), CSS/SCSS lint (stylelint), format of the CSS/SCSS plus the HTML and JS the extension ships (prettier), and prose-lint.
@@ -137,6 +150,6 @@ Both hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_extens
 
 - `_extensions/hebstr-doc/`: the extension itself (do not flatten).
 - `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (currently `mcanouil/code-window`).
-- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus the two render probes `r-syntax-tokens.sh` and `anx-float.sh` with the `.qmd` each renders; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
+- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus the three render probes `r-syntax-tokens.sh`, `anx-float.sh` and `docx-cell.sh` with the `.qmd` each renders; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
 - `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).
 - `package.json` + `package-lock.json` + `stylelint.config.mjs`: the pinned stylelint/prettier toolchain and the SCSS rules it enforces; `node_modules/` is gitignored.

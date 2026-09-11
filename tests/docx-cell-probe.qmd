@@ -1,0 +1,19 @@
+---
+title: DOCX cell probe
+format: hebstr-doc-docx
+---
+
+A `gt` table inside a cross-referenced float, the one shape that leaves a table
+cell open: knitr prints the table as a raw `{=openxml}` block ending on
+`</w:tbl>`, and Quarto wraps the float in a one-cell table to keep caption and
+content together.
+
+```{r}
+#| label: tbl-gt
+#| tbl-cap: "A gt table in a referenced float."
+#| echo: false
+
+gt::gt(head(mtcars[, 1:3], 3))
+```
+
+Reference: @tbl-gt.

@@ -82,6 +82,12 @@
 - A `gt` table wider than the body column compresses its columns instead of hiding them behind a horizontal scrollbar.
   `gt` declares the table width in pixels and wraps the table in a scrolling container, so anything past the column edge was reachable only by scrolling ; `table.gt_table` now caps at `max-width: 100%`, which leaves the declared width alone wherever it fits.
 
+- Word opens a DOCX whose referenced tables come from `flextable` or `gt` rather than refusing it with "an ambiguous cell mapping was encountered".
+  Word holds the last block-level element of a `w:tc` to be a `w:p` and offers no recovery when one is missing, while Quarto wraps every referenced float in a one-cell table to keep caption and content together: a table arriving as an `{=openxml}` block ends on `</w:tbl>` and leaves that cell open.
+  `filters/docx-cell-paragraph.lua` closes it with a 1 pt empty paragraph appended to the raw block, a Pandoc `Para` carrying no inline being dropped before the writer ever sees it.
+  The defect reaches no reader on a Linux machine: LibreOffice renders the same file without complaint, so it shows on a real Word install alone.
+  `tests/docx-cell.sh` renders its own DOCX probe in CI and counts the cells left open, which must be none; it is the workflow's only DOCX render.
+
 ## [1.4.0] - 2026-08-29
 
 ### Added
