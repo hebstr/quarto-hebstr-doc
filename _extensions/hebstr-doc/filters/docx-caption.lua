@@ -26,7 +26,9 @@
 -- position. A character style cannot unbold it: bold is a toggle property that
 -- Word combines across paragraph and character styles, and it leaves an
 -- explicit `w:b w:val="0"` there bold, where `basedOn` between paragraph styles
--- is a plain override.
+-- is a plain override. The title above a subtitle takes `Table Caption Title`
+-- or `Image Caption Title`, which drop the space after it and keep it with the
+-- subtitle: Word's contextual spacing only joins paragraphs of one style.
 --
 -- A float whose content is a table leaves the wrapper altogether, its caption
 -- and table set at the level the wrapper stood. Word lays out a table nested in
@@ -135,7 +137,7 @@ local function restyle(blocks, recenter)
         if j == i then
           local role = top and "Table Caption" or "Image Caption"
           local title, subtitle = split_caption(block)
-          out:insert(styled({ pandoc.Para(title) }, role))
+          out:insert(styled({ pandoc.Para(title) }, subtitle and role .. " Title" or role))
           if subtitle then
             out:insert(styled({ pandoc.Para(subtitle) }, role .. " Subtitle"))
           end

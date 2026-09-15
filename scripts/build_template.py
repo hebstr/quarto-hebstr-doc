@@ -147,7 +147,7 @@ def build_styles(styles):
         (
             '<w:style w:type="paragraph" w:default="1" w:styleId="Normal">'
             '<w:name w:val="Normal"/><w:qFormat/>'
-            '<w:pPr><w:spacing w:before="120" w:after="120"/></w:pPr>'
+            '<w:pPr><w:suppressAutoHyphens/><w:spacing w:before="120" w:after="120"/></w:pPr>'
             "</w:style>"
         ),
     )
@@ -160,7 +160,8 @@ def build_styles(styles):
             "Body Text",
             based_on="Normal",
             link="BodyTextChar",
-            ppr='<w:spacing w:line="360" w:lineRule="auto"/><w:jc w:val="both"/>',
+            ppr='<w:suppressAutoHyphens w:val="0"/><w:spacing w:line="360" w:lineRule="auto"/>'
+            '<w:jc w:val="both"/>',
             rpr=sz(22),
         ),
     )
@@ -186,7 +187,8 @@ def build_styles(styles):
             "Compact",
             based_on="BodyText",
             custom=True,
-            ppr='<w:spacing w:before="36" w:after="36"/><w:jc w:val="left"/>',
+            ppr='<w:suppressAutoHyphens/><w:spacing w:before="36" w:after="36"/>'
+            '<w:jc w:val="left"/>',
         ),
     )
 
@@ -431,7 +433,16 @@ def build_styles(styles):
     # A paragraph style, since Word keeps a character style's b val=0 bold in a bold paragraph
     subtitle_rpr = '<w:b w:val="0"/><w:bCs w:val="0"/>' + color("555555") + sz(18)
     added = "".join(
+        # A title followed by a subtitle, so the gap between the two lines is not the caption's own
         style(
+            "paragraph",
+            f"{sid}Title",
+            f"{name} Title",
+            based_on=sid,
+            custom=True,
+            ppr='<w:keepNext/><w:spacing w:after="0"/>',
+        )
+        + style(
             "paragraph",
             f"{sid}Subtitle",
             f"{name} Subtitle",

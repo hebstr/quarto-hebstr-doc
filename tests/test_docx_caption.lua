@@ -172,7 +172,7 @@ end
 -- Word keeps a character style's `w:b w:val="0"` bold inside a bold paragraph.
 function TestDocxCaption:test_a_subcaption_becomes_a_paragraph_of_its_own()
   local out = docx().Table(wrapper({ image(), subtitled() }))
-  lu.assertEquals(styles(contents(out)), { "Captioned Figure", "Image Caption", "Image Caption Subtitle" })
+  lu.assertEquals(styles(contents(out)), { "Captioned Figure", "Image Caption Title", "Image Caption Subtitle" })
 end
 
 function TestDocxCaption:test_the_title_and_subtitle_lose_the_blanks_around_the_break()
@@ -186,7 +186,7 @@ end
 function TestDocxCaption:test_a_top_subcaption_follows_its_title_above_the_table()
   local inner = pandoc.RawBlock("openxml", "<w:tbl/>")
   local out = docx().Table(wrapper({ float("tbl-x", { subtitled(), inner }) }))
-  lu.assertEquals(styles(out), { "Table Caption", "Table Caption Subtitle" })
+  lu.assertEquals(styles(out), { "Table Caption Title", "Table Caption Subtitle" })
   lu.assertEquals(out[1].content[3].text, "<w:tbl/>")
 end
 

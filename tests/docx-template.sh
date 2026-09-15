@@ -38,13 +38,13 @@ import zipfile
 import xml.etree.ElementTree as ET
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
-CAPTION_STYLES = ("TableCaption", "ImageCaption")
+CAPTION_STYLES = ("TableCaption", "ImageCaption", "TableCaptionTitle", "ImageCaptionTitle")
 SUBTITLE_STYLES = ("TableCaptionSubtitle", "ImageCaptionSubtitle")
 EXPECTED = [
-    ("Figure", "ImageCaption", "CaptionedFigure", "ImageCaptionSubtitle"),
+    ("Figure", "ImageCaptionTitle", "CaptionedFigure", "ImageCaptionSubtitle"),
     ("Figure", "TableCaption", "Figure", None),
     ("Table", "TableCaption", None, None),
-    ("Table", "TableCaption", None, "TableCaptionSubtitle"),
+    ("Table", "TableCaptionTitle", None, "TableCaptionSubtitle"),
     ("Annexe", "TableCaption", None, None),
 ]
 EXPECTED_ANCHORS = {"fig-bottom", "fig-top", "tbl-md", "tbl-gt", "anx-probe"}
@@ -82,6 +82,33 @@ for cell in root.iter(W + "tc"):
     inner = blocks(cell)
     if inner and inner[-1].tag == W + "tbl":
         failures.append("a table ends a table cell, still nested in its float wrapper")
+
+# Hyphenation is document-wide in settings.xml and suppressed per style, so it
+# is resolved along basedOn: body prose only, nothing inherited from Normal.
+styles = {s.get(W + "styleId"): s for s in ET.fromstring(zipfile.ZipFile(sys.argv[1]).read("word/styles.xml")).iter(W + "style")}
+
+
+def hyphenates(style_id):
+    while style_id in styles:
+        node = styles[style_id].find(f"{W}pPr/{W}suppressAutoHyphens")
+        if node is not None:
+            return node.get(W + "val") in ("0", "false", "off")
+        based = styles[style_id].find(W + "basedOn")
+        style_id = None if based is None else based.get(W + "val")
+    return True
+
+
+for style_id, wanted_hyphens in (
+    ("BodyText", True),
+    ("FirstParagraph", True),
+    ("Normal", False),
+    ("Compact", False),
+    ("Heading1", False),
+    ("ImageCaption", False),
+    ("FootnoteText", False),
+):
+    if hyphenates(style_id) != wanted_hyphens:
+        failures.append(f"{style_id} {'hyphenates' if not wanted_hyphens else 'does not hyphenate'}, body prose alone should")
 
 children = list(root.find(W + "body"))
 toc = next((i for i, el in enumerate(children) if el.tag == W + "sdt"), None)
@@ -130,8 +157,9 @@ for caption in root.iter(W + "p"):
 
     if content.tag == W + "tbl" and parent.tag != W + "body":
         failures.append(f"{label}: table float nested in {parent.tag.removeprefix(W)}, not at body level")
-    if style(caption) != wanted:
-        failures.append(f"{label}: caption {'above' if top else 'below'} its content is {style(caption)}, not {wanted}")
+    titled = wanted + ("Title" if subtitle is not None else "")
+    if style(caption) != titled:
+        failures.append(f"{label}: caption {'above' if top else 'below'} its content is {style(caption)}, not {titled}")
     if len(caption.findall(W + "pPr")) != 1:
         failures.append(f"{label}: caption carries {len(caption.findall(W + 'pPr'))} w:pPr, Word expects one")
     if caption.find(f"{W}pPr/{W}jc") is not None:

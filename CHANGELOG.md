@@ -79,7 +79,8 @@
 - `template.dotx` is rebuilt from Pandoc's reference document instead of a Word document stripped of its content, and weighs 11.9 KB instead of 562 KB.
   The previous template carried ten images and an OLE object that Pandoc copied into every output, about 1 MB per document, and lacked 35 of the 49 styles Pandoc writes, so first paragraphs, compact lists, captions and the title block fell back to `Normal` without a warning.
   Text is set in Aptos throughout, declared with Calibri as its fallback for Word before 2024, where the body used to be Arial and the lower headings Calibri.
-  Headings keep their Word numbering, their `#1B4377` colour and their sizes; body paragraphs stay justified and gain hyphenation, and compact lists and table cells are left-aligned.
+  Headings keep their Word numbering, their `#1B4377` colour and their sizes; body paragraphs stay justified and gain hyphenation, which stops at body prose, and compact lists and table cells are left-aligned.
+  Hyphenation is switched on for the whole document and suppressed on `Normal`, then cleared on `Body Text` and suppressed again on `Compact`, so headings, captions, lists, footnotes and table cells never break a word.
   The title block stands alone on the first page and the table of contents opens the second, with the page number centred in the footer from page 2.
   Float captions are bold, 10 pt, `#111111` and no longer italic, the typography `hebstr` gives the captions of its Word tables.
   The geometry does not move: A4, 2.5 cm margins, 6.2958 in of text, the width `hebstr::docx_page_width()` reads to size Word tables.
@@ -115,6 +116,7 @@
   A `<br>` followed by a `quarto-float-subcaption` span, the markup `hebstr::str_fig()` writes, sets that note as a paragraph of its own under the title, in `Table Caption Subtitle` or `Image Caption Subtitle` (not bold, 9 pt, `#555555`) after the caption style of the same position, instead of running into the title in bold.
   A character style could not do it: Word combines bold across paragraph and character styles as a toggle, and kept a `Caption Subtitle` run bold inside the bold caption where LibreOffice did not, while one paragraph style based on another simply overrides it.
   The paragraph also drops the stray space the line break and indentation of `str_fig()` left at the start of the second line.
+  The title above a subtitle takes `Table Caption Title` or `Image Caption Title`, which drop the space after the title and keep it with its subtitle: Word only joins the spacing of paragraphs that share a style, so the caption's own spacing would otherwise open a gap between the two lines.
   Unit-tested, validated in Word, and asserted in CI by `tests/docx-template.sh`, which renders a probe carrying each caption shape.
 
 - A table in a referenced DOCX float, whether a Markdown table, a `gt` or a `flextable`, is laid out to its content in Word instead of being crushed.

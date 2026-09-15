@@ -360,6 +360,7 @@ The Word output applies the same rule by position, described below.
 `hebstr-doc-docx` renders against `template.dotx`, built from Pandoc's own reference document so that every style Pandoc writes is defined in it.
 The text is set in Aptos, and Word versions that lack Aptos fall back to Calibri.
 Body paragraphs are justified and hyphenated, and headings are numbered by the template itself, which is why the format turns `number-sections` off.
+Hyphenation stops at body prose: headings, captions, lists, footnotes and table cells never break a word.
 Body paragraphs are set in `Body Text`, with the first after a heading in `First Paragraph` and list items in `Compact`, both based on it, so restyle prose there rather than in `Normal`: every other style inherits from `Normal`, and the `flextable` cells that use it carry their own direct formatting.
 The title block stands alone on the first page, which carries no page number, the table of contents opens the second, and the body starts on the page after it.
 The table of contents takes its title from the document language, "Table of contents" in English and "Table des matières" in French, and `language: toc-title-document:` in `_quarto.yml` or the front matter overrides it.
@@ -371,14 +372,14 @@ Float captions are styled by where they sit, as in HTML.
 A caption above its content takes the `Table Caption` style, centred, and one below takes `Image Caption`, left-aligned.
 Tables and annexes are captioned on top by default and figures at the bottom, so a figure moved with `fig-cap-location: top` reads like a table caption.
 A float whose content is a table is set at body level, caption then table, rather than inside the one-cell table Quarto builds around a float, where Word would crush its columns; figures stay inside it.
-A caption can carry a second line, neither bold nor as large, by following its title with `<br>` and a span of class `quarto-float-subcaption`, which is the markup `hebstr::str_fig()` writes; in Word that line is a paragraph of its own, in `Table Caption Subtitle` or `Image Caption Subtitle` after the caption above it:
+A caption can carry a second line, neither bold nor as large, by following its title with `<br>` and a span of class `quarto-float-subcaption`, which is the markup `hebstr::str_fig()` writes; in Word that line is a paragraph of its own, in `Table Caption Subtitle` or `Image Caption Subtitle`, under a title set in `Table Caption Title` or `Image Caption Title` so the two lines sit close:
 
 ```r
 #| label: fig-mass
 #| fig-cap: "Body mass by species<br><span class='quarto-float-subcaption'>Adult penguins only.</span>"
 ```
 
-To render against a template of your own, keep the style names the extension's DOCX filter writes: `Table Caption`, `Image Caption`, `Table Caption Subtitle`, `Image Caption Subtitle`, `Figure` and `Captioned Figure`.
+To render against a template of your own, keep the style names the extension's DOCX filter writes: `Table Caption`, `Image Caption`, `Table Caption Title`, `Image Caption Title`, `Table Caption Subtitle`, `Image Caption Subtitle`, `Figure` and `Captioned Figure`.
 
 ```yaml
 format:
