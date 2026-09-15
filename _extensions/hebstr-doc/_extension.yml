@@ -14,7 +14,6 @@ contributes:
       number-depth: 4
       toc: true
       toc-depth: 4
-      toc-title: " "
       colorlinks: true
       default-image-extension: png
       crossref:
@@ -45,6 +44,7 @@ contributes:
       monofont: "Fira Code"
       linestretch: 1.75
       toc-expand: true
+      toc-title: " "
       anchor-sections: false
       code-link: false
       code-fold: true
@@ -93,6 +93,7 @@ contributes:
           style: default
     typst:
       mainfont: "Luciole"
+      toc-title: " "
       font-paths: fonts
       papersize: a4
       margin:
@@ -121,4 +122,6 @@ contributes:
           path: filters/docx-cell-paragraph.lua
         - at: post-render
           path: filters/docx-caption.lua
+        - at: post-render
+          path: filters/docx-toc-break.lua
       number-sections: false

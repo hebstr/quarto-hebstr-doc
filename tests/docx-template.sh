@@ -83,6 +83,20 @@ for cell in root.iter(W + "tc"):
     if inner and inner[-1].tag == W + "tbl":
         failures.append("a table ends a table cell, still nested in its float wrapper")
 
+children = list(root.find(W + "body"))
+toc = next((i for i, el in enumerate(children) if el.tag == W + "sdt"), None)
+if toc is None:
+    failures.append("no table of contents in the output, which the format turns on")
+else:
+    heading = "".join(
+        t.text or "" for p in children[toc].iter(W + "p") if style(p) == "TOCHeading" for t in p.iter(W + "t")
+    )
+    if heading != "Table of contents":
+        failures.append(f"table of contents titled {heading!r}, not the language's toc-title-document")
+    first = next((el for el in children[toc + 1 :] if el.tag in (W + "p", W + "tbl")), None)
+    if first is None or not any(br.get(W + "type") == "page" for br in first.iter(W + "br")):
+        failures.append("the body does not open on a new page after the table of contents")
+
 bookmarks = {b.get(W + "name") for b in root.iter(W + "bookmarkStart")}
 anchors = {h.get(W + "anchor") for h in root.iter(W + "hyperlink") if h.get(W + "anchor")}
 for anchor in sorted(anchors - bookmarks):

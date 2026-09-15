@@ -13,6 +13,7 @@ require("test_add_code_files")
 require("test_crossref_anx")
 require("test_docx_caption")
 require("test_docx_cell_paragraph")
+require("test_docx_toc_break")
 require("test_filetree")
 require("test_r_syntax")
 

@@ -78,7 +78,7 @@ Its setup chunk sources `_extensions/hebstr-doc/fonts/register.R`, so the bundle
 
 Currently HTML only: `hebstr-doc-typst` and `hebstr-doc-docx` are declared in `_extension.yml` but not yet validated, and `example.qmd` will declare all three once they are.
 That gap hides rendering keys as well as a format: `link-citations: true` sits in the `docx:` block, and no local render and no CI step exercises it.
-Both DOCX-only filters of that block are rendered in CI, because their unit tests cover the AST edit alone and would stay green if the wiring stopped resolving: `tests/docx-cell.sh` asserts the cells `filters/docx-cell-paragraph.lua` closes, and `tests/docx-template.sh` the captions `filters/docx-caption.lua` restyles and the table floats it takes out of their wrapper.
+The three DOCX-only filters of that block are rendered in CI, because their unit tests cover the AST edit alone and would stay green if the wiring stopped resolving: `tests/docx-cell.sh` asserts the cells `filters/docx-cell-paragraph.lua` closes, and `tests/docx-template.sh` the captions `filters/docx-caption.lua` restyles, the table floats it takes out of their wrapper, and the page break `filters/docx-toc-break.lua` sets after the table of contents.
 What neither reaches is the outcome itself, Word opening and laying out the file: LibreOffice converts documents Word refuses and breaks justified lines differently, so that half is owed to a real Word install.
 
 `template.dotx` is a binary, rebuilt rather than edited by hand: change `scripts/build_template.py`, run it, then check what it wrote.
@@ -143,6 +143,7 @@ bash tests/docx-template.sh
 It renders `tests/docx-template-probe.qmd`, which carries a title block, a footnote, a figure captioned at the bottom with a subtitle line, a figure moved to the top, a Markdown table, a `gt` table with a subtitle line and an annexe.
 `scripts/check-docx.R` then reads the output, and a structural pass asserts every float caption: a single paragraph-properties element with no direct alignment, `Table Caption` above its content and `Image Caption` below, each subtitle in a paragraph of its own under the matching `Table Caption Subtitle` or `Image Caption Subtitle`, and the five captions in the positions the probe asks for.
 The same pass asserts that no table float is left inside a table cell, where Word crushes it, and that each of the probe's cross-references resolves to a bookmark.
+It also reads the table of contents: titled "Table of contents" from the language rather than Pandoc's hard-coded default, and followed by a page break before the body.
 It needs the `officer` R package on top of what the render uses, and its probe is staged and removed like the others.
 
 ## Pre-commit hooks
