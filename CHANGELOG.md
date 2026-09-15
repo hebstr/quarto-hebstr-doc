@@ -85,6 +85,8 @@
   The geometry does not move: A4, 2.5 cm margins, 6.2958 in of text, the width `hebstr::docx_page_width()` reads to size Word tables.
   A project whose installed copy of `template.dotx` was edited by hand gets that geometry back on `quarto update`, and its table widths move with it.
   Validated in Word.
+  The typography of the title block and body was then set in Word and carried back into `scripts/build_template.py`: body text at 11 pt with 1.5 line spacing, title at 28 pt, subtitle at 24 pt, author and date at 16 pt and centred, heading 4 no longer italic, headings 3 and 4 on a hanging indent, a centred table of contents heading with styled entries, and Word 2013 compatibility mode.
+  Word's automatic style updates and the 11 pt it gave hyperlinks were left out, so a reviewer's direct formatting stays local and a link inside a 10 pt caption keeps the caption's size; the rebuilt file is owed its own pass in Word.
   The template derives from Pandoc's reference document, which Pandoc distributes under the GPL, version 2 or later, so it joins `syntax/r.xml` as a copyleft component of the extension, attributed in `template.LICENSE` and listed in [LICENSE.md](LICENSE.md).
 
 ### Removed

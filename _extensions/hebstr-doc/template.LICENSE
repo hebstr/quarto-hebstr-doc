@@ -24,12 +24,13 @@ summary:
   - `autoHyphenation` is on, Aptos and Aptos Display declare Calibri as their
     `altName`, and the theme's heading font is Aptos
   - Normal, Body Text, Compact, Title, Subtitle, Author, Date, heading 1 to 9,
-    the character styles of Title, Subtitle and each heading, TOC Heading,
-    Caption, Table Caption, Image Caption, Figure, Hyperlink, Footnote Text
-    and Bibliography are restyled, and theme colour attributes are removed
-    from every style
+    the character styles of Body Text, Title, Subtitle and each heading,
+    TOC Heading, Caption, Table Caption, Image Caption, Figure, Captioned
+    Figure, Hyperlink, Verbatim Char, Footnote Text and Bibliography are
+    restyled, and theme colour attributes are removed from every style
   - a numbering definition links heading 1 to 8 to decimal outline numbers
-  - Caption Subtitle (character) and footer (paragraph) are added
+  - Caption Subtitle (character), footer and toc 1 to 3 (paragraph) are added
+  - the settings declare Word 2013 compatibility mode
 
 Rebuild procedure, from the repository root:
 

@@ -95,22 +95,47 @@ SPACED = 'w:before="200" w:after="0"'
 HEADINGS = {
     1: {
         "spacing": 'w:before="480" w:after="320"',
-        "jc": "left",
+        "ind": None,
         "rpr": "<w:b/><w:bCs/>" + color(BLUE) + sz(32),
     },
     2: {
         "spacing": 'w:before="240" w:after="240"',
-        "jc": "left",
+        "ind": None,
         "rpr": "<w:b/><w:bCs/>" + color(BLUE) + sz(28),
     },
-    3: {"spacing": SPACED, "jc": "left", "rpr": "<w:b/><w:bCs/>" + color(BLUE) + sz(26)},
-    4: {"spacing": SPACED, "jc": "left", "rpr": "<w:b/><w:bCs/><w:i/><w:iCs/>" + color(BLUE)},
-    5: {"spacing": SPACED, "jc": None, "rpr": color(BLUE)},
-    6: {"spacing": SPACED, "jc": None, "rpr": "<w:i/><w:iCs/>" + color(BLUE)},
-    7: {"spacing": SPACED, "jc": None, "rpr": "<w:i/><w:iCs/>" + color("404040")},
-    8: {"spacing": SPACED, "jc": None, "rpr": color("404040") + sz(20)},
-    9: {"spacing": SPACED, "jc": None, "rpr": "<w:i/><w:iCs/>" + color("404040") + sz(20)},
+    3: {
+        "spacing": 'w:before="200" w:after="200"',
+        "ind": 862,
+        "rpr": "<w:b/><w:bCs/>" + color(BLUE) + sz(26),
+    },
+    4: {
+        "spacing": 'w:before="160" w:after="160"',
+        "ind": 1009,
+        "rpr": "<w:b/><w:bCs/><w:iCs/>" + color(BLUE),
+    },
+    5: {"spacing": SPACED, "ind": None, "rpr": color(BLUE)},
+    6: {"spacing": SPACED, "ind": None, "rpr": "<w:i/><w:iCs/>" + color(BLUE)},
+    7: {"spacing": SPACED, "ind": None, "rpr": "<w:i/><w:iCs/>" + color("404040")},
+    8: {"spacing": SPACED, "ind": None, "rpr": color("404040") + sz(20)},
+    9: {"spacing": SPACED, "ind": None, "rpr": "<w:i/><w:iCs/>" + color("404040") + sz(20)},
 }
+
+COMPAT = (
+    "<w:compat><w:useFELayout/>"
+    + "".join(
+        f'<w:compatSetting w:name="{name}" w:uri="http://schemas.microsoft.com/office/word"'
+        f' w:val="{val}"/>'
+        for name, val in (
+            ("compatibilityMode", 15),
+            ("overrideTableStyleFontSizeAndJustification", 1),
+            ("enableOpenTypeFeatures", 1),
+            ("doNotFlipMirrorIndents", 1),
+            ("differentiateMultirowTableHeaders", 1),
+            ("useWord2013TrackBottomHyphenation", 0),
+        )
+    )
+    + "</w:compat>"
+)
 
 
 def build_styles(styles):
@@ -135,7 +160,21 @@ def build_styles(styles):
             "Body Text",
             based_on="Normal",
             link="BodyTextChar",
-            ppr='<w:spacing w:before="120" w:after="120"/><w:jc w:val="both"/>',
+            ppr='<w:spacing w:line="360" w:lineRule="auto"/><w:jc w:val="both"/>',
+            rpr=sz(22),
+        ),
+    )
+    styles = replace_style(
+        styles,
+        "BodyTextChar",
+        style(
+            "character",
+            "BodyTextChar",
+            "Body Text Char",
+            based_on="DefaultParagraphFont",
+            link="BodyText",
+            custom=True,
+            rpr=sz(22),
         ),
     )
     styles = replace_style(
@@ -152,7 +191,9 @@ def build_styles(styles):
     )
 
     title_rpr = (
-        "<w:b/><w:bCs/>" + color(BLUE) + '<w:spacing w:val="5"/><w:kern w:val="28"/>' + sz(48)
+        "<w:b/><w:bCs/>"
+        + color(BLUE)
+        + '<w:spacing w:val="5"/><w:kern w:val="28"/><w:sz w:val="56"/><w:szCs w:val="48"/>'
     )
     styles = replace_style(
         styles,
@@ -165,7 +206,7 @@ def build_styles(styles):
             next_="BodyText",
             link="TitleChar",
             ppr=(
-                '<w:spacing w:before="0" w:after="240"/>'
+                '<w:spacing w:before="480" w:after="480"/>'
                 '<w:contextualSpacing/><w:jc w:val="center"/>'
             ),
             rpr=title_rpr,
@@ -194,9 +235,8 @@ def build_styles(styles):
             based_on="Title",
             next_="BodyText",
             link="SubtitleChar",
-            ppr='<w:spacing w:before="0" w:after="480"/>',
             rpr='<w:b w:val="0"/><w:bCs w:val="0"/><w:spacing w:val="0"/><w:kern w:val="0"/>'
-            + sz(28),
+            '<w:sz w:val="48"/><w:szCs w:val="28"/>',
         ),
     )
     styles = replace_style(
@@ -209,10 +249,10 @@ def build_styles(styles):
             based_on="DefaultParagraphFont",
             link="Subtitle",
             custom=True,
-            rpr=color(BLUE) + sz(28),
+            rpr=color(BLUE) + '<w:sz w:val="48"/><w:szCs w:val="28"/>',
         ),
     )
-    for sid in ("Author", "Date"):
+    for sid, bold in (("Author", "<w:b/><w:bCs/>"), ("Date", "<w:bCs/>")):
         styles = replace_style(
             styles,
             sid,
@@ -220,19 +260,16 @@ def build_styles(styles):
                 "paragraph",
                 sid,
                 sid,
-                based_on="Title",
+                based_on="Normal",
                 next_="BodyText",
                 custom=(sid == "Author"),
-                ppr='<w:keepNext/><w:keepLines/><w:spacing w:before="0" w:after="60"/>',
-                rpr='<w:b w:val="0"/><w:bCs w:val="0"/>'
-                + color("111111")
-                + '<w:spacing w:val="0"/><w:kern w:val="0"/>'
-                + sz(24),
+                ppr='<w:keepNext/><w:keepLines/><w:spacing w:after="60"/><w:jc w:val="center"/>',
+                rpr=bold + color("111111") + '<w:sz w:val="32"/>',
             ),
         )
 
     for level, spec in HEADINGS.items():
-        jc = f'<w:jc w:val="{spec["jc"]}"/>' if spec["jc"] else ""
+        ind = f'<w:ind w:left="{spec["ind"]}" w:hanging="{spec["ind"]}"/>' if spec["ind"] else ""
         numbering = num_pr(level) if level <= 8 else ""
         hidden = "" if level == 1 else '<w:uiPriority w:val="9"/><w:semiHidden/><w:unhideWhenUsed/>'
         styles = replace_style(
@@ -246,7 +283,7 @@ def build_styles(styles):
                 next_="BodyText",
                 link=f"Heading{level}Char",
                 extra=hidden,
-                ppr=f"<w:keepNext/><w:keepLines/>{numbering}<w:spacing {spec['spacing']}/>{jc}"
+                ppr=f"<w:keepNext/><w:keepLines/>{numbering}<w:spacing {spec['spacing']}/>{ind}"
                 f'<w:outlineLvl w:val="{level - 1}"/>',
                 rpr=spec["rpr"],
             ),
@@ -276,7 +313,8 @@ def build_styles(styles):
             next_="BodyText",
             extra='<w:uiPriority w:val="39"/><w:unhideWhenUsed/>',
             ppr='<w:pageBreakBefore/><w:numPr><w:ilvl w:val="0"/><w:numId w:val="0"/></w:numPr>'
-            '<w:spacing w:before="0" w:after="240"/><w:outlineLvl w:val="9"/>',
+            '<w:spacing w:before="0" w:after="240"/><w:jc w:val="center"/>'
+            '<w:outlineLvl w:val="9"/>',
         ),
     )
 
@@ -289,7 +327,6 @@ def build_styles(styles):
             "Caption",
             "Caption",
             based_on="Normal",
-            ppr='<w:spacing w:before="120" w:after="120"/>',
             rpr=caption_rpr,
         ),
     )
@@ -314,7 +351,6 @@ def build_styles(styles):
             "Image Caption",
             based_on="Caption",
             custom=True,
-            ppr='<w:jc w:val="left"/>',
         ),
     )
     styles = replace_style(
@@ -331,13 +367,38 @@ def build_styles(styles):
     )
     styles = replace_style(
         styles,
+        "CaptionedFigure",
+        style(
+            "paragraph",
+            "CaptionedFigure",
+            "Captioned Figure",
+            based_on="Figure",
+            custom=True,
+            ppr='<w:keepNext/><w:spacing w:before="240" w:after="240"/>',
+        ),
+    )
+    # Body Text Char carries 11 pt, which a link inside a 10 pt caption must not inherit
+    styles = replace_style(
+        styles,
         "Hyperlink",
         style(
             "character",
             "Hyperlink",
             "Hyperlink",
-            based_on="BodyTextChar",
+            based_on="DefaultParagraphFont",
             rpr=color("0000FF") + '<w:u w:val="single"/>',
+        ),
+    )
+    styles = replace_style(
+        styles,
+        "VerbatimChar",
+        style(
+            "character",
+            "VerbatimChar",
+            "Verbatim Char",
+            based_on="BodyTextChar",
+            custom=True,
+            rpr='<w:rFonts w:ascii="Consolas" w:hAnsi="Consolas"/><w:sz w:val="20"/>',
         ),
     )
     styles = replace_style(
@@ -383,6 +444,30 @@ def build_styles(styles):
         ppr='<w:spacing w:before="0" w:after="0"/><w:jc w:val="center"/>',
         rpr=sz(20),
     )
+    toc_extra = '<w:uiPriority w:val="39"/><w:unhideWhenUsed/>'
+    added += style(
+        "paragraph",
+        "TOC1",
+        "toc 1",
+        based_on="Normal",
+        next_="Normal",
+        extra=toc_extra,
+        ppr='<w:tabs><w:tab w:val="left" w:pos="480"/>'
+        '<w:tab w:val="right" w:leader="dot" w:pos="9056"/></w:tabs>'
+        '<w:spacing w:before="80" w:after="80"/>',
+        rpr='<w:b/><w:noProof/><w:sz w:val="22"/>',
+    )
+    for level, indent in ((2, 238), (3, 482)):
+        added += style(
+            "paragraph",
+            f"TOC{level}",
+            f"toc {level}",
+            based_on="TOC1",
+            next_="Normal",
+            extra=toc_extra,
+            ppr=f'<w:ind w:left="{indent}"/>',
+            rpr='<w:b w:val="0"/>',
+        )
     return sub1(r"</w:styles>", added + "</w:styles>", styles, "styles tail")
 
 
@@ -479,6 +564,7 @@ def transform(name, data):
             text,
             "autoHyphenation",
         )
+        text = sub1(r"<w:rsids>", COMPAT + "<w:rsids>", text, "compat")
     elif name == "word/fontTable.xml":
         for font in ("Aptos", "Aptos Display"):
             text = sub1(
