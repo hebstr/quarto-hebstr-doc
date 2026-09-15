@@ -45,6 +45,7 @@ jobs:
             any::palmerpenguins
             any::sessioninfo
             any::officer
+            any::xml2
 
       - uses: quarto-dev/quarto-actions/setup@v2
 
