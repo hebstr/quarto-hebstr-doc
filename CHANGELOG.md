@@ -23,7 +23,7 @@
   `reactable` joins the workflows as its own entry rather than riding on `gt`, which imports it, so no install is added; the cost is page weight, the widget's bundle taking `example.html` from 4.20 MB to 4.66 MB under `embed-resources: true`.
 
 - Body prose is justified in HTML, which the two other formats already did and the theme left to each document.
-  `template.typ` sets `justify: true` on `par`, and the `Normal` style of `template.dotx` carries `w:jc w:val="both"`, so HTML was the odd one of the three rather than the second to fall in line.
+  `template.typ` sets `justify: true` on `par`, and `template.dotx` justifies the `Body Text` style Pandoc sets paragraphs in, so HTML was the odd one of the three rather than the second to fall in line.
   The rule is anchored on `#quarto-document-content` rather than written as a bare `p`: the id keeps the TOC sidebar out, and carries the weight a document-level `<style>` used to take from source order alone.
   The margin column is not kept out by that id, Quarto emitting it inside the same container, so a rule of its own hands `.column-margin` back to `left` : justification needs a measure the 450 px margin column does not have, and a document mixing the two columns opens its rivers there first.
   That one class covers the three shapes margin content takes, a `.column-margin` div, an `.aside` and a footnote under `reference-location: margin` all rendering as the same container, and it repeats the id to outweigh the rule above rather than relying on source order.
@@ -38,7 +38,14 @@
 
 - `link-citations: true` on the Word format, so a citation hyperlinks to its bibliography entry instead of printing a dead marker.
   Pandoc defaults the key to `false` and it reaches `docx` and PDF only: the HTML writer anchors citations on its own, and the Typst format hands `@key` to Typst's bibliography engine rather than to citeproc, so `docx` is the single format here that consumes it.
-  The link lands styled rather than dangling, which is not a given for this template: Pandoc resolves a style by its `w:name` and not by its identifier, so the `Hyperlink` it asks for reaches `template.dotx`'s `Lienhypertexte`, and the bibliography it anchors into reaches `Bibliographie` the same way (measured on a probe carrying one citation, whose run comes back as `<w:rStyle w:val="Lienhypertexte"/>`).
+  The link lands styled rather than dangling: Pandoc resolves a style by its `w:name`, and `template.dotx` defines both the `Hyperlink` character style it asks for and the `Bibliography` paragraph style it anchors into.
+
+- `scripts/check-docx.R` asserts, on any `.docx` or `.dotx`, the properties a Word reader depends on and no render reports: every referenced style defined, every table cell closed by a paragraph, no unreferenced media, a text width of 6.2958 in, hyphenation on, and Calibri declared as the fallback of Aptos.
+  Each check has been seen failing, on a report rendered against the previous template and on a hand-built document holding an open cell, so a green run is evidence rather than silence.
+  Run it on a rendered document as well as on the template, since Pandoc decides what of the template reaches the output.
+  It needs the `officer` R package; CI runs it on the output of `tests/docx-template.sh`.
+
+- `scripts/build_template.py` rebuilds `template.dotx` from the reference document Quarto's Pandoc ships, through substitutions that must each match exactly once, so the binary has a recipe that can be read, changed and run again.
 
 ### Changed
 
@@ -69,6 +76,17 @@
 - The `prettier` hook of `prek.toml` widens from the stylesheets to the HTML and JS the extension ships (`filters/toggle-position.html`, `filters/add-code-files.js`), which held no format gate until now, and skips `tests/fixtures/` so the verbatim test inputs stay byte-identical.
   `filters/toggle-position.html` is reformatted to that gate ; no rendered output, public SCSS variable or CSS custom property changes.
 
+- `template.dotx` is rebuilt from Pandoc's reference document instead of a Word document stripped of its content, and weighs 11.9 KB instead of 562 KB.
+  The previous template carried ten images and an OLE object that Pandoc copied into every output, about 1 MB per document, and lacked 35 of the 49 styles Pandoc writes, so first paragraphs, compact lists, captions and the title block fell back to `Normal` without a warning.
+  Text is set in Aptos throughout, declared with Calibri as its fallback for Word before 2024, where the body used to be Arial and the lower headings Calibri.
+  Headings keep their Word numbering, their `#1B4377` colour and their sizes; body paragraphs stay justified and gain hyphenation, and compact lists and table cells are left-aligned.
+  The title block stands alone on the first page and the table of contents opens the second, with the page number centred in the footer from page 2.
+  Float captions are bold, 10 pt, `#111111` and no longer italic, the typography `hebstr` gives the captions of its Word tables.
+  The geometry does not move: A4, 2.5 cm margins, 6.2958 in of text, the width `hebstr::docx_page_width()` reads to size Word tables.
+  A project whose installed copy of `template.dotx` was edited by hand gets that geometry back on `quarto update`, and its table widths move with it.
+  Validated in Word.
+  The template derives from Pandoc's reference document, which Pandoc distributes under the GPL, version 2 or later, so it joins `syntax/r.xml` as a copyleft component of the extension, attributed in `template.LICENSE` and listed in [LICENSE.md](LICENSE.md).
+
 ### Removed
 
 - `$surface-default` and `$figure-shadow`, two public SCSS variables that nothing consumed, together with their `--surface-default` and `--figure-shadow` counterparts under `:root`.
@@ -86,7 +104,14 @@
   Word holds the last block-level element of a `w:tc` to be a `w:p` and offers no recovery when one is missing, while Quarto wraps every referenced float in a one-cell table to keep caption and content together: a table arriving as an `{=openxml}` block ends on `</w:tbl>` and leaves that cell open.
   `filters/docx-cell-paragraph.lua` closes it with a 1 pt empty paragraph appended to the raw block, a Pandoc `Para` carrying no inline being dropped before the writer ever sees it.
   The defect reaches no reader on a Linux machine: LibreOffice renders the same file without complaint, so it shows on a real Word install alone.
-  `tests/docx-cell.sh` renders its own DOCX probe in CI and counts the cells left open, which must be none; it is the workflow's only DOCX render.
+  `tests/docx-cell.sh` renders its own DOCX probe in CI and counts the cells left open, which must be none.
+
+- Float captions in DOCX take the caption style their position calls for, through `filters/docx-caption.lua`, run at `post-render`.
+  Quarto writes every float caption as `Image Caption` with a direct left alignment, inside a one-cell table whose column is centred: a table caption never got the keep-with-next of `Table Caption` and could be stranded at the foot of a page, and each caption paragraph carried two property elements, whose two alignments overrode the template.
+  A caption above its content now takes `Table Caption`, centred, and one below takes `Image Caption`, left-aligned, which is the position rule the HTML theme applies: a figure moved to `fig-cap-location: top` reads like a table caption.
+  The centring moves onto the image through the `Figure` and `Captioned Figure` styles, so a Markdown table inside a float keeps its own column alignment, left by default, instead of inheriting the wrapper's.
+  A `<br>` followed by a `quarto-float-subcaption` span, the markup `hebstr::str_fig()` writes, breaks the caption onto a second line in the `Caption Subtitle` style (not bold, 9 pt, `#555555`) instead of running into the title in bold.
+  Unit-tested, validated in Word, and asserted in CI by `tests/docx-template.sh`, which renders a probe carrying each caption shape.
 
 ## [1.4.0] - 2026-08-29
 

@@ -33,7 +33,9 @@ Bundled assets keep the licence they arrived under, each with its own text along
 | add-code-files (JS) | `_extensions/hebstr-doc/filters/add-code-files.LICENSE` | MIT |
 | code-window (embedded extension) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/LICENSE` | MIT |
 | R syntax definition | `_extensions/hebstr-doc/syntax/RSyntax.LICENSE` | **GPL v2** |
+| Word reference document | `_extensions/hebstr-doc/template.LICENSE` | **GPL v2 or later** |
 
-`syntax/r.xml` is the one copyleft component.
-It derives from the KDE Kate highlighting module for R and stays GPL v2.
-No other file in this extension derives from it, so the MIT terms above govern the rest.
+`syntax/r.xml` and `template.dotx` are the two copyleft components.
+`syntax/r.xml` derives from the KDE Kate highlighting module for R and stays GPL v2.
+`template.dotx` derives from the reference document Pandoc ships and stays under Pandoc's licence, GPL version 2 or later.
+No other file in this extension derives from either, so the MIT terms above govern the rest.

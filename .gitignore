@@ -2,6 +2,7 @@
 **/*.quarto_ipynb
 /anx-float-probe.qmd
 /docx-cell-probe.qmd
+/docx-template-probe.qmd
 /r-syntax-probe.qmd
 /*.typ
 /*.html

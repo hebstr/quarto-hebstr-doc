@@ -77,9 +77,19 @@ That render needs the `svglite` package, which the HTML format sets as the knitr
 Its setup chunk sources `_extensions/hebstr-doc/fonts/register.R`, so the bundled faces are registered on a machine that lacks them and the figures do not fall back silently.
 
 Currently HTML only: `hebstr-doc-typst` and `hebstr-doc-docx` are declared in `_extension.yml` but not yet validated, and `example.qmd` will declare all three once they are.
-That gap hides a rendering key as well as a format: `link-citations: true` sits in the `docx:` block, and no local render and no CI step exercises it.
-The other key of that block, the `filters/docx-cell-paragraph.lua` filter, is the exception: `tests/docx-cell.sh` renders its own DOCX probe and asserts the cells it closes, because its unit tests cover the AST edit alone and would stay green if the wiring stopped resolving.
-What the probe cannot reach is the outcome itself, Word opening the file: LibreOffice converts the invalid document without complaint, so that half is owed to a real Word install.
+That gap hides rendering keys as well as a format: `link-citations: true` sits in the `docx:` block, and no local render and no CI step exercises it.
+Both DOCX-only filters of that block are rendered in CI, because their unit tests cover the AST edit alone and would stay green if the wiring stopped resolving: `tests/docx-cell.sh` asserts the cells `filters/docx-cell-paragraph.lua` closes, and `tests/docx-template.sh` the captions `filters/docx-caption.lua` restyles.
+What neither reaches is the outcome itself, Word opening and laying out the file: LibreOffice converts documents Word refuses and breaks justified lines differently, so that half is owed to a real Word install.
+
+`template.dotx` is a binary, rebuilt rather than edited by hand: change `scripts/build_template.py`, run it, then check what it wrote.
+
+```bash
+uv run scripts/build_template.py
+Rscript scripts/check-docx.R _extensions/hebstr-doc/template.dotx
+```
+
+`scripts/check-docx.R` takes any `.docx` or `.dotx` and asserts what a Word reader depends on: every referenced style defined, every table cell closed by a paragraph, no unreferenced media, a text width of 6.2958 in, hyphenation on, and Calibri declared as the fallback of Aptos.
+Run it on a rendered document as well as on the template, since Pandoc decides what of the template reaches the output; it needs the `officer` R package.
 
 The document does not instantiate every selector the theme ships, and a clean render is therefore not proof that a rule applies.
 It holds no figure without a cross-reference label and no `.column-margin` content, so the caption rules for a non-float figure and the margin exemption on justified prose are compiled but never matched.
@@ -112,7 +122,7 @@ It renders `tests/anx-float-probe.qmd` and asserts the three authoring forms of 
 A float that stopped reaching the type would lose its number and its caption while the render still exited 0, which is what the assertions exist to catch.
 This probe is staged and removed the same way.
 
-A fourth step is the workflow's only DOCX render, and it asserts the one property no render reports on its own:
+A fourth step renders DOCX, and it asserts the one property no render reports on its own:
 
 ```bash
 bash tests/docx-cell.sh
@@ -123,10 +133,20 @@ Word refuses to open a document holding one and names no usable location, while 
 The assertion is structural rather than lexical, read off the parsed `word/document.xml` through the `python3` that GitHub's runner ships preinstalled.
 This probe is staged and removed like the other two.
 
+A fifth step renders the Word template itself:
+
+```bash
+bash tests/docx-template.sh
+```
+
+It renders `tests/docx-template-probe.qmd`, which carries a title block, a footnote, a figure captioned at the bottom with a subtitle line, a figure moved to the top, a Markdown table, a `gt` table and an annexe.
+`scripts/check-docx.R` then reads the output, and a structural pass asserts every float caption: a single paragraph-properties element with no direct alignment, `Table Caption` above its content and `Image Caption` below, the subtitle on its own line in `Caption Subtitle`, and the five captions in the positions the probe asks for.
+It needs the `officer` R package on top of what the render uses, and its probe is staged and removed like the others.
+
 ## Pre-commit hooks
 
 The repo ships a [`prek`](https://github.com/j178/prek) config (`prek.toml`): YAML/large-file/merge-conflict checks, secret scanning (gitleaks), R format/lint (air, jarl), Typst (typstyle), Lua (StyLua), shell format/lint (shfmt, shellcheck), CSS/SCSS lint (stylelint), format of the CSS/SCSS plus the HTML and JS the extension ships (prettier), and prose-lint.
-The same hooks run in CI (`render.yml`), alongside four gates that are not hooks: the three test steps above and a `lua-language-server --check` type pass.
+The same hooks run in CI (`render.yml`), alongside six gates that are not hooks: the five test steps above and a `lua-language-server --check` type pass.
 Running the hooks locally therefore avoids most of a red build, not all of it.
 
 Both hooks resolve from `node_modules/.bin`, so install the pinned toolchain once before running them (stylelint 17 needs Node >= 20.19; CI pins 22):
@@ -150,6 +170,7 @@ Both hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_extens
 
 - `_extensions/hebstr-doc/`: the extension itself (do not flatten).
 - `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (currently `mcanouil/code-window`).
-- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus the three render probes `r-syntax-tokens.sh`, `anx-float.sh` and `docx-cell.sh` with the `.qmd` each renders; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
+- `scripts/`: `demo_penguins.R`, which `example.qmd` injects; `build_template.py` and `check-docx.R`, the rebuild recipe and the invariant check of the DOCX template.
+- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus the four render probes `r-syntax-tokens.sh`, `anx-float.sh`, `docx-cell.sh` and `docx-template.sh` with the `.qmd` each renders; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
 - `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).
 - `package.json` + `package-lock.json` + `stylelint.config.mjs`: the pinned stylelint/prettier toolchain and the SCSS rules it enforces; `node_modules/` is gitignored.

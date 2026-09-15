@@ -44,6 +44,7 @@ jobs:
             any::svglite
             any::palmerpenguins
             any::sessioninfo
+            any::officer
 
       - uses: quarto-dev/quarto-actions/setup@v2
 
@@ -67,11 +68,17 @@ jobs:
       - name: Annexe float assertions
         run: bash tests/anx-float.sh
 
-      # The only DOCX render of this workflow, and the only assertion no render
-      # can make on its own: LibreOffice converts a document Word refuses, so a
-      # cell left open by a raw OOXML table shows nowhere else.
+      # The one assertion no render can make on its own: LibreOffice converts a
+      # document Word refuses, so a cell left open by a raw OOXML table shows
+      # nowhere else.
       - name: DOCX cell assertions
         run: bash tests/docx-cell.sh
+
+      # The caption filter hangs on the shape and stage Quarto writes float
+      # captions in, neither documented, and scripts/check-docx.R (officer)
+      # reads what of template.dotx Pandoc carries into the output.
+      - name: DOCX template assertions
+        run: bash tests/docx-template.sh
 
       - name: Render example.qmd (HTML)
         run: quarto render example.qmd --to hebstr-doc-html

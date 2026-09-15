@@ -119,4 +119,6 @@ contributes:
           path: filters/r-syntax.lua
         - at: post-quarto
           path: filters/docx-cell-paragraph.lua
+        - at: post-render
+          path: filters/docx-caption.lua
       number-sections: false

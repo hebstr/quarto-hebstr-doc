@@ -353,6 +353,35 @@ This is the same specificity trap the `gt` section above describes, seen from th
 A figure carrying a cross-reference label is a Quarto float, and its caption sits at the bottom, left-aligned.
 A figure without one is not a float, and its caption takes the same typography (0.95rem, bold, `var(--caption-color)`) but is centred, as is any float caption the document moves to the top with `fig-cap-location: top`.
 Table and annexe captions are centred for the same reason, their caption being on top by default.
+The Word output applies the same rule by position, described below.
+
+### Word output
+
+`hebstr-doc-docx` renders against `template.dotx`, built from Pandoc's own reference document so that every style Pandoc writes is defined in it.
+The text is set in Aptos, and Word versions that lack Aptos fall back to Calibri.
+Body paragraphs are justified and hyphenated, and headings are numbered by the template itself, which is why the format turns `number-sections` off.
+The title block stands alone on the first page, which carries no page number, and the table of contents opens the second.
+
+The page is A4 with 2.5 cm margins, a text width of 6.2958 in.
+That width is a contract rather than a detail: the `hebstr` R package reads it through `docx_page_width()` to size Word tables, so any change to the template's geometry is recorded in the changelog.
+
+Float captions are styled by where they sit, as in HTML.
+A caption above its content takes the `Table Caption` style, centred, and one below takes `Image Caption`, left-aligned.
+Tables and annexes are captioned on top by default and figures at the bottom, so a figure moved with `fig-cap-location: top` reads like a table caption.
+A caption can carry a second line, neither bold nor as large, by following its title with `<br>` and a span of class `quarto-float-subcaption`, which is the markup `hebstr::str_fig()` writes:
+
+```r
+#| label: fig-mass
+#| fig-cap: "Body mass by species<br><span class='quarto-float-subcaption'>Adult penguins only.</span>"
+```
+
+To render against a template of your own, keep the style names the extension's DOCX filter writes: `Table Caption`, `Image Caption`, `Figure`, `Captioned Figure` and `Caption Subtitle`.
+
+```yaml
+format:
+  hebstr-doc-docx:
+    reference-doc: my-template.dotx
+```
 
 ### Code highlighting
 
@@ -384,5 +413,5 @@ quarto render example.qmd
 
 ## License
 
-[MIT](LICENSE.md), except `_extensions/hebstr-doc/syntax/r.xml`, which derives from the KDE Kate highlighting module for R and stays [GPL v2](_extensions/hebstr-doc/syntax/RSyntax.LICENSE).
+[MIT](LICENSE.md), except two files that stay under the GPL: `_extensions/hebstr-doc/syntax/r.xml`, which derives from the KDE Kate highlighting module for R ([GPL v2](_extensions/hebstr-doc/syntax/RSyntax.LICENSE)), and `_extensions/hebstr-doc/template.dotx`, which derives from the reference document Pandoc ships ([GPL v2 or later](_extensions/hebstr-doc/template.LICENSE)).
 Bundled fonts and icons keep their own licences; [LICENSE.md](LICENSE.md) lists all of them.

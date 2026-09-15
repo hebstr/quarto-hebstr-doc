@@ -1,0 +1,55 @@
+---
+title: "DOCX template probe"
+subtitle: "Reference document and float captions"
+author: "hebstr"
+format: hebstr-doc-docx
+---
+
+# Section
+
+An opening paragraph, long enough to wrap, so the body style and its justification reach the output, with a footnote.[^1]
+
+## Figures
+
+```{r}
+#| label: fig-bottom
+#| fig-cap: "Bottom caption<br><span class='quarto-float-subcaption'>Subtitle line.</span>"
+#| fig-height: 2
+
+plot(1:3)
+```
+
+```{r}
+#| label: fig-top
+#| fig-cap: "Top caption."
+#| fig-cap-location: top
+#| fig-height: 2
+
+plot(1:3)
+```
+
+## Tables
+
+::: {#tbl-md}
+  | a   | b   |
+  | --- | --- |
+  | 1   | 2   |
+
+A Markdown table caption.
+:::
+
+```{r}
+#| label: tbl-gt
+#| tbl-cap: "A gt table caption."
+
+gt::gt(head(mtcars[, 1:3], 3))
+```
+
+```{r}
+#| label: tbl-anx-probe
+#| tbl-cap: "An annexe caption."
+
+knitr::kable(head(mtcars[, 1:2], 2))
+```
+
+[^1]: A footnote.
