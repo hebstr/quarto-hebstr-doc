@@ -20,6 +20,14 @@
 -- forcing `Compact` onto any Plain inside a table cell over the Div's style. A
 -- wrapper aligned otherwise keeps its alignment.
 --
+-- A `<br>` followed by a `quarto-float-subcaption` span, the markup
+-- `hebstr::str_fig()` writes, becomes a paragraph of its own in `Table Caption
+-- Subtitle` or `Image Caption Subtitle`, based on the caption style of the same
+-- position. A character style cannot unbold it: bold is a toggle property that
+-- Word combines across paragraph and character styles, and it leaves an
+-- explicit `w:b w:val="0"` there bold, where `basedOn` between paragraph styles
+-- is a plain override.
+--
 -- A float whose content is a table leaves the wrapper altogether, its caption
 -- and table set at the level the wrapper stood. Word lays out a table nested in
 -- that cell against the wrapper's fixed layout and nominal grid, and crushes
@@ -48,20 +56,37 @@ local function is_caption(block)
     and first.text:find(CAPTION_MARKER, 1, true) ~= nil
 end
 
-local function caption_inlines(block)
-  local out = pandoc.Inlines({})
+local BLANK = { Space = true, SoftBreak = true, LineBreak = true }
+
+local function trim(inlines)
+  while #inlines > 0 and BLANK[inlines[1].t] do
+    inlines:remove(1)
+  end
+  while #inlines > 0 and BLANK[inlines[#inlines].t] do
+    inlines:remove(#inlines)
+  end
+  return inlines
+end
+
+local function split_caption(block)
+  local title, subtitle = pandoc.Inlines({}), nil
   for i = 2, #block.content do
     local el = block.content[i]
-    if el.t == "RawInline" and el.format == "html" and el.text:match("^<br%s*/?>$") then
-      out:insert(pandoc.LineBreak())
+    if subtitle == nil and el.t == "RawInline" and el.format == "html" and el.text:match("^<br%s*/?>$") then
+      subtitle = pandoc.Inlines({})
     elseif el.t == "Span" and el.classes:includes(SUBCAPTION_CLASS) then
-      el.attributes["custom-style"] = "Caption Subtitle"
-      out:insert(el)
+      subtitle = subtitle or pandoc.Inlines({})
+      subtitle:extend(el.content)
+    elseif subtitle then
+      subtitle:insert(el)
     else
-      out:insert(el)
+      title:insert(el)
     end
   end
-  return out
+  if subtitle and #trim(subtitle) == 0 then
+    subtitle = nil
+  end
+  return trim(title), subtitle
 end
 
 local function has_image(plain)
@@ -108,7 +133,12 @@ local function restyle(blocks, recenter)
       local out = pandoc.Blocks({})
       for j, sibling in ipairs(blocks) do
         if j == i then
-          out:insert(styled({ pandoc.Para(caption_inlines(block)) }, top and "Table Caption" or "Image Caption"))
+          local role = top and "Table Caption" or "Image Caption"
+          local title, subtitle = split_caption(block)
+          out:insert(styled({ pandoc.Para(title) }, role))
+          if subtitle then
+            out:insert(styled({ pandoc.Para(subtitle) }, role .. " Subtitle"))
+          end
         else
           tabular = tabular and is_tabular(sibling)
           if recenter then

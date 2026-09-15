@@ -112,7 +112,9 @@
   Quarto writes every float caption as `Image Caption` with a direct left alignment, inside a one-cell table whose column is centred: a table caption never got the keep-with-next of `Table Caption` and could be stranded at the foot of a page, and each caption paragraph carried two property elements, whose two alignments overrode the template.
   A caption above its content now takes `Table Caption`, centred, and one below takes `Image Caption`, left-aligned, which is the position rule the HTML theme applies: a figure moved to `fig-cap-location: top` reads like a table caption.
   The centring moves onto the image through the `Figure` and `Captioned Figure` styles, so a Markdown table inside a float keeps its own column alignment, left by default, instead of inheriting the wrapper's.
-  A `<br>` followed by a `quarto-float-subcaption` span, the markup `hebstr::str_fig()` writes, breaks the caption onto a second line in the `Caption Subtitle` style (not bold, 9 pt, `#555555`) instead of running into the title in bold.
+  A `<br>` followed by a `quarto-float-subcaption` span, the markup `hebstr::str_fig()` writes, sets that note as a paragraph of its own under the title, in `Table Caption Subtitle` or `Image Caption Subtitle` (not bold, 9 pt, `#555555`) after the caption style of the same position, instead of running into the title in bold.
+  A character style could not do it: Word combines bold across paragraph and character styles as a toggle, and kept a `Caption Subtitle` run bold inside the bold caption where LibreOffice did not, while one paragraph style based on another simply overrides it.
+  The paragraph also drops the stray space the line break and indentation of `str_fig()` left at the start of the second line.
   Unit-tested, validated in Word, and asserted in CI by `tests/docx-template.sh`, which renders a probe carrying each caption shape.
 
 - A table in a referenced DOCX float, whether a Markdown table, a `gt` or a `flextable`, is laid out to its content in Word instead of being crushed.

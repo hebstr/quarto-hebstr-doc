@@ -40,7 +40,7 @@ A Markdown table caption.
 
 ```{r}
 #| label: tbl-gt
-#| tbl-cap: "A gt table caption."
+#| tbl-cap: "A gt table caption.<br><span class='quarto-float-subcaption'>Table subtitle.</span>"
 
 gt::gt(head(mtcars[, 1:3], 3))
 ```

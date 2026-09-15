@@ -154,14 +154,45 @@ function TestDocxCaption:test_a_caption_nested_in_divs_is_found()
   lu.assertEquals(styles(contents(out)), { "Captioned Figure", "Image Caption" })
 end
 
--- hebstr::str_fig() writes `title<br><span class='quarto-float-subcaption'>`.
-function TestDocxCaption:test_a_subcaption_breaks_the_line_and_takes_its_own_style()
-  local sub = pandoc.Span({ pandoc.Str("Note") }, pandoc.Attr("", { "quarto-float-subcaption" }))
-  local out = docx().Table(wrapper({ image(), caption(pandoc.Str("Title"), pandoc.RawInline("html", "<br>"), sub) }))
-  local para = contents(out)[2].content[1]
-  lu.assertEquals(para.content[1].text, "Title")
-  lu.assertEquals(para.content[2].t, "LineBreak")
-  lu.assertEquals(para.content[3].attributes["custom-style"], "Caption Subtitle")
+local function subcaption()
+  return pandoc.Span({ pandoc.Str("Note") }, pandoc.Attr("", { "quarto-float-subcaption" }))
+end
+
+-- hebstr::str_fig() writes `title<br>\n  <span class='quarto-float-subcaption'>`.
+local function subtitled()
+  return caption(
+    pandoc.Str("Title"),
+    pandoc.Space(),
+    pandoc.RawInline("html", "<br>"),
+    pandoc.SoftBreak(),
+    subcaption()
+  )
+end
+
+-- Word keeps a character style's `w:b w:val="0"` bold inside a bold paragraph.
+function TestDocxCaption:test_a_subcaption_becomes_a_paragraph_of_its_own()
+  local out = docx().Table(wrapper({ image(), subtitled() }))
+  lu.assertEquals(styles(contents(out)), { "Captioned Figure", "Image Caption", "Image Caption Subtitle" })
+end
+
+function TestDocxCaption:test_the_title_and_subtitle_lose_the_blanks_around_the_break()
+  local blocks = contents(docx().Table(wrapper({ image(), subtitled() })))
+  lu.assertEquals(pandoc.utils.stringify(blocks[2]), "Title")
+  lu.assertEquals(#blocks[2].content[1].content, 1)
+  lu.assertEquals(blocks[3].content[1].content[1].text, "Note")
+  lu.assertEquals(#blocks[3].content[1].content, 1)
+end
+
+function TestDocxCaption:test_a_top_subcaption_follows_its_title_above_the_table()
+  local inner = pandoc.RawBlock("openxml", "<w:tbl/>")
+  local out = docx().Table(wrapper({ float("tbl-x", { subtitled(), inner }) }))
+  lu.assertEquals(styles(out), { "Table Caption", "Table Caption Subtitle" })
+  lu.assertEquals(out[1].content[3].text, "<w:tbl/>")
+end
+
+function TestDocxCaption:test_a_caption_without_a_subcaption_stays_one_paragraph()
+  local out = docx().Table(wrapper({ image(), caption(pandoc.Str("Only"), pandoc.RawInline("html", "<br>")) }))
+  lu.assertEquals(styles(contents(out)), { "Captioned Figure", "Image Caption" })
 end
 
 function TestDocxCaption:test_a_table_without_a_quarto_caption_is_left_alone()

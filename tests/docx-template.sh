@@ -39,12 +39,13 @@ import xml.etree.ElementTree as ET
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 CAPTION_STYLES = ("TableCaption", "ImageCaption")
+SUBTITLE_STYLES = ("TableCaptionSubtitle", "ImageCaptionSubtitle")
 EXPECTED = [
-    ("Figure", "ImageCaption", "CaptionedFigure"),
-    ("Figure", "TableCaption", "Figure"),
-    ("Table", "TableCaption", None),
-    ("Table", "TableCaption", None),
-    ("Annexe", "TableCaption", None),
+    ("Figure", "ImageCaption", "CaptionedFigure", "ImageCaptionSubtitle"),
+    ("Figure", "TableCaption", "Figure", None),
+    ("Table", "TableCaption", None, None),
+    ("Table", "TableCaption", None, "TableCaptionSubtitle"),
+    ("Annexe", "TableCaption", None, None),
 ]
 EXPECTED_ANCHORS = {"fig-bottom", "fig-top", "tbl-md", "tbl-gt", "anx-probe"}
 
@@ -93,7 +94,10 @@ for caption in root.iter(W + "p"):
     if style(caption) not in CAPTION_STYLES:
         continue
     parent = parents[caption]
-    siblings = blocks(parent)
+    full = blocks(parent)
+    following = full[full.index(caption) + 1] if full.index(caption) + 1 < len(full) else None
+    subtitle = following if following is not None and style(following) in SUBTITLE_STYLES else None
+    siblings = [b for b in full if style(b) not in SUBTITLE_STYLES]
     i = siblings.index(caption)
     label = "".join(t.text or "" for t in caption.iter(W + "t")).split("\xa0")[0]
     after = siblings[i + 1] if i + 1 < len(siblings) else None
@@ -108,7 +112,7 @@ for caption in root.iter(W + "p"):
 
     wanted = "TableCaption" if top else "ImageCaption"
     image = style(content) if content.tag == W + "p" else None
-    found.append((label, style(caption), image))
+    found.append((label, style(caption), image, None if subtitle is None else style(subtitle)))
 
     if content.tag == W + "tbl" and parent.tag != W + "body":
         failures.append(f"{label}: table float nested in {parent.tag.removeprefix(W)}, not at body level")
@@ -118,12 +122,16 @@ for caption in root.iter(W + "p"):
         failures.append(f"{label}: caption carries {len(caption.findall(W + 'pPr'))} w:pPr, Word expects one")
     if caption.find(f"{W}pPr/{W}jc") is not None:
         failures.append(f"{label}: caption carries a direct alignment, which overrides its style")
-    if len(found) == 1:
-        subtitled = next(caption.iter(W + "br"), None) is not None and any(
-            r.get(W + "val") == "CaptionSubtitle" for r in caption.iter(W + "rStyle")
-        )
-        if not subtitled:
-            failures.append(f"{label}: the quarto-float-subcaption span did not become a Caption Subtitle line")
+    if next(caption.iter(W + "br"), None) is not None:
+        failures.append(f"{label}: caption carries a line break, the subtitle belongs in its own paragraph")
+    if subtitle is not None:
+        text = "".join(t.text or "" for t in subtitle.iter(W + "t"))
+        if style(subtitle) != wanted + "Subtitle":
+            failures.append(f"{label}: subtitle under a {style(caption)} is {style(subtitle)}")
+        if text != text.strip():
+            failures.append(f"{label}: subtitle {text!r} keeps the blanks around the break")
+        if len(subtitle.findall(W + "pPr")) != 1 or subtitle.find(f"{W}pPr/{W}jc") is not None:
+            failures.append(f"{label}: subtitle carries a second w:pPr or a direct alignment")
 
 if found != EXPECTED:
     failures.append(f"captions found {found}, expected {EXPECTED}")

@@ -428,13 +428,19 @@ def build_styles(styles):
         ),
     )
 
-    added = style(
-        "character",
-        "CaptionSubtitle",
-        "Caption Subtitle",
-        based_on="DefaultParagraphFont",
-        custom=True,
-        rpr='<w:b w:val="0"/><w:bCs w:val="0"/>' + color("555555") + sz(18),
+    # A paragraph style, since Word keeps a character style's b val=0 bold in a bold paragraph
+    subtitle_rpr = '<w:b w:val="0"/><w:bCs w:val="0"/>' + color("555555") + sz(18)
+    added = "".join(
+        style(
+            "paragraph",
+            f"{sid}Subtitle",
+            f"{name} Subtitle",
+            based_on=sid,
+            custom=True,
+            ppr='<w:spacing w:before="0"/>',
+            rpr=subtitle_rpr,
+        )
+        for sid, name in (("TableCaption", "Table Caption"), ("ImageCaption", "Image Caption"))
     ) + style(
         "paragraph",
         "Footer",
