@@ -360,6 +360,7 @@ The Word output applies the same rule by position, described below.
 `hebstr-doc-docx` renders against `template.dotx`, built from Pandoc's own reference document so that every style Pandoc writes is defined in it.
 The text is set in Aptos, and Word versions that lack Aptos fall back to Calibri.
 Body paragraphs are justified and hyphenated, and headings are numbered by the template itself, which is why the format turns `number-sections` off.
+Body paragraphs are set in `Body Text`, with the first after a heading in `First Paragraph` and list items in `Compact`, both based on it, so restyle prose there rather than in `Normal`: every other style inherits from `Normal`, and the `flextable` cells that use it carry their own direct formatting.
 The title block stands alone on the first page, which carries no page number, and the table of contents opens the second.
 
 The page is A4 with 2.5 cm margins, a text width of 6.2958 in.
