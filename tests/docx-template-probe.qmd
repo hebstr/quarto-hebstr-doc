@@ -52,4 +52,6 @@ gt::gt(head(mtcars[, 1:3], 3))
 knitr::kable(head(mtcars[, 1:2], 2))
 ```
 
+Cross-references to @fig-bottom, @fig-top, @tbl-md, @tbl-gt and @anx-probe.
+
 [^1]: A footnote.

@@ -115,6 +115,12 @@
   A `<br>` followed by a `quarto-float-subcaption` span, the markup `hebstr::str_fig()` writes, breaks the caption onto a second line in the `Caption Subtitle` style (not bold, 9 pt, `#555555`) instead of running into the title in bold.
   Unit-tested, validated in Word, and asserted in CI by `tests/docx-template.sh`, which renders a probe carrying each caption shape.
 
+- A table in a referenced DOCX float, whether a Markdown table, a `gt` or a `flextable`, is laid out to its content in Word instead of being crushed.
+  Quarto sets every referenced float inside a one-cell table of fixed layout, whose single column Pandoc writes on a nominal 5.5 in grid, and Word lays a table nested there out against that cell: in a report rendered with this extension, tables carrying the same properties rendered correctly at body level and crushed inside the wrapper, `gt` and `flextable` alike.
+  `filters/docx-caption.lua` takes a float whose content is a table out of that wrapper, caption then table at the level the wrapper stood, and the float keeps its identifier, so cross-references still land on its bookmark.
+  Figures keep the wrapper, which does them no harm.
+  `tests/docx-template.sh` asserts that no table float is left inside a table cell and that every cross-reference resolves to a bookmark; the layout itself is owed a pass in Word.
+
 ## [1.4.0] - 2026-08-29
 
 ### Added

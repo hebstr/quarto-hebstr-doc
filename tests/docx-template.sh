@@ -29,8 +29,9 @@ quarto render "$staged" --to hebstr-doc-docx --quiet
 
 Rscript "${repo_root}/scripts/check-docx.R" "$rendered"
 
-# The rule is read off the order of blocks inside each float's one-cell
-# wrapper, which is structural, hence the parsed tree rather than the markup.
+# Caption position, nesting and bookmarks are structural, hence the parsed
+# tree rather than the markup. A table float must sit at body level: Word
+# crushes a table nested in the one-cell wrapper Quarto builds for a float.
 python3 - "$rendered" <<'PY'
 import sys
 import zipfile
@@ -45,6 +46,7 @@ EXPECTED = [
     ("Table", "TableCaption", None),
     ("Annexe", "TableCaption", None),
 ]
+EXPECTED_ANCHORS = {"fig-bottom", "fig-top", "tbl-md", "tbl-gt", "anx-probe"}
 
 
 def style(paragraph):
@@ -56,35 +58,60 @@ def has_drawing(paragraph):
     return next(paragraph.iter(W + "drawing"), None) is not None
 
 
+def is_content(block):
+    return block.tag == W + "tbl" or has_drawing(block)
+
+
+# The 1 pt paragraph docx-cell-paragraph.lua appends to a raw table holds no
+# run, and must not hide the table it closes.
+def blocks(parent):
+    return [
+        b
+        for b in parent
+        if b.tag == W + "tbl" or (b.tag == W + "p" and next(b.iter(W + "r"), None) is not None)
+    ]
+
+
 root = ET.fromstring(zipfile.ZipFile(sys.argv[1]).read("word/document.xml"))
+parents = {child: parent for parent in root.iter() for child in parent}
 failures = []
 found = []
 
-for table in root.iter(W + "tbl"):
-    row = table.find(W + "tr")
-    cell = None if row is None else row.find(W + "tc")
-    if cell is None:
+for cell in root.iter(W + "tc"):
+    inner = blocks(cell)
+    if inner and inner[-1].tag == W + "tbl":
+        failures.append("a table ends a table cell, still nested in its float wrapper")
+
+bookmarks = {b.get(W + "name") for b in root.iter(W + "bookmarkStart")}
+anchors = {h.get(W + "anchor") for h in root.iter(W + "hyperlink") if h.get(W + "anchor")}
+for anchor in sorted(anchors - bookmarks):
+    failures.append(f"cross-reference to {anchor} resolves to no bookmark")
+if anchors != EXPECTED_ANCHORS:
+    failures.append(f"cross-references found {sorted(anchors)}, expected {sorted(EXPECTED_ANCHORS)}")
+
+for caption in root.iter(W + "p"):
+    if style(caption) not in CAPTION_STYLES:
         continue
-    blocks = list(cell)
-    captions = [
-        i for i, b in enumerate(blocks) if b.tag == W + "p" and style(b) in CAPTION_STYLES
-    ]
-    if not captions:
-        continue
-    caption = blocks[captions[0]]
+    parent = parents[caption]
+    siblings = blocks(parent)
+    i = siblings.index(caption)
     label = "".join(t.text or "" for t in caption.iter(W + "t")).split("\xa0")[0]
-    content = [
-        i for i, b in enumerate(blocks) if b.tag == W + "tbl" or (b.tag == W + "p" and has_drawing(b))
-    ]
-    if not content:
+    after = siblings[i + 1] if i + 1 < len(siblings) else None
+    before = siblings[i - 1] if i > 0 else None
+    if after is not None and is_content(after):
+        top, content = True, after
+    elif before is not None and is_content(before):
+        top, content = False, before
+    else:
         failures.append(f"{label}: a caption with no figure or table beside it")
         continue
 
-    top = captions[0] < content[0]
     wanted = "TableCaption" if top else "ImageCaption"
-    image = next((style(blocks[i]) for i in content if blocks[i].tag == W + "p"), None)
+    image = style(content) if content.tag == W + "p" else None
     found.append((label, style(caption), image))
 
+    if content.tag == W + "tbl" and parent.tag != W + "body":
+        failures.append(f"{label}: table float nested in {parent.tag.removeprefix(W)}, not at body level")
     if style(caption) != wanted:
         failures.append(f"{label}: caption {'above' if top else 'below'} its content is {style(caption)}, not {wanted}")
     if len(caption.findall(W + "pPr")) != 1:
@@ -104,11 +131,14 @@ if found != EXPECTED:
 if failures:
     print("FAIL  " + "\nFAIL  ".join(failures), file=sys.stderr)
     print(
-        "      The raw caption Quarto writes no longer reaches\n"
+        "      The float Quarto renders no longer reaches\n"
         "      filters/docx-caption.lua, or no longer matches what it reads.",
         file=sys.stderr,
     )
     sys.exit(1)
 
-print(f"ok    {len(found)} float captions styled by position, subtitle on its own line")
+print(
+    f"ok    {len(found)} float captions styled by position, subtitle on its own line,"
+    f" table floats at body level, {len(anchors)} cross-references resolved"
+)
 PY

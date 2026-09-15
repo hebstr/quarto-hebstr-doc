@@ -9,6 +9,10 @@
 -- open. LibreOffice renders such a file, which is why the defect only shows on
 -- a real Word install.
 --
+-- `docx-caption.lua` takes a float whose content is a table out of that
+-- wrapper, so a Quarto float no longer leaves a cell open; the paragraph guards
+-- any raw table something else places last in a cell.
+--
 -- The paragraph is appended to the raw block rather than inserted into the
 -- surrounding cell, because a Pandoc Para carrying no inline is dropped before
 -- the writer ever sees it. It is sized to 1 pt with its spacing zeroed so it

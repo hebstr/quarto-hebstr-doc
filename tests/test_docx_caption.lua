@@ -31,6 +31,10 @@ local function wrapper(blocks, align)
   )
 end
 
+local function float(id, blocks)
+  return pandoc.Div(blocks, pandoc.Attr(id))
+end
+
 local function contents(tbl)
   return tbl.bodies[1].body[1].cells[1].contents
 end
@@ -77,12 +81,57 @@ function TestDocxCaption:test_a_caption_before_its_figure_is_a_table_caption()
   lu.assertEquals(styles(contents(out)), { "Table Caption", "Figure" })
 end
 
-function TestDocxCaption:test_a_table_float_keeps_its_content_untouched()
+function TestDocxCaption:test_a_figure_float_keeps_its_wrapper()
+  local out = docx().Table(wrapper({ float("fig-x", { image(), caption(pandoc.Str("x")) }) }))
+  lu.assertEquals(out.t, "Table")
+end
+
+-- Word crushes a table nested in the wrapper's fixed-layout cell.
+function TestDocxCaption:test_a_raw_table_float_leaves_its_wrapper()
   local inner = pandoc.RawBlock("openxml", "<w:tbl/>")
-  local out = docx().Table(wrapper({ caption(pandoc.Str("Table")), inner }))
-  local blocks = contents(out)
-  lu.assertEquals(styles(blocks), { "Table Caption" })
-  lu.assertEquals(blocks[2].text, "<w:tbl/>")
+  local out = docx().Table(wrapper({ float("tbl-x", { caption(pandoc.Str("Table")), inner }) }))
+  lu.assertEquals(#out, 1)
+  lu.assertEquals(out[1].t, "Div")
+  lu.assertEquals(styles(out), { "Table Caption" })
+  lu.assertEquals(out[1].content[2].text, "<w:tbl/>")
+end
+
+-- Pandoc writes the bookmark cross-references point to from the Div identifier.
+function TestDocxCaption:test_the_unwrapped_float_keeps_its_identifier()
+  local inner = pandoc.RawBlock("openxml", "<w:tbl/>")
+  local out = docx().Table(wrapper({ float("tbl-x", { caption(pandoc.Str("Table")), inner }) }))
+  lu.assertEquals(out[1].identifier, "tbl-x")
+end
+
+function TestDocxCaption:test_a_pandoc_table_float_leaves_its_wrapper()
+  local inner = wrapper({ pandoc.Plain({ pandoc.Str("1") }) }, pandoc.AlignDefault)
+  local out = docx().Table(wrapper({ float("tbl-x", { caption(pandoc.Str("Table")), inner }) }))
+  lu.assertEquals(out[1].content[2].t, "Table")
+end
+
+-- knitr nests the table inside its cell output div.
+function TestDocxCaption:test_a_table_nested_in_divs_leaves_its_wrapper()
+  local inner = pandoc.Div({ pandoc.RawBlock("openxml", '<w:tbl xmlns:w="w">') })
+  local out = docx().Table(wrapper({ float("tbl-x", { caption(pandoc.Str("Table")), inner }) }))
+  lu.assertEquals(out[1].identifier, "tbl-x")
+end
+
+function TestDocxCaption:test_a_table_captioned_below_leaves_its_wrapper_in_order()
+  local inner = pandoc.RawBlock("openxml", "<w:tbl/>")
+  local out = docx().Table(wrapper({ float("tbl-x", { inner, caption(pandoc.Str("Table")) }) }))
+  lu.assertEquals(out[1].content[1].text, "<w:tbl/>")
+  lu.assertEquals(styles(out), { "Image Caption" })
+end
+
+function TestDocxCaption:test_a_float_mixing_a_table_and_prose_keeps_its_wrapper()
+  local blocks =
+    { caption(pandoc.Str("Table")), pandoc.RawBlock("openxml", "<w:tbl/>"), pandoc.Para({ pandoc.Str("Note") }) }
+  lu.assertEquals(docx().Table(wrapper({ float("tbl-x", blocks) })).t, "Table")
+end
+
+function TestDocxCaption:test_raw_openxml_other_than_a_table_keeps_its_wrapper()
+  local blocks = { caption(pandoc.Str("Table")), pandoc.RawBlock("openxml", "<w:p/>") }
+  lu.assertEquals(docx().Table(wrapper({ float("tbl-x", blocks) })).t, "Table")
 end
 
 -- The centring moves to the image style, or it would reach the caption as a
