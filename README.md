@@ -325,7 +325,7 @@ format:
       dark:  [theme-dark.scss,  theme-base.scss, custom.scss]
 ```
 
-The overridable variables are the `!default` declarations in `theme-light.scss`, `theme-dark.scss` and `theme-base.scss`; [CONTRIBUTING.md](CONTRIBUTING.md) defines that surface and the SemVer policy that protects it.
+The overridable variables are the `!default` declarations in `theme-light.scss`, `theme-dark.scss` and `theme-base.scss`; [CONTRIBUTING.md](CONTRIBUTING.md) lists all 47 under surface 2 of the public API, with the file each is declared in, and carries the SemVer policy that protects them.
 
 ### Text alignment
 

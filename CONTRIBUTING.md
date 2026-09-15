@@ -1,14 +1,14 @@
 # Contributing to hebstr-doc
 
 This document covers the SemVer policy, the public API surface, and the release procedure for `hebstr-doc`.
-For the SCSS layering and the variables it exposes, see [README.md](README.md); the public API surface below defines what of it is versioned.
+For the SCSS layering and the override form, see [README.md](README.md); the public API surface below enumerates the variables it exposes and defines what of it is versioned.
 
 ## Public API surface
 
 A change is "API-affecting" only if it touches one of these surfaces:
 
 1. **Format names** declared in `_extension.yml`: `hebstr-doc-html`, `hebstr-doc-typst`, `hebstr-doc-docx`.
-2. **SCSS variables** with `!default` in `theme-light.scss`, `theme-dark.scss`, or `theme-base.scss`.
+2. **SCSS variables** with `!default` in `theme-light.scss`, `theme-dark.scss`, or `theme-base.scss`, enumerated below.
 3. **CSS custom properties** exposed under `:root` in `theme-base.scss`, each named after the SCSS variable it mirrors with `--` instead of `$`.
    The mapping is partial: typography defaults, the layout-chrome variables, and `$body-bg` / `$body-color` are consumed at compile time and have no `:root` counterpart.
 4. **Frontmatter keys** wired through `_extension.yml` (`mainfont`, `monofont`, `linestretch`, `grid.*`, etc.).
@@ -22,6 +22,26 @@ A change is "API-affecting" only if it touches one of these surfaces:
 10. **Crossref types** declared under `crossref: custom:` in `_extension.yml`: currently `anx`, together with the `tbl-anx-` / `fig-anx-` carrier convention `filters/crossref-anx.lua` reads.
     Renaming the key or the carrier breaks every `@anx-…` reference and every annexe label in a consumer document.
     The `Annexe` prefix it ships is not part of the surface: a document overrides it by redeclaring the type.
+
+The 47 variables of surface 2, grouped as they are declared.
+A group declared in `theme-light.scss` + `theme-dark.scss` carries one value per colour scheme, so an override supplies both; a group declared in `theme-base.scss` is scheme-invariant and is overridden once.
+
+  | Group             | Declared in                            | Variables                                                                                                                                     |
+  | ----------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Typography        | `theme-base.scss`                      | `$font-family-sans-serif`, `$font-family-monospace`, `$font-size-root`, `$toc-font-size`, `$callout-icon-scale`                               |
+  | Brand             | `theme-light.scss` + `theme-dark.scss` | `$primary`, `$primary-back`, `$primary-surface`, `$primary-dark`, `$secondary`                                                                |
+  | Body              | `theme-light.scss` + `theme-dark.scss` | `$body-bg`, `$body-color`                                                                                                                     |
+  | Surfaces          | `theme-light.scss` + `theme-dark.scss` | `$neutral`, `$em-background-color`, `$caption-color`                                                                                          |
+  | Inline highlights | `theme-light.scss` + `theme-dark.scss` | `$str-color`, `$dig-color`                                                                                                                    |
+  | Callouts          | `theme-light.scss` + `theme-dark.scss` | `$callout-{note,tip,caution,warning,important}-color`, `$callout-mix-base`, `$callout-text-mix`, `$callout-bg-mix`                            |
+  | Code chrome       | `theme-base.scss`                      | `$code-foreground-color`, `$code-background-color`, `$code-comment-color`, `$code-window-{titlebar-bg,border,line-divider,muted,line-number}` |
+  | Tabsets           | `theme-base.scss`                      | `$tab-surface`                                                                                                                                |
+  | Filetree          | `theme-base.scss`                      | `$filetree-{bg,fg,muted,highlight,guide}`                                                                                                     |
+  | Layout chrome     | `theme-light.scss` + `theme-dark.scss` | `$navbar-bg`, `$navbar-fg`, `$navbar-hl`, `$sidebar-bg`, `$sidebar-fg`, `$sidebar-hl`, `$footer-bg`, `$footer-fg`                             |
+
+Two groups carry a constraint beyond their name.
+Layout chrome only takes effect in a project layout (website, book), a single-document render having no navbar, sidebar or footer, and its values must be Sass-resolvable colours: Quarto's Bootstrap layer calls `theme-contrast()` on them, so a CSS `color-mix(...)` there fails the compile rather than falling back.
+Code chrome and filetree are deliberately dark in both schemes, being editor chrome; overriding them per scheme means overriding them in your own layer, not in theirs.
 
 Changes to private internals (rule selectors, computed colour-mix knobs that are not exposed as variables, internal helpers, file reorganisation that does not move public resources) are **not** API-affecting.
 The `rhebstr` class that `filters/r-syntax.lua` adds to R code blocks is one of these: it exists so Pandoc resolves the bundled R syntax definition, it sits alongside the `r` class rather than replacing it, and it carries no promise.
@@ -175,6 +195,7 @@ Both hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_extens
 - `_extensions/hebstr-doc/`: the extension itself (do not flatten).
 - `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (currently `mcanouil/code-window`).
 - `scripts/`: `demo_penguins.R`, which `example.qmd` injects; `build_template.py` and `check-docx.R`, the rebuild recipe and the invariant check of the DOCX template.
-- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus the four render probes `r-syntax-tokens.sh`, `anx-float.sh`, `docx-cell.sh` and `docx-template.sh` with the `.qmd` each renders; `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
+- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus the four render probes `r-syntax-tokens.sh`, `anx-float.sh`, `docx-cell.sh` and `docx-template.sh` with the `.qmd` each renders.
+- Repo root: `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
 - `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).
 - `package.json` + `package-lock.json` + `stylelint.config.mjs`: the pinned stylelint/prettier toolchain and the SCSS rules it enforces; `node_modules/` is gitignored.
