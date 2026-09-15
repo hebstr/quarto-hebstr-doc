@@ -31,7 +31,7 @@ summary:
     restyled, and theme colour attributes are removed from every style
   - a numbering definition links heading 1 to 8 to decimal outline numbers
   - Table Caption Title, Image Caption Title, Table Caption Subtitle, Image
-    Caption Subtitle, footer and toc 1 to 3 (paragraph) are added
+    Caption Subtitle, footer and toc 1 to 9 (paragraph) are added
   - the settings declare Word 2013 compatibility mode and ask the application
     to recalculate fields when the document is opened
 

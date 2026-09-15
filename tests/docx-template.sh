@@ -110,6 +110,10 @@ for style_id, wanted_hyphens in (
     if hyphenates(style_id) != wanted_hyphens:
         failures.append(f"{style_id} {'hyphenates' if not wanted_hyphens else 'does not hyphenate'}, body prose alone should")
 
+missing_toc = [f"TOC{level}" for level in range(1, 10) if f"TOC{level}" not in styles]
+if missing_toc:
+    failures.append(f"the template defines no {', '.join(missing_toc)} style, so those entries fall back to Normal")
+
 update = ET.fromstring(zipfile.ZipFile(sys.argv[1]).read("word/settings.xml")).find(W + "updateFields")
 if update is None or update.get(W + "val") not in ("true", "1", "on"):
     failures.append("settings.xml does not ask Word to update fields on open, so the table of contents opens empty")

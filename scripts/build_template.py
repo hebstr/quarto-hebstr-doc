@@ -474,7 +474,8 @@ def build_styles(styles):
         '<w:spacing w:before="80" w:after="80"/>',
         rpr='<w:b/><w:noProof/><w:sz w:val="22"/>',
     )
-    for level, indent in ((2, 238), (3, 482)):
+    # One level per heading the template numbers, so raising toc-depth needs no rebuild
+    for level in range(2, 10):
         added += style(
             "paragraph",
             f"TOC{level}",
@@ -482,7 +483,7 @@ def build_styles(styles):
             based_on="TOC1",
             next_="Normal",
             extra=toc_extra,
-            ppr=f'<w:ind w:left="{indent}"/>',
+            ppr=f'<w:ind w:left="{238 + 244 * (level - 2)}"/>',
             rpr='<w:b w:val="0"/>',
         )
     return sub1(r"</w:styles>", added + "</w:styles>", styles, "styles tail")
