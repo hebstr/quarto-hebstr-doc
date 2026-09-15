@@ -581,6 +581,13 @@ def transform(name, data):
             text,
             "autoHyphenation",
         )
+        # Word offers to update the table of contents on open, a field no render can fill
+        text = sub1(
+            r"<w:footnotePr>",
+            '<w:updateFields w:val="true"/><w:footnotePr>',
+            text,
+            "updateFields",
+        )
         text = sub1(r"<w:rsids>", COMPAT + "<w:rsids>", text, "compat")
     elif name == "word/fontTable.xml":
         for font in ("Aptos", "Aptos Display"):

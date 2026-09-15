@@ -128,7 +128,9 @@
 - The Word table of contents is titled in the document's language, and the body opens on the page after it.
   `toc-title: " "` moves from `common:` to the HTML and Typst blocks, where the blank title is meant: Pandoc reads a blank title as none and wrote a hard-coded "Table of Contents" in Word whatever `lang` said, where the title now comes from Quarto's `toc-title-document`, "Table des matières" under `lang: fr` and overridable through `language:` in `_quarto.yml`.
   The template already breaks the page before the table of contents, and `filters/docx-toc-break.lua` adds the break after it whenever `toc` is on, so the first heading no longer follows the last entry on the same page.
-  Unit-tested, and asserted in CI by `tests/docx-template.sh`, which reads the title and the break off its probe.
+  The template also asks Word to recalculate fields on open, so the reader is offered the update the table of contents needs to show anything at all instead of having to run it by hand.
+  Nothing silent is available short of a macro, and the offer is declined as easily as accepted, so a document still reaches a reader who clicks past it with an empty table.
+  Unit-tested, and asserted in CI by `tests/docx-template.sh`, which reads the title, the break and that setting off its probe.
 
 ## [1.4.0] - 2026-08-29
 

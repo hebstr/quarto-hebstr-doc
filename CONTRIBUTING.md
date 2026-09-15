@@ -143,7 +143,7 @@ bash tests/docx-template.sh
 It renders `tests/docx-template-probe.qmd`, which carries a title block, a footnote, a figure captioned at the bottom with a subtitle line, a figure moved to the top, a Markdown table, a `gt` table with a subtitle line and an annexe.
 `scripts/check-docx.R` then reads the output, and a structural pass asserts every float caption: a single paragraph-properties element with no direct alignment, `Table Caption` above its content and `Image Caption` below, each subtitle in a paragraph of its own under the matching `Table Caption Subtitle` or `Image Caption Subtitle`, and the five captions in the positions the probe asks for.
 The same pass asserts that no table float is left inside a table cell, where Word crushes it, and that each of the probe's cross-references resolves to a bookmark.
-It also reads the table of contents: titled "Table of contents" from the language rather than Pandoc's hard-coded default, and followed by a page break before the body.
+It also reads the table of contents: titled "Table of contents" from the language rather than Pandoc's hard-coded default, followed by a page break before the body, and carried by a document whose settings ask Word to recalculate fields on open.
 Last, it resolves hyphenation style by style along `basedOn`: on for `Body Text` and `First Paragraph`, off for `Normal`, `Compact`, headings, captions and footnotes.
 It needs the `officer` R package on top of what the render uses, and its probe is staged and removed like the others.
 

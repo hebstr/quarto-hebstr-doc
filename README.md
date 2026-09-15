@@ -364,6 +364,7 @@ Hyphenation stops at body prose: headings, captions, lists, footnotes and table 
 Body paragraphs are set in `Body Text`, with the first after a heading in `First Paragraph` and list items in `Compact`, both based on it, so restyle prose there rather than in `Normal`: every other style inherits from `Normal`, and the `flextable` cells that use it carry their own direct formatting.
 The title block stands alone on the first page, which carries no page number, the table of contents opens the second, and the body starts on the page after it.
 The table of contents takes its title from the document language, "Table of contents" in English and "Table des matières" in French, and `language: toc-title-document:` in `_quarto.yml` or the front matter overrides it.
+Word offers to update the table of contents when the document opens: its entries and page numbers are a field no renderer fills, so a document opened without accepting that offer shows the heading alone.
 
 The page is A4 with 2.5 cm margins, a text width of 6.2958 in.
 That width is a contract rather than a detail: the `hebstr` R package reads it through `docx_page_width()` to size Word tables, so any change to the template's geometry is recorded in the changelog.
