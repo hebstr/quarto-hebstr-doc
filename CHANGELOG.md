@@ -88,6 +88,7 @@
   Validated in Word.
   The typography of the title block and body was then set in Word and carried back into `scripts/build_template.py`: body text at 11 pt with 1.5 line spacing, title at 28 pt, subtitle at 24 pt, author and date at 16 pt and centred, heading 4 no longer italic, headings 3 and 4 on a hanging indent, a centred table of contents heading with styled entries, and Word 2013 compatibility mode.
   Those entries are styled down to level 9, one per heading level the template numbers, where the carry-back stopped at three and a level-4 entry fell back to `Normal`, out of line with the three above it.
+  A second review in Word tightened the table of contents to 2 pt before and after each entry, with levels 2 and below at 10 pt under an 11 pt first level, and gave a caption above its content 12 pt before and after, which its title and subtitle variants share on their outer edges.
   Word's automatic style updates and the 11 pt it gave hyperlinks were left out, so a reviewer's direct formatting stays local and a link inside a 10 pt caption keeps the caption's size; the rebuilt file is owed its own pass in Word.
   The template derives from Pandoc's reference document, which Pandoc distributes under the GPL, version 2 or later, so it joins `syntax/r.xml` as a copyleft component of the extension, attributed in `template.LICENSE` and listed in [LICENSE.md](LICENSE.md).
 

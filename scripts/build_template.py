@@ -341,7 +341,7 @@ def build_styles(styles):
             "Table Caption",
             based_on="Caption",
             custom=True,
-            ppr='<w:keepNext/><w:jc w:val="center"/>',
+            ppr='<w:keepNext/><w:spacing w:before="240" w:after="240"/><w:jc w:val="center"/>',
         ),
     )
     styles = replace_style(
@@ -471,7 +471,7 @@ def build_styles(styles):
         extra=toc_extra,
         ppr='<w:tabs><w:tab w:val="left" w:pos="480"/>'
         '<w:tab w:val="right" w:leader="dot" w:pos="9056"/></w:tabs>'
-        '<w:spacing w:before="80" w:after="80"/>',
+        '<w:spacing w:before="40" w:after="40"/>',
         rpr='<w:b/><w:noProof/><w:sz w:val="22"/>',
     )
     # One level per heading the template numbers, so raising toc-depth needs no rebuild
@@ -484,7 +484,7 @@ def build_styles(styles):
             next_="Normal",
             extra=toc_extra,
             ppr=f'<w:ind w:left="{238 + 244 * (level - 2)}"/>',
-            rpr='<w:b w:val="0"/>',
+            rpr='<w:b w:val="0"/><w:sz w:val="20"/>',
         )
     return sub1(r"</w:styles>", added + "</w:styles>", styles, "styles tail")
 
