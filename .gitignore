@@ -1,19 +1,63 @@
+# Quarto
 /.quarto/
 **/*.quarto_ipynb
-/anx-float-probe.qmd
-/docx-cell-probe.qmd
-/docx-template-probe.qmd
-/r-syntax-probe.qmd
+/_site/
+/_freeze/
+/*_files/
 /*.typ
 /*.html
 /*.pdf
 /*.docx
-/*_files/
-/_site/
-/.claude/
+
+# Render probes staged at the root by tests/*.sh
+/anx-float-probe.qmd
+/docx-cell-probe.qmd
+/docx-template-probe.qmd
+/r-syntax-probe.qmd
+
+# R
 .Rhistory
 .RData
 .Ruserdata
 .Rproj.user/
-TODO.md
+*.Rproj
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+.pytest_cache/
+
+# Node
 node_modules/
+npm-debug.log*
+
+# Lua
+luacov.*.out
+
+# Office lock files
+~$*
+.~lock.*#
+
+# Editors and OS
+.positron/
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
+!.env.example
+.Renviron
+
+# Fixtures are verbatim inputs, dotfiles included
+!/tests/fixtures/**
+
+# Local only
+/.claude/
+TODO.md
