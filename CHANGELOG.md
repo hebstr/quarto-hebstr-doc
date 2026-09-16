@@ -43,7 +43,7 @@
 - `scripts/check-docx.R` asserts, on any `.docx` or `.dotx`, the properties a Word reader depends on and no render reports: every referenced style defined, every table cell closed by a paragraph, no unreferenced media, a text width of 6.2958 in, hyphenation on, and Calibri declared as the fallback of Aptos.
   Each check has been seen failing, on a report rendered against the previous template and on a hand-built document holding an open cell, so a green run is evidence rather than silence.
   Run it on a rendered document as well as on the template, since Pandoc decides what of the template reaches the output.
-  It needs the `officer` R package; CI runs it on the output of `tests/docx-template.sh`.
+  It needs the `officer` and `xml2` R packages; CI runs it on the output of `tests/docx-template.sh`.
 
 - `scripts/build_template.py` rebuilds `template.dotx` from the reference document Quarto's Pandoc ships, through substitutions that must each match exactly once, so the binary has a recipe that can be read, changed and run again.
 
@@ -76,20 +76,20 @@
 - The `prettier` hook of `prek.toml` widens from the stylesheets to the HTML and JS the extension ships (`filters/toggle-position.html`, `filters/add-code-files.js`), which held no format gate until now, and skips `tests/fixtures/` so the verbatim test inputs stay byte-identical.
   `filters/toggle-position.html` is reformatted to that gate ; no rendered output, public SCSS variable or CSS custom property changes.
 
-- `template.dotx` is rebuilt from Pandoc's reference document instead of a Word document stripped of its content, and weighs 11.9 KB instead of 562 KB.
+- `template.dotx` is rebuilt from Pandoc's reference document instead of a Word document stripped of its content, and weighs 12.4 KB instead of 562 KB.
   The previous template carried ten images and an OLE object that Pandoc copied into every output, about 1 MB per document, and lacked 35 of the 49 styles Pandoc writes, so first paragraphs, compact lists, captions and the title block fell back to `Normal` without a warning.
   Text is set in Aptos throughout, declared with Calibri as its fallback for Word before 2024, where the body used to be Arial and the lower headings Calibri.
   Headings keep their Word numbering, their `#1B4377` colour and their sizes; body paragraphs stay justified and gain hyphenation, which stops at body prose, and compact lists and table cells are left-aligned.
-  Hyphenation is switched on for the whole document and suppressed on `Normal`, then cleared on `Body Text` and suppressed again on `Compact`, so headings, captions, lists, footnotes and table cells never break a word.
+  Hyphenation is switched on for the whole document and suppressed on `Normal`, then cleared on `Body Text` and suppressed again on `Compact`, so headings, captions, lists, footnotes and single-paragraph table cells never break a word, while block quotes and the paragraphs of a multi-paragraph cell, which Pandoc sets in styles based on `Body Text`, do.
   The title block stands alone on the first page and the table of contents opens the second, with the page number centred in the footer from page 2.
   Float captions are bold, 10 pt, `#111111` and no longer italic, the typography `hebstr` gives the captions of its Word tables.
   The geometry does not move: A4, 2.5 cm margins, 6.2958 in of text, the width `hebstr::docx_page_width()` reads to size Word tables.
   A project whose installed copy of `template.dotx` was edited by hand gets that geometry back on `quarto update`, and its table widths move with it.
   Validated in Word.
-  The typography of the title block and body was then set in Word and carried back into `scripts/build_template.py`: body text at 11 pt with 1.5 line spacing, title at 28 pt, subtitle at 24 pt, author and date at 16 pt and centred, heading 4 no longer italic, headings 3 and 4 on a hanging indent, a centred table of contents heading with styled entries, and Word 2013 compatibility mode.
+  The typography of the title block and body was then set in Word and carried back into `scripts/build_template.py`: body text at 11 pt with 1.5 line spacing, title at 28 pt, subtitle at 24 pt, author and date at 16 pt and centred, heading 4 no longer italic, headings 3 and 4 on a hanging indent, inline code at 10 pt, a captioned figure spaced 12 pt before and after, a centred table of contents heading with styled entries, and Word 2013 compatibility mode.
   Those entries are styled down to level 9, one per heading level the template numbers, where the carry-back stopped at three and a level-4 entry fell back to `Normal`, out of line with the three above it.
   A second review in Word tightened the table of contents to 2 pt before and after each entry, with levels 2 and below at 10 pt under an 11 pt first level, and gave a caption above its content 12 pt before and after, which its title and subtitle variants share on their outer edges.
-  Word's automatic style updates and the 11 pt it gave hyperlinks were left out, so a reviewer's direct formatting stays local and a link inside a 10 pt caption keeps the caption's size; the rebuilt file is owed its own pass in Word.
+  Word's automatic style updates and the 11 pt it gave hyperlinks were left out, so a reviewer's direct formatting stays local and a link inside a 10 pt caption keeps the caption's size; the rebuilt file is validated in Word.
   The template derives from Pandoc's reference document, which Pandoc distributes under the GPL, version 2 or later, so it joins `syntax/r.xml` as a copyleft component of the extension, attributed in `template.LICENSE` and listed in [LICENSE.md](LICENSE.md).
 
 ### Removed
@@ -125,7 +125,7 @@
   Quarto sets every referenced float inside a one-cell table of fixed layout, whose single column Pandoc writes on a nominal 5.5 in grid, and Word lays a table nested there out against that cell: in a report rendered with this extension, tables carrying the same properties rendered correctly at body level and crushed inside the wrapper, `gt` and `flextable` alike.
   `filters/docx-caption.lua` takes a float whose content is a table out of that wrapper, caption then table at the level the wrapper stood, and the float keeps its identifier, so cross-references still land on its bookmark.
   Figures keep the wrapper, which does them no harm.
-  `tests/docx-template.sh` asserts that no table float is left inside a table cell and that every cross-reference resolves to a bookmark; the layout itself is owed a pass in Word.
+  `tests/docx-template.sh` asserts that no table float is left inside a table cell and that every cross-reference resolves to a bookmark, and the layout is validated in Word.
 
 - The Word table of contents is titled in the document's language, and the body opens on the page after it.
   `toc-title: " "` moves from `common:` to the HTML and Typst blocks, where the blank title is meant: Pandoc reads a blank title as none and wrote a hard-coded "Table of Contents" in Word whatever `lang` said, where the title now comes from Quarto's `toc-title-document`, "Table des matières" under `lang: fr` and overridable through `language:` in `_quarto.yml`.

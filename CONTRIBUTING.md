@@ -161,10 +161,10 @@ bash tests/docx-template.sh
 ```
 
 It renders `tests/docx-template-probe.qmd`, which carries a title block, a footnote, a figure captioned at the bottom with a subtitle line, a figure moved to the top, a Markdown table, a `gt` table with a subtitle line and an annexe.
-`scripts/check-docx.R` then reads the output, and a structural pass asserts every float caption: a single paragraph-properties element with no direct alignment, `Table Caption` above its content and `Image Caption` below, each subtitle in a paragraph of its own under the matching `Table Caption Subtitle` or `Image Caption Subtitle`, and the five captions in the positions the probe asks for.
+`scripts/check-docx.R` then reads the output, and a structural pass asserts every float caption: a single paragraph-properties element with no direct alignment, `Table Caption` above its content and `Image Caption` below (`Table Caption Title` or `Image Caption Title` when a subtitle follows), each subtitle in a paragraph of its own under the matching `Table Caption Subtitle` or `Image Caption Subtitle`, and the five captions in the positions the probe asks for.
 The same pass asserts that no table float is left inside a table cell, where Word crushes it, and that each of the probe's cross-references resolves to a bookmark.
-It also reads the table of contents: titled "Table of contents" from the language rather than Pandoc's hard-coded default, followed by a page break before the body, and carried by a document whose settings ask Word to recalculate fields on open.
-Last, it resolves hyphenation style by style along `basedOn`: on for `Body Text` and `First Paragraph`, off for `Normal`, `Compact`, headings, captions and footnotes.
+It also reads the table of contents: titled "Table of contents" from the language rather than Pandoc's hard-coded default, followed by a page break before the body, and carried by a document whose settings ask Word to recalculate fields on open and whose styles define `TOC1` to `TOC9`.
+Last, it resolves hyphenation style by style along `basedOn`: on for `Body Text` and `First Paragraph`, off for `Normal`, `Compact`, `Heading 1`, `Image Caption` and `Footnote Text`.
 It needs the `officer` R package on top of what the render uses, and its probe is staged and removed like the others.
 
 ## Pre-commit hooks
@@ -196,6 +196,6 @@ Both hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_extens
 - `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (currently `mcanouil/code-window`).
 - `scripts/`: `demo_penguins.R`, which `example.qmd` injects; `build_template.py` and `check-docx.R`, the rebuild recipe and the invariant check of the DOCX template.
 - `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus the four render probes `r-syntax-tokens.sh`, `anx-float.sh`, `docx-cell.sh` and `docx-template.sh` with the `.qmd` each renders.
-- Repo root: `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the Lua, shell and prose gates.
+- Repo root: `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the commit hooks (R, Typst, Lua, shell, CSS/HTML/JS, secrets, prose) and the LuaLS type check.
 - `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).
 - `package.json` + `package-lock.json` + `stylelint.config.mjs`: the pinned stylelint/prettier toolchain and the SCSS rules it enforces; `node_modules/` is gitignored.

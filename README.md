@@ -276,7 +276,7 @@ Caption goes here.
 ````
 
 `ink` requires ggplot2 4.0 and does not reach tick labels or gridlines, which need explicit `axis.text`, `panel.grid` and `axis.ticks` colours.
-Both renderings stay in the DOM, so switching modes costs no reload and the lightbox keeps working.
+Both renderings stay in the DOM, so switching modes costs no reload.
 See the Figure section of [`example.qmd`](example.qmd).
 
 ### Tables that follow the light/dark toggle
@@ -360,7 +360,7 @@ The Word output applies the same rule by position, described below.
 `hebstr-doc-docx` renders against `template.dotx`, built from Pandoc's own reference document so that every style Pandoc writes is defined in it.
 The text is set in Aptos, and Word versions that lack Aptos fall back to Calibri.
 Body paragraphs are justified and hyphenated, and headings are numbered by the template itself, which is why the format turns `number-sections` off.
-Hyphenation stops at body prose: headings, captions, lists, footnotes and table cells never break a word.
+Hyphenation stops at body prose: headings, captions, lists, footnotes and single-paragraph table cells never break a word, while block quotes and the paragraphs of a multi-paragraph cell, set in styles based on `Body Text`, do.
 Body paragraphs are set in `Body Text`, with the first after a heading in `First Paragraph` and list items in `Compact`, both based on it, so restyle prose there rather than in `Normal`: every other style inherits from `Normal`, and the `flextable` cells that use it carry their own direct formatting.
 The title block stands alone on the first page, which carries no page number, the table of contents opens the second, and the body starts on the page after it.
 The table of contents takes its title from the document language, "Table of contents" in English and "Table des matières" in French, and `language: toc-title-document:` in `_quarto.yml` or the front matter overrides it.

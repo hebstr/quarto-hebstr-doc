@@ -102,7 +102,7 @@ p + theme_hebstr(ink = "#e8e8e8", grid = "#4d4d4d")
 Bill length vs flipper length by species (palmerpenguins).
 :::
 
-Both renderings stay in the DOM: mode switches need no reload, and the lightbox tracks the visible one.
+Both renderings stay in the DOM: mode switches need no reload.
 
 # Table
 
