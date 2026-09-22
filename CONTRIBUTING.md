@@ -66,7 +66,8 @@ Git tags drive releases: `release.yml` creates a GitHub Release for each `v*` ta
 3. Commit.
 4. Create an annotated tag: `git tag -a vX.Y.Z -m "vX.Y.Z"`.
 5. Push the commit and the tag: `git push && git push --tags`.
-6. Check the GitHub Release created by `release.yml`, and paste the changelog section into it if needed.
+6. Check the GitHub Release created by `release.yml`, whose body is the tag's changelog section followed by the comparison link.
+   The job fails if `CHANGELOG.md` has no non-empty `## [X.Y.Z]` section matching the tag.
 
 Users pin a release with `quarto add hebstr/quarto-hebstr-doc@vX.Y.Z`, which downloads the tagged source archive.
 `quarto add hebstr/quarto-hebstr-doc`, with or without `@latest`, installs the current `main` branch, not the latest release.
