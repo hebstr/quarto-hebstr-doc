@@ -1,394 +1,236 @@
 # Changelog
 
+All notable changes to this project are documented in this file.
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as defined in [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## [Unreleased]
+
+## [1.5.0] - 2026-09-22
 
 ### Added
 
-- `reactable` tables follow the dark scheme where their author left them unthemed.
-  The widget ships its own stylesheet, which Quarto loads after the theme bundle, so the rules carry the weight that settles source order rather than a marker.
-  An untouched widget takes the theme's two page surfaces, `$primary-surface` for the ground, the search box and the column filters, `$primary-back` for the striped rows, with `$neutral` on its borders.
-  That is the reverse of the pairing a `gt` table lands on, where the tint carries the ground and the striping is the page colour, `gt` reading its own palette from R while a widget here has none to read.
-  A widget carrying any `reactableTheme()` keeps the palette its R code set, which is the route to prefer: `reactable` accepts a CSS variable where `gt` rejects one, so an author can follow the toggle from R with no override at all.
-  That opt-out is a class guard rather than a weighing of selectors, Emotion emitting a theme at a weight that varies by property: matched on the striped rows, outranked on the table border, so specificity alone would have overridden half of an author's palette.
-  It covers the six colours `reactableTheme()` names directly and stops there: the search box, the column filters and the page controls are reachable from R through style lists alone, which arrive as inline styles and outrank any stylesheet, so those are dressed whether the widget is themed or not.
-
-- `example.qmd` renders a `gt` table under `# Table`, beside the Markdown one, which is where the dark override recorded under Changed becomes observable in this repo.
-  The table asks for a deliberate light palette through `tab_options()`, the pale blue ground with white striped rows the house reports use (`#F0FAFF`, a step off the `#F2FAFF` `primary-back` compiles to in light), so dark shows the override winning over colours the chunk wrote rather than over `gt` defaults.
-  Its shape follows those reports too: a flat body so the striping alternates uninterrupted, a spanner, bold column labels over a rule, no vertical hairlines, and a source note.
-  The caption is a Quarto `tbl-cap` rather than a `gt` header, which is what those tables do and what makes the float centring rule apply.
-  No render probe comes with it: an uncovered `gt` class paints a light card on a dark ground, which the published demo shows at a glance, where `tests/r-syntax-tokens.sh` and `tests/anx-float.sh` exist for defects that leave the render green.
-  `gt` becomes a render-time requirement of the demo document, added to both workflows; it pulls `juicyjuice` and `V8`, the heaviest dependency `example.qmd` carries.
-
-- `example.qmd` renders a `reactable` widget beside that table, naming the theme's own tokens through `reactableTheme()`, so it lands on the pairing the theme gives an untouched widget, `$primary-surface` on the ground and `$primary-back` on the striped rows, in both schemes from one declaration, and demonstrates the route the documentation recommends.
-  `reactable` joins the workflows as its own entry rather than riding on `gt`, which imports it, so no install is added; the cost is page weight, the widget's bundle taking `example.html` from 4.20 MB to 4.66 MB under `embed-resources: true`.
-
-- Body prose is justified in HTML, which the two other formats already did and the theme left to each document.
-  `template.typ` sets `justify: true` on `par`, and `template.dotx` justifies the `Body Text` style Pandoc sets paragraphs in, so HTML was the odd one of the three rather than the second to fall in line.
-  The rule is anchored on `#quarto-document-content` rather than written as a bare `p`: the id keeps the TOC sidebar out, and carries the weight a document-level `<style>` used to take from source order alone.
-  The margin column is not kept out by that id, Quarto emitting it inside the same container, so a rule of its own hands `.column-margin` back to `left` : justification needs a measure the 450 px margin column does not have, and a document mixing the two columns opens its rivers there first.
-  That one class covers the three shapes margin content takes, a `.column-margin` div, an `.aside` and a footnote under `reference-location: margin` all rendering as the same container, and it repeats the id to outweigh the rule above rather than relying on source order.
-  `hyphens: auto` rides along on the same rule, and it is what makes the justification affordable rather than a decoration: a line absorbs its leftover width by breaking a word, instead of pushing all of it into the spaces between the few words it holds.
-  The difference is measurable on this document, whose prose is dense in inline code, and inline code is the worst case for justification twice over, being unbreakable and long: a `<code>` that does not fit moves whole to the next line and leaves the gap behind it, on a line that holds fewer words to share it.
-  Word spaces measured across the body of `example.qmd`, at 1000 px: a median of 5.7 px ragged-right against 7.6 px justified, and a worst line at 18.3 px, 3.2 times the natural space.
-  A document that wants otherwise overrides it in three lines, and those three lines have to repeat the id : a bare `p { text-align: left }` loses whatever its position, source order settling only a tie, so the override reads `#quarto-document-content p` in a `custom.scss` or in a document `<style>` alike.
-
-- A figure with no cross-reference label takes the float caption's typography and is centred, alongside the top-located float caption.
-  Such a figure carries no `.quarto-float-caption`, so it fell outside the `.quarto-float` block and rendered as body prose, which shows on any document mixing labelled and unlabelled figures.
-  Centring is where the two stop agreeing, and deliberately so : a labelled figure keeps its caption at the bottom and reads left, the position Quarto defaults it to, while an unlabelled one carries no number to hang that line on and is centred with the top-located captions.
-
-- `link-citations: true` on the Word format, so a citation hyperlinks to its bibliography entry instead of printing a dead marker.
-  Pandoc defaults the key to `false` and it reaches `docx` and PDF only: the HTML writer anchors citations on its own, and the Typst format hands `@key` to Typst's bibliography engine rather than to citeproc, so `docx` is the single format here that consumes it.
-  The link lands styled rather than dangling: Pandoc resolves a style by its `w:name`, and `template.dotx` defines both the `Hyperlink` character style it asks for and the `Bibliography` paragraph style it anchors into.
-
-- `scripts/check-docx.R` asserts, on any `.docx` or `.dotx`, the properties a Word reader depends on and no render reports: every referenced style defined, every table cell closed by a paragraph, no unreferenced media, a text width of 6.2958 in, hyphenation on, and Calibri declared as the fallback of Aptos.
-  Each check has been seen failing, on a report rendered against the previous template and on a hand-built document holding an open cell, so a green run is evidence rather than silence.
-  Run it on a rendered document as well as on the template, since Pandoc decides what of the template reaches the output.
-  It needs the `officer` and `xml2` R packages; CI runs it on the output of `tests/docx-template.sh`.
-
-- `scripts/build_template.py` rebuilds `template.dotx` from the reference document Quarto's Pandoc ships, through substitutions that must each match exactly once, so the binary has a recipe that can be read, changed and run again.
-
-- A `paths` key of the `filetree` sidecar can be a glob, so a file whose name carries a date or a version keeps its description across releases without the sidecar being edited.
-  Only `*` is special, matching within one path segment; every other character stays literal, which is why the keys are globs rather than the Lua patterns `exclude` and `highlight` take: `-` and `.` are magic in a Lua pattern, and existing keys such as `fig-flowchart` would have stopped matching themselves.
-  An exact key wins over a glob, and a conflict between globs resolves on the first key in byte order with a warning, a YAML mapping reaching Lua with no declaration order to fall back on.
-  A glob that takes no rendered entry warns like a dead exact key, a glob having no single path whose existence on disk could be tested.
-
-- `{{< filetree >}}` resolves ten more file families to a specific icon, vendored from Material Icon Theme at the same v5.37.0 tag: `table` (`xlsx`, `xlsm`, `xls`, `ods`, `csv`, `tsv`), `powerpoint` (`pptx`, `ppt`, `potx`, `odp`), `pdf`, `svg`, `bibliography` (`bib`), `console` (`sh`, `bash`, `zsh`), `log`, `database` (`sql`, `db`, `sqlite`, `duckdb`, `parquet`, `feather`), `xml` (`xml`, `csl`) and `rust` (`rs`).
-  An `.svg` file now takes the dedicated `svg` icon rather than the generic `image` one, as it does upstream; `duckdb` is the one extension upstream maps to nothing.
+- `reactable` tables follow the dark scheme when left unthemed.
+  A widget with its own `reactableTheme()` keeps its colours; pass CSS variables such as `var(--primary-surface)` to follow the toggle from R.
+- Body text is justified and hyphenated in HTML, matching the Typst and Word formats.
+  Margin content stays left-aligned.
+  See [Text alignment](README.md#text-alignment) to opt out.
+- Figures without a cross-reference label get the float caption style, centred.
+- Citations link to their bibliography entry in Word output (`link-citations: true`).
+- `scripts/check-docx.R` checks a rendered `.docx` or the `.dotx` template for the properties Word output depends on: defined styles, well-formed table cells, no unused media, text width, hyphenation and font fallback.
+  Requires the `officer` and `xml2` R packages.
+- `scripts/build_template.py` rebuilds `template.dotx` from Pandoc's reference document.
+- `filetree`: keys under `paths` accept a `*` wildcard, matching within a single path segment (`docs/*_report.html`).
+  Exact keys take precedence over wildcards.
+- `filetree`: icons for spreadsheets and CSV, presentations, PDF, SVG, BibTeX, shell scripts, logs, databases and data files (SQL, SQLite, DuckDB, Parquet, Feather), XML and CSL, and Rust.
+- `example.qmd` demonstrates `gt` and `reactable` tables.
 
 ### Changed
 
-- The `{{< script >}}` shortcode renders in HTML only and emits nothing in Typst and DOCX.
-  What it builds is chrome that JavaScript assembles: the code-fold summary, the code-window title bar, and the `<summary>` rewriter shipped as `filters/add-code-files.js`.
-  None of the three reaches a Typst or Word output, so what the call left there was the file's contents as a plain code block, which is not what a document asks for by injecting a script it keeps on disk.
-  The guard is `quarto.doc.is_format("html:js")` at the head of the handler, ahead of the file read and of the JavaScript dependency, so the call stops doing the work rather than only hiding its result.
-  `filters/filetree.lua` carries the same guard and degrades to a bullet list, a form a file listing has no equivalent of, the chrome being the whole point of injecting one.
-  Emitting a `.content-visible when-format="html"` div around the output was the other route and is not equivalent: it reads the file in every format, it adds a div level the hand-off to code-window has to survive, and it makes the result depend on an ordering between Quarto's own filters that no test here pins.
-  A document that wants the file printed in every format holds a plain code fence instead, which the shortcode does not replace.
-  Verified on a Typst render of a probe carrying the call: the output holds neither the listing nor the literal shortcode text, and the prose around it is untouched.
+- `gt` tables follow the dark scheme instead of keeping the light palette set in R.
+  Colours passed to `gt::tab_options()` are replaced in dark mode; to adjust them, override `$primary-surface`, `$primary-back`, `$neutral` and `$body-color`.
+  Light mode is unchanged.
 
-- `gt` tables follow the dark scheme instead of staying on the light palette their R code resolved.
-  A `gt` table writes its own colours into a `<style>` block scoped by the table's generated id, so the page renders a light card on a dark ground, and nothing in a stylesheet could reach it: every selector in that block carries an id, which no id-free rule can outrank whatever its class count.
-  Quarto ships its own `table.gt_table { color: var(--quarto-body-color); background-color: transparent }` and loses for exactly that reason.
-  The rules therefore carry `!important`, and they are the one `scss:rules` region outside `theme-base.scss`: they must exist in a single scheme, the light palette being already right, and being compiled into the dark bundle alone is what scopes them, with no dependency on the `body.quarto-dark` class the toggle script adds after the sheet is live.
-  Text and the rules that structure the table follow `var(--bs-body-color)`, Bootstrap's own mirror of `$body-color`, which the theme exposes no `:root` counterpart for, and the hairlines between cells are drawn from `$neutral`, so those are what a consumer re-tints to move a table.
-  The two surfaces are the page's own pair rather than a neutral grey, which is what keeps a dark table the counterpart of the light one instead of a second design: the blocks a light table leaves on the page background (column labels, striped rows, footnotes) take `$primary-surface`, the colour the page carries, and the table ground takes `$primary-back`, the tint the TOC sidebar is painted with, which is the pairing a light house table already lands on.
-  Per channel the two sit (2, 4, 5) apart in dark against (13, 5, 0) in light, which reads as a wider gap than it is: in CIE lightness they measure 1.86 and 2.18, so the striping is about as faint in either scheme, sRGB's curve giving a small step near black more lightness than a larger one near white.
-  Going the other way is not available: `gt` validates each colour option through `html_color()` and rejects `var()`, `currentColor` and `inherit`, so no theme token can be handed to `gt::tab_options()` in the first place.
-  Measured on a probe rendering a plain `gt` table and one carrying the palette `hebstr::theme_gt()` writes; the light bundle carries no rule from this change, so light output is untouched.
+- The light/dark toggle moved from beside the document title to the top of the table of contents sidebar.
+  On narrow screens it returns to the top-right corner.
 
-- The light/dark toggle now sits at the top of the TOC sidebar, above the table of contents and centred on that panel, instead of beside the document title.
-  `filters/toggle-position.html` inserts a `.hebstr-toggle-row` as the first child of `#quarto-margin-sidebar` and moves the control into it ; the `.hebstr-title-row` it used to build around the `h1` is gone, and so are its two theme rules.
-  The margin sidebar leaves the layout below Quarto's breakpoint, and a toggle parked inside it would leave with it, so the same function hands the control back to the parent it was found in, floating `top-right` again, and a frame-throttled `resize` listener re-runs it on both sides of that threshold.
-  The `aria-label` the control gained in 1.2.1 is unchanged.
+- `{{< script >}}` renders in HTML only and produces no output in Typst and Word.
+  Use a plain code block to show a file in every format.
 
-- The `prettier` hook of `prek.toml` widens from the stylesheets to the HTML and JS the extension ships (`filters/toggle-position.html`, `filters/add-code-files.js`), which held no format gate until now, and skips `tests/fixtures/` so the verbatim test inputs stay byte-identical.
-  `filters/toggle-position.html` is reformatted to that gate ; no rendered output, public SCSS variable or CSS custom property changes.
+- `filetree`: `.svg` files use the dedicated SVG icon instead of the generic image icon.
+  Rules targeting `.ft-i-image` no longer apply to them; use `.ft-i-svg`.
 
-- `template.dotx` is rebuilt from Pandoc's reference document instead of a Word document stripped of its content, and weighs 12.4 KB instead of 562 KB.
-  The previous template carried ten images and an OLE object that Pandoc copied into every output, about 1 MB per document, and lacked 35 of the 49 styles Pandoc writes, so first paragraphs, compact lists, captions and the title block fell back to `Normal` without a warning.
-  Text is set in Aptos throughout, declared with Calibri as its fallback for Word before 2024, where the body used to be Arial and the lower headings Calibri.
-  Headings keep their Word numbering, their `#1B4377` colour and their sizes; body paragraphs stay justified and gain hyphenation, which stops at body prose, and compact lists and table cells are left-aligned.
-  Hyphenation is switched on for the whole document and suppressed on `Normal`, then cleared on `Body Text` and suppressed again on `Compact`, so headings, captions, lists, footnotes and single-paragraph table cells never break a word, while block quotes and the paragraphs of a multi-paragraph cell, which Pandoc sets in styles based on `Body Text`, do.
-  The title block stands alone on the first page and the table of contents opens the second, with the page number centred in the footer from page 2.
-  Float captions are bold, 10 pt, `#111111` and no longer italic, the typography `hebstr` gives the captions of its Word tables.
-  The geometry does not move: A4, 2.5 cm margins, 6.2958 in of text, the width `hebstr::docx_page_width()` reads to size Word tables.
-  A project whose installed copy of `template.dotx` was edited by hand gets that geometry back on `quarto update`, and its table widths move with it.
-  Validated in Word.
-  The typography of the title block and body was then set in Word and carried back into `scripts/build_template.py`: body text at 11 pt with 1.5 line spacing, title at 28 pt, subtitle at 24 pt, author and date at 16 pt and centred, heading 4 no longer italic, headings 3 and 4 on a hanging indent, inline code at 10 pt, a captioned figure spaced 12 pt before and after, a centred table of contents heading with styled entries, and Word 2013 compatibility mode.
-  Those entries are styled down to level 9, one per heading level the template numbers, where the carry-back stopped at three and a level-4 entry fell back to `Normal`, out of line with the three above it.
-  A second review in Word tightened the table of contents to 2 pt before and after each entry, with levels 2 and below at 10 pt under an 11 pt first level, and gave a caption above its content 12 pt before and after, which its title and subtitle variants share on their outer edges.
-  Word's automatic style updates and the 11 pt it gave hyperlinks were left out, so a reviewer's direct formatting stays local and a link inside a 10 pt caption keeps the caption's size; the rebuilt file is validated in Word.
-  The template derives from Pandoc's reference document, which Pandoc distributes under the GPL, version 2 or later, so it joins `syntax/r.xml` as a copyleft component of the extension, attributed in `template.LICENSE` and listed in [LICENSE.md](LICENSE.md).
+- `template.dotx` is rebuilt from Pandoc's reference document (12 KB, down from 562 KB), and Word output changes accordingly:
+  - text is set in Aptos, with Calibri as fallback for Word versions before 2024;
+  - body text is 11 pt with 1.5 line spacing, justified and hyphenated; headings, captions, lists, footnotes and single-paragraph table cells are not hyphenated;
+  - the title block has its own page, and the table of contents starts on the second page;
+  - captions are bold, 10 pt, not italic;
+  - every style Pandoc uses is defined (the previous template left 35 of them to fall back to `Normal`), and rendered documents no longer carry about 1 MB of unused media.
+
+  Page geometry is unchanged: A4, 2.5 cm margins, 6.2958 in text width.
+  `quarto update` replaces an installed copy of the template edited by hand.
+  The template is licensed under the GPL, version 2 or later, as a derivative of Pandoc's reference document; see [LICENSE.md](LICENSE.md).
 
 ### Removed
 
-- `$surface-default` and `$figure-shadow`, two public SCSS variables that nothing consumed, together with their `--surface-default` and `--figure-shadow` counterparts under `:root`.
-  Both were declared with `!default` in each scheme file and mirrored in `theme-base.scss`, so surfaces 2 and 3 of `CONTRIBUTING.md` promised a consumer that overriding them moved something; neither was read by a single rule, so an override compiled clean and changed nothing.
-  `var(--figure-shadow)` never appeared in any commit of this repository; `var(--surface-default)` lost its last consumer when the `gt` override above moved to the page's own surface pair.
-  `$surface-default` carried a second cost: its name announces the theme's default surface where the real ones are `$primary-surface` and `$primary-back`, which is the confusion the first pass at that override fell into.
-  Breaking under the strict table, shipped under MINOR rather than MAJOR per the no-consumer clause in [CONTRIBUTING.md](CONTRIBUTING.md).
+- **Breaking:** the SCSS variables `$surface-default` and `$figure-shadow`, and their CSS custom properties `--surface-default` and `--figure-shadow`.
+  No rule used either, so overriding them had no effect.
+  Shipped as a minor release under the no-consumer clause of [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Fixed
 
-- A `gt` table wider than the body column compresses its columns instead of hiding them behind a horizontal scrollbar.
-  `gt` declares the table width in pixels and wraps the table in a scrolling container, so anything past the column edge was reachable only by scrolling ; `table.gt_table` now caps at `max-width: 100%`, which leaves the declared width alone wherever it fits.
-
-- Word opens a DOCX whose referenced tables come from `flextable` or `gt` rather than refusing it with "an ambiguous cell mapping was encountered".
-  Word holds the last block-level element of a `w:tc` to be a `w:p` and offers no recovery when one is missing, while Quarto wraps every referenced float in a one-cell table to keep caption and content together: a table arriving as an `{=openxml}` block ends on `</w:tbl>` and leaves that cell open.
-  `filters/docx-cell-paragraph.lua` closes it with a 1 pt empty paragraph appended to the raw block, a Pandoc `Para` carrying no inline being dropped before the writer ever sees it.
-  The defect reaches no reader on a Linux machine: LibreOffice renders the same file without complaint, so it shows on a real Word install alone.
-  `tests/docx-cell.sh` renders its own DOCX probe in CI and counts the cells left open, which must be none.
-
-- Float captions in DOCX take the caption style their position calls for, through `filters/docx-caption.lua`, run at `post-render`.
-  Quarto writes every float caption as `Image Caption` with a direct left alignment, inside a one-cell table whose column is centred: a table caption never got the keep-with-next of `Table Caption` and could be stranded at the foot of a page, and each caption paragraph carried two property elements, whose two alignments overrode the template.
-  A caption above its content now takes `Table Caption`, centred, and one below takes `Image Caption`, left-aligned, which is the position rule the HTML theme applies: a figure moved to `fig-cap-location: top` reads like a table caption.
-  The centring moves onto the image through the `Figure` and `Captioned Figure` styles, so a Markdown table inside a float keeps its own column alignment, left by default, instead of inheriting the wrapper's.
-  A `<br>` followed by a `quarto-float-subcaption` span, the markup `hebstr::str_fig()` writes, sets that note as a paragraph of its own under the title, in `Table Caption Subtitle` or `Image Caption Subtitle` (not bold, 9 pt, `#555555`) after the caption style of the same position, instead of running into the title in bold.
-  A character style could not do it: Word combines bold across paragraph and character styles as a toggle, and kept a `Caption Subtitle` run bold inside the bold caption where LibreOffice did not, while one paragraph style based on another simply overrides it.
-  The paragraph also drops the stray space the line break and indentation of `str_fig()` left at the start of the second line.
-  The title above a subtitle takes `Table Caption Title` or `Image Caption Title`, which drop the space after the title and keep it with its subtitle: Word only joins the spacing of paragraphs that share a style, so the caption's own spacing would otherwise open a gap between the two lines.
-  Unit-tested, validated in Word, and asserted in CI by `tests/docx-template.sh`, which renders a probe carrying each caption shape.
-
-- A table in a referenced DOCX float, whether a Markdown table, a `gt` or a `flextable`, is laid out to its content in Word instead of being crushed.
-  Quarto sets every referenced float inside a one-cell table of fixed layout, whose single column Pandoc writes on a nominal 5.5 in grid, and Word lays a table nested there out against that cell: in a report rendered with this extension, tables carrying the same properties rendered correctly at body level and crushed inside the wrapper, `gt` and `flextable` alike.
-  `filters/docx-caption.lua` takes a float whose content is a table out of that wrapper, caption then table at the level the wrapper stood, and the float keeps its identifier, so cross-references still land on its bookmark.
-  Figures keep the wrapper, which does them no harm.
-  `tests/docx-template.sh` asserts that no table float is left inside a table cell and that every cross-reference resolves to a bookmark, and the layout is validated in Word.
-
-- The Word table of contents is titled in the document's language, and the body opens on the page after it.
-  `toc-title: " "` moves from `common:` to the HTML and Typst blocks, where the blank title is meant: Pandoc reads a blank title as none and wrote a hard-coded "Table of Contents" in Word whatever `lang` said, where the title now comes from Quarto's `toc-title-document`, "Table des matières" under `lang: fr` and overridable through `language:` in `_quarto.yml`.
-  The template already breaks the page before the table of contents, and `filters/docx-toc-break.lua` adds the break after it whenever `toc` is on, so the first heading no longer follows the last entry on the same page.
-  The template also asks Word to recalculate fields on open, so the reader is offered the update the table of contents needs to show anything at all instead of having to run it by hand.
-  Nothing silent is available short of a macro, and the offer is declined as easily as accepted, so a document still reaches a reader who clicks past it with an empty table.
-  Unit-tested, and asserted in CI by `tests/docx-template.sh`, which reads the title, the break and that setting off its probe.
+- `gt` tables wider than the text column shrink to fit instead of scrolling horizontally.
+- Word no longer refuses to open documents containing cross-referenced `flextable` or `gt` tables ("an ambiguous cell mapping was encountered").
+- Cross-referenced tables are no longer squeezed in Word, whether Markdown, `gt` or `flextable`.
+- Word captions are styled by position: a caption above its content uses `Table Caption` (centred, kept with the next paragraph), one below uses `Image Caption` (left-aligned).
+  A subtitle written as `<br><span class='quarto-float-subcaption'>…</span>`, as `hebstr::str_fig()` does, becomes a separate paragraph in a lighter style.
+- The Word table of contents takes its title from the document language instead of a hard-coded "Table of Contents", and the body starts on the page after it.
+  Word offers to update the table of contents when the document is opened.
 
 ## [1.4.0] - 2026-08-29
 
 ### Added
 
-- Numbered annexes, through a custom `anx` crossref type declared in `_extension.yml` and reached by `filters/crossref-anx.lua`.
-  An annexe is captioned *Annexe n.*, referenced as `@anx-...`, and counted in a sequence of its own, shared by the three forms that can produce one.
-  Quarto has no appendix type of its own: the built-in list stops at fig/tbl/eq/sec/lst and the theorem family, and `crossref: appendix-title` letters the chapters of a book project and reaches nothing else.
-  A chunk cannot carry an `anx-` label either, the knitr engine building a float only from a label matching `^#?(fig|tbl)-` and dropping any other before it reaches Pandoc, so an annexe is authored as `tbl-anx-x` or `fig-anx-x` and the filter strips that carrier prefix at `pre-quarto`, the one stage where the float node is built and still mutable.
-  The carrier earns its place twice over: it decides whether `tbl-cap` or `fig-cap` is read, and it leaves the block an ordinary table or figure, still visible and still captioned, should the filter ever stop running.
-  A hand-written `::: {#anx-x}` div carries no prefix and joins the same counter.
-  `theme-base.scss` extends the rule that centres a float caption to the new type, which has no styling of its own.
-  Declared for all three formats and asserted in HTML by `tests/anx-float.sh`, which renders its own probe: a float that stopped reaching the type would lose its number and caption without failing the render.
-  Numbering is in digits: `anx-labels` does not exist, the `crossref` schema being closed, and lettering would mean pinning five other `*-labels` keys back to arabic in every document for a cosmetic effect on one type.
-
-- Figure SVGs carry the body font with them, so they no longer fall back to another face on a machine without Luciole installed.
-  An SVG lands in the page as `<img src="data:image/svg+xml;base64,…">`, and an SVG referenced by `<img>` is an isolated document: it never reaches the `@font-face` rules of `fonts/fonts.css`, so its `font-family` resolves against the reader's installed fonts alone.
-  Tables, being ordinary nodes of the parent document, were unaffected, which is what made the gap look like a figure-only quirk.
-  `fonts/register.R` now embeds the Luciole regular and bold faces into every svglite figure as `@font-face` blocks with a base64 WOFF2 `src:`, adding roughly 114 KB per figure.
-  Those two faces only: figure text set in italic, and anything monospaced, which the format's `mono` alias sends to Fira Code, still resolves against the reader's installed fonts.
-  It calls `svglite::font_face(woff2 = <data URI>)` and builds the URI itself, which keeps the `;charset=utf-8` token `embed = TRUE` adds off a binary payload; the form to avoid is `local = <family>` with `embed = TRUE`, which resolves the family through `systemfonts::font_info()` and embeds whichever file that yields, a system TTF where one is installed, at many times the weight.
-  The faces are built on first use rather than at source time, so an interactive session that never renders does not pay the encoding.
-  Injection goes through `knitr::opts_hooks$set(dev = )` rather than `opts_chunk$set()`: a hook runs after option resolution, so it survives both a chunk setting its own `dev.args` and the format applying its value after `.Rprofile` has run.
-  It merges, so a chunk keeps its own `bg`.
-  `!expr` in the format's `knitr.opts_chunk` was tried first and does not work: Quarto passes the tagged node through unevaluated and the render fails on `unused arguments (value = …, tag = "!expr")`.
-  That tag is a knitr chunk-option feature, not a Quarto metadata one.
-
-- R code blocks colour the package name in front of `::` and `:::`, and read `library`/`require`/`requireNamespace` as keywords rather than as ordinary calls.
-  Pandoc's stock R definition emits no token for either, so no stylesheet could reach them: the package name arrived as unstyled normal text and `library` was indistinguishable from any other function call.
-  `syntax/r.xml` supplies both missing rules, `filters/r-syntax.lua` routes R blocks to it, and the theme colours the resulting `.im` token.
-  Applies to HTML and DOCX, the two formats Pandoc highlights itself; Typst re-emits a raw fence and highlights it through `code.tmTheme`, which is unchanged.
-  The definition derives from the KDE Kate module for R and is **GPL v2**, the extension's one copyleft component, attributed in `syntax/RSyntax.LICENSE` and listed in [LICENSE.md](LICENSE.md).
-  It is taken at upstream version 14 while Quarto bundles version 12, so the two rules above are not the whole of what changes: the `:=` entry below comes with that newer base, as does a `.dt` token on the `L` and `i` suffixes of an integer or complex literal, which the theme colours with the other numeric literals rather than leaving on Quarto's light fallback.
-
-- `$font-size-root` joins the public SCSS variables, at `1rem`.
-  Quarto declares it at `17px` in its own Bootstrap layer, and a theme layer is applied first, so the document now takes the reader's browser root size instead.
-  It reaches the page as `--bs-root-font-size` on `html`, which every `rem`-derived size, padding and margin in the document scales against, so overriding it rescales the whole document from one knob.
+- Numbered annexes through a custom `anx` cross-reference type.
+  Label a chunk `tbl-anx-<name>` or `fig-anx-<name>`, or a fenced div `anx-<name>`, and reference it as `@anx-<name>`; it is captioned *Annexe n.* and numbered separately.
+- R code highlighting marks the package name before `::` and `:::`, and treats `library`, `require` and `requireNamespace` as keywords.
+  Applies to HTML and Word.
+  The R syntax definition is licensed under the GPL v2; see [LICENSE.md](LICENSE.md).
+- Figure SVGs embed the Luciole regular and bold faces when `fonts/register.R` is sourced, so figure text renders in Luciole for readers who do not have it installed.
+  Adds about 114 KB per figure.
+  Italic and monospaced figure text still depends on the reader's fonts.
+- New public SCSS variable `$font-size-root`, defaulting to `1rem`, so the document follows the reader's browser font size and can be rescaled from one variable.
 
 ### Changed
 
-- R code blocks colour their punctuation.
-  The argument separator and the `=` of a named argument take the operator colour; brackets of every shape, round, curly and square, take the namespace gold.
-  Upstream tokenises none of the three: the first two fall through to normal text and brackets map to `dsNormal`, which skylighting emits without a span at all, so no stylesheet could reach any of them.
-  Colouring brackets means borrowing a token style that nominally means something else, skylighting exposing a closed set of them; `dsRegionMarker` carries them, so `.re` is gold from now on wherever it appears, in any language.
-  The `=` rule also splits `n =` into two tokens where it used to be one, so an argument name keeps `.at` and only the `=` moves.
-
-- `.im` no longer shares the keyword colour.
-  It is now `#fad430` against `#d08aff` for `.kw`/`.cf`, which is what makes the package name legible as a namespace rather than as a keyword.
-  Languages other than R that emit `.im` are affected too: a Python `from x import y` now renders its `import` and `from` in the same gold.
-
-- Code blocks are no longer bold as a whole.
-  Weight is reserved for `.kw`, `.cf`, `.im` and `.cn`, so identifiers, strings, numbers and function calls render at normal weight.
-
-- Code type sizes are harmonised.
-  A code block and an inline `code()` span outside one both sit at `0.9rem`, and the code-fold summary label drops to `0.8rem` so a filename header reads as chrome rather than as content.
-
-- `$toc-font-size` drops from `0.825rem` to `0.8rem`, which settles the table of contents on the same step as the code-fold label.
+- R code highlighting colours argument separators, the `=` of named arguments, and brackets.
+  Brackets reuse the `.re` token class, which now renders in gold in every language.
+- The import/namespace token `.im` has its own colour (`#fad430`), distinct from keywords.
+  This also affects imports in other languages, such as Python.
+- Code blocks are no longer bold throughout; bold is kept for keywords, imports and constants.
+- Code sizes are harmonised: code blocks and inline code at `0.9rem`, the code-fold label at `0.8rem`.
+- `$toc-font-size` changes from `0.825rem` to `0.8rem`.
 
 ### Fixed
 
-- `:=` no longer renders its `=` as an error token in R code.
-  Quarto's bundled R definition predates the rule that reads the pair as a single operator, so `data.table`'s `DT[, x := 1]` and rlang's `!!name :=` arrived as a `.sc` colon followed by an `.er` equals.
-  The rule comes with the upstream base `syntax/r.xml` is taken at, rather than being one of the two added here.
-
-- Comment and line-number contrast inside code blocks, both of which failed WCAG AA against the code surface.
-  `$code-comment-color` moves from `#6c675f` to `#8d8d8d` (2.70:1 to 4.57:1) and `$code-window-line-number` from `#5a5955` to `#7b7a76` (2.16:1 to 3.53:1).
-  `$code-comment-color` also backs the code-block selection band and the copy-button hover, both of which lighten with it.
-
-- `fonts/register.R` reads the `.woff` faces rather than the `.woff2` ones.
-  FreeType decodes WOFF with zlib, which every build carries, but WOFF2 only where brotli was compiled in, so the registration silently produced nothing on a build without it and the figure fell back to the system sans.
-  Both formats ship beside the script and carry identical metrics; `fonts.css` keeps WOFF2 for the browser, which needs no such caveat.
+- The R `:=` operator (`data.table`, rlang) is no longer highlighted as an error.
+- Code comments and line numbers meet WCAG contrast requirements: `$code-comment-color` changes to `#8d8d8d` and `$code-window-line-number` to `#7b7a76`.
+- `fonts/register.R` works on systems whose FreeType lacks WOFF2 support.
 
 ## [1.3.0] - 2026-08-01
 
 ### Added
 
-- `fonts/register.R` ships beside the font files and makes the bundled Luciole and Fira Code usable on a machine that has neither installed.
-  A project activates it with one `source()` from its `.Rprofile` or a setup chunk; the script locates its own directory while being sourced, so no font path leaks into the project.
-  It skips any family the system already provides, `systemfonts::register_font()` being an error on an installed one, and it covers both routes to the font: the plots that name their family, and the generic `system_fonts` alias below, which resolves through the same registry.
-  Without it, `svglite` writes the fallback family it matched, so the figure claims a family nobody asked for and carries the wrong metrics.
-  This settles the render side only: an SVG inserted as `<img>` never sees the page's `@font-face` rules, so which typeface a reader sees still depends on what that reader has installed.
+- `fonts/register.R` makes the bundled Luciole and Fira Code fonts available to R graphics devices on machines where they are not installed.
+  Source it from `.Rprofile` or a setup chunk.
 
 ### Changed
 
-- HTML figures render through `svglite` (`dev: svglite`) instead of R's built-in cairo device.
-  Cairo bakes every figure label into vector paths; `svglite` writes them as `<text>`, so they stay selectable and searchable and the file runs several times lighter, which compounds under `embed-resources: true`.
-  **The `svglite` R package becomes a render-time requirement for the HTML format**, and it covers more than the documents that draw.
-  knitr resolves the device when it opens a chunk, so one that merely prints a table fails the same way, on `there is no package called 'svglite'`; only a document with no R chunk at all is spared.
-  A document returns to the cairo device with `knitr: { opts_chunk: { dev: svg, dev.args: null } }`, the second key being required because `svg()` rejects the `svglite`-only font arguments the format sets.
-  That override is the documented fallback, so the new requirement ships under MINOR rather than MAJOR; the no-consumer clause in [CONTRIBUTING.md](CONTRIBUTING.md) covers it either way.
-  Typst and DOCX are unaffected.
-
-- HTML figures alias the generic `sans` and `mono` families to `Luciole` and `Fira Code`, so a plot that names no font matches the document typography instead of landing on `Liberation Sans`.
-  Only the generics move: a plot asking for a family explicitly (`par(family=)`, ggplot's `base_family=`) resolves through another path and is untouched.
-  The alias reads the rendering machine's fonts and degrades silently to the fallback family where they are missing, unless `fonts/register.R` above has supplied them.
-  A chunk that sets `dev.args` for another purpose replaces the alias rather than extending it and falls back.
+- **The HTML format requires the `svglite` R package.**
+  Figures render with `svglite`, which keeps text selectable and produces smaller files.
+  Any document with an R chunk needs the package, even if it draws no figure.
+  To keep R's built-in device, set `knitr: { opts_chunk: { dev: svg, dev.args: null } }`.
+- In HTML figures, the generic `sans` and `mono` font families map to Luciole and Fira Code.
+  A chunk that sets its own `dev.args` loses this mapping.
 
 ### Fixed
 
-- The light theme's `$primary-surface` mixed 2% of `$primary` into what is meant to be the page white, tinting the body background, the appendix block and the blockquote border that fill from it.
-  Its default is plain white.
+- The light theme page background is plain white; `$primary-surface` no longer mixes in 2% of `$primary`.
 
 ## [1.2.1] - 2026-07-26
 
 ### Added
 
-- `{{< filetree >}}` resolves more file types to a specific icon: extensions `mjs`, `cjs`, `rmd`, `htm`, `jsonc`, `json5`, `ttf`, `otf`, `gif`, `webp`, `avif`, `doc`, `odt`, `rtf`, and the names `.Rhistory`, `.luacheckrc`, `typst.toml`.
-  They previously fell through to the generic `ft-i-document`, so a consumer overriding that class no longer reaches them.
-  No new SVG ships.
-
-- `{{< script >}}` names a malformed call site instead of absorbing it: an extra positional argument, an unknown attribute, a non-boolean `numbers`, a `lines` spec that is not a range or ends before it starts, and a non-numeric `dedent` each raise a render warning and fall back to the documented default.
-  `numbers` accepts `true`/`yes`/`on`/`1` and their negatives, case-insensitively, matching `hidden` on `{{< filetree >}}`.
-
-- The color-scheme toggle and the callout icons carry alternative text.
-  The toggle sits beside the title in a `.hebstr-title-row` rather than inside the `h1`, so it no longer joins the heading's accessible name or its heading-navigation target, and it gains an `aria-label`.
+- `filetree`: icons for more file types, including `.mjs`, `.cjs`, `.Rmd`, `.htm`, `.jsonc`, `.ttf`, `.otf`, `.gif`, `.webp`, `.avif`, `.doc`, `.odt` and `.rtf`.
+- `{{< script >}}` warns on invalid arguments instead of ignoring them silently.
+- Alternative text for the color-scheme toggle and callout icons.
 
 ### Changed
 
-- The three theme stylesheets and `fonts/fonts.css` are brought to conformance with a new SCSS lint/format gate (`stylelint`, `prettier`), pinned in `package.json`.
-  No public SCSS variable, CSS custom property, or compiled colour changes.
-
-- `template.typ` drops a `#set document()` that configured nothing and a redundant `#show heading` rule.
+- Stylesheets are checked by stylelint and prettier.
+  No visual change.
+- Unused rules removed from `template.typ`.
 
 ### Fixed
 
-- `{{< script >}}`: the summary rewriter threw on the first code block rendered without `code-fold`, aborting the script so no block on the page got its filename.
-
-- `{{< filetree >}}`: a `highlight` match on an expandable folder rendered without `$filetree-highlight` or its bold weight in `dynamic` mode.
-
-- `{{< filetree >}}`: a blank line or a `#` comment inside the `filetree:` block of the sidecar ended the sequence being read, so `exclude` and `highlight` silently lost every pattern written after one.
-  A key left empty now falls through to its default instead of handing a list to the readers of `root`, `depth`, `hidden` and `mode`.
+- `{{< script >}}`: a code block without `code-fold` stopped filenames from appearing on the whole page.
+- `filetree`: highlighted folders lost their styling in `dynamic` mode.
+- `filetree`: a blank line or a comment in the sidecar truncated the `exclude` and `highlight` lists.
 
 ## [1.2.0] - 2026-07-21
 
 ### Added
 
-- `{{< filetree >}}` shortcode: renders a directory tree walked from disk at render time.
-  Config via a `filetree.yml` sidecar (`root`, `depth`, `mode`, `exclude`, `highlight`, `hidden`, `paths`); every key but `paths` is also a shortcode attribute overriding the sidecar, while `paths` supplies quoted inline-Markdown per-entry descriptions.
-  HTML emits a nested `.filetree` list, other formats a bullet list.
-  `root` and `annotations` resolve from the project root, a single-file render from the document's own directory.
-  Malformed call sites raise a render warning.
-- Filetree theming: dark surface in both light and dark modes, driven by five invariant SCSS variables (`$filetree-bg`, `$filetree-fg`, `$filetree-muted`, `$filetree-highlight`, `$filetree-guide`).
-  Per-type icons (curated Material Icon Theme subset, MIT) inlined as a `--ft-icon` custom property so the page stays self-contained; the `ft-i-<key>` class overrides one icon from a `custom.scss`.
-  Icons never carry meaning alone: directories keep their trailing slash, highlighted entries are wrapped in `<strong>`, and the truncation marker is labelled for assistive technology.
-- `mode` attribute and sidecar key for `{{< filetree >}}`: `dynamic` renders each expandable folder as a JavaScript-free collapsible `<details>/<summary>`, with `depth` as the level open on load.
-  `static` (default) keeps the full tree to `depth`; non-HTML formats ignore `mode`.
+- `{{< filetree >}}` shortcode, which renders a directory tree read from disk.
+  Configure it with a `filetree.yml` sidecar or shortcode attributes; see the [README](README.md#filetree).
+  Includes file-type icons from Material Icon Theme and five SCSS variables for its colours.
+- `mode: dynamic` renders the tree with collapsible folders, without JavaScript.
 
 ### Changed
 
-- `$tab-background` renamed to `$tab-surface`, now exposed at `:root` so it is overridable from a `custom.scss`.
-  The old variable drove no rule, so nothing regresses.
-
-- The `grid` defaults tighten: `body-width` from 1100px to 1000px and `margin-width` from 600px to 450px.
-  Both remain frontmatter overrides.
+- `$tab-background` is renamed `$tab-surface` and exposed as a CSS custom property.
+- The default layout is narrower: `body-width` 1000px (was 1100px), `margin-width` 450px (was 600px).
 
 ### Removed
 
-- `fontsize: 1.2rem` is no longer declared by `hebstr-doc-html`; body text falls back to the Bootstrap default Quarto ships.
-  `fontsize` is a stock Quarto key, so a consumer wanting the previous measure declares it themselves.
-  Shipped under MINOR rather than MAJOR per the no-consumer clause in [CONTRIBUTING.md](CONTRIBUTING.md).
+- **Breaking:** the HTML format no longer sets `fontsize: 1.2rem`.
+  Set `fontsize` in your document to restore it.
 
 ### Fixed
 
-- `{{< script >}}`: `dedent=n` stripped every space in the first `n` columns instead of the leading indentation, dropping an interior space on lines indented by less than `n`.
-  It now removes leading spaces only, at most `n`.
+- `{{< script >}}`: `dedent` removed spaces inside lines instead of only leading indentation.
 
 ## [1.1.0] - 2026-07-07
 
 ### Added
 
-- SVG lightbox figures scale to fit the viewport instead of displaying at their small intrinsic size.
-  Scoped to SVG; raster figures keep Quarto's default fit.
+- SVG figures in the lightbox scale to fit the viewport.
 
 ### Changed
 
-- HTML figures render as SVG (`fig-format: svg`) via R's built-in cairo device instead of the default raster, with no added R dependency.
-  Opt into the `svglite` device per document with `knitr.opts_chunk.dev: svglite`, or render raster with `fig-format: png`.
-  Scoped to `hebstr-doc-html`; Typst and DOCX keep `default-image-extension: png`.
+- HTML figures render as SVG instead of PNG.
+  Use `fig-format: png` to restore raster output.
 
 ## [1.0.0] - 2026-04-29
 
-First public stable release.
-The public API surface (formats, SCSS variables, CSS custom properties, frontmatter keys, shortcodes, bundled fonts, `quarto-required`) is now versioned per [CONTRIBUTING.md](CONTRIBUTING.md): MAJOR for breaking changes, MINOR for additions, PATCH for fixes.
+First stable release.
+The public API surface is versioned as described in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Added
 
-- Public SCSS API for layout chrome: `$navbar-bg`, `$navbar-fg`, `$navbar-hl`, `$sidebar-bg`, `$sidebar-fg`, `$sidebar-hl`, `$footer-bg`, `$footer-fg`.
-  These are consumed by Quarto's Bootstrap layer at compile time and only take effect in project layouts (book, website); single-document renders are unaffected.
-  No CSS custom property counterpart is exposed.
-- [CONTRIBUTING.md](CONTRIBUTING.md): public API surface, SemVer policy, release procedure, local validation, repo layout.
+- SCSS variables for the navbar, sidebar and footer of websites and books: `$navbar-bg`, `$navbar-fg`, `$navbar-hl`, `$sidebar-bg`, `$sidebar-fg`, `$sidebar-hl`, `$footer-bg`, `$footer-fg`.
+- [CONTRIBUTING.md](CONTRIBUTING.md), with the public API surface, versioning policy and release procedure.
 
 ### Changed
 
-- Consumers using `title-block-banner: true` on `hebstr-doc-html` see their banner background switch from Quarto's slate-blue default (`#517699`) to the hebstr navbar-bg, which Bootstrap-Quarto couples to `$navbar-bg`.
-  Opt out with `title-block-banner: false`, by overriding `.quarto-title-banner { background: ... }`, or by overriding `$navbar-bg`.
+- With `title-block-banner: true`, the banner uses the navbar colour instead of Quarto's default blue.
 
 ## [0.12.0] - 2026-04-28
 
 ### Changed
 
-- **Breaking**: extension renamed `hebstr` → `hebstr-doc` and repo renamed `quarto-hebstr` → `quarto-hebstr-doc`.
-  Re-run `quarto add hebstr/quarto-hebstr-doc` and update `format:` to `hebstr-doc-html` / `hebstr-doc-typst` / `hebstr-doc-docx`.
+- **Breaking:** the extension is renamed `hebstr-doc` and the repository `quarto-hebstr-doc`.
+  Reinstall with `quarto add hebstr/quarto-hebstr-doc` and use `hebstr-doc-html`, `hebstr-doc-typst` or `hebstr-doc-docx`.
 
 ### Added
 
-- Frontmatter overrides for the most common aesthetic knobs: `mainfont`, `monofont`, `fontsize`, `linestretch` (joining `page-layout`, `toc*`, `grid.*`).
-- `_brand.yml` interop: `$primary` / `$secondary` defer to Quarto's brand layer and derived shades recompute, so cross-format brand colours and typography work without any extension change.
-- Release pipeline via GitHub Actions: `render.yml` (HTML render on push/PR), `pages.yml` (deploy demo), `release.yml` (GitHub Release on `v*` tag).
+- Front matter options `mainfont`, `monofont`, `fontsize` and `linestretch`.
+- Support for `_brand.yml` colours and typography.
+- GitHub Actions workflows for rendering, the demo site and releases.
 
 ### Fixed
 
-- `linestretch` from the YAML is respected.
-  A hardcoded `p { line-height: 1.75rem }` shadowed Bootstrap's `$line-height-base` and silently ignored any consumer override; `linestretch: 1.75` (the new default) reproduces the prior look.
+- `linestretch` is respected.
 
 ## [0.11.0] - 2026-04-27
 
 ### Added
 
-- Light and dark theme support, switchable via Quarto's color-scheme toggle (sun/moon icon, anchored in the document title).
-- Font Awesome 7 Solid bundled locally (no CDN dependency at render time).
+- Light and dark themes, switchable from the page.
+- Font Awesome 7 icons bundled locally.
 
 ### Changed
 
-- **Breaking** for consumers overriding the theme directly: the single `theme.scss` is gone.
-  Use `format: hebstr-html` (recommended), or wire `theme: { light: [theme-light.scss, theme-base.scss], dark: [theme-dark.scss, theme-base.scss] }`.
-- Callout colors adapt to the active theme.
-  `tip` and `warning` body text are slightly darker than before.
-- `anchor-sections: false` by default.
+- **Breaking:** `theme.scss` is split into `theme-base.scss`, `theme-light.scss` and `theme-dark.scss`.
+  Use `format: hebstr-html`, or list the files in `theme:`.
+- Callout colours follow the active theme.
+- Section anchors are disabled by default.
 
 ## [0.10.0] - 2026-04-26
 
 ### Added
 
-- Self-contained `example.qmd` demonstrating the theme (HTML).
-- `script` shortcode for injecting external scripts: `{{< script path/to/file.R >}}` auto-derives language and filename, renders inside a foldable code block.
-  Optional args: `lang=`, `filename=`, `numbers=`, `lines=10-30`, `dedent=N`, `suffix=`.
-- Embedded [`mcanouil/code-window`](https://github.com/mcanouil/quarto-code-window) for code-block chrome (HTML + Typst).
+- `example.qmd` demonstration document.
+- `{{< script >}}` shortcode, which includes an external file as a foldable code block.
+- Embedded `mcanouil/code-window` extension for code block headers.
 
 ### Changed
 
-- **Breaking**: extension renamed `hebstr-template` → `hebstr`.
-  Re-run `quarto add hebstr/quarto-hebstr` and update `format:` to `hebstr-html` / `hebstr-typst` / `hebstr-docx`.
-- **Breaking**: `lang` removed from common defaults.
-  Declare your own `lang:` in `_quarto.yml`.
-- `quarto-required` bumped to `>=1.9.36`.
+- **Breaking:** the extension is renamed `hebstr`.
+- **Breaking:** `lang` is no longer set by default; declare it in `_quarto.yml`.
+- Requires Quarto 1.9.36 or later.
 
 ## [0.9.0] - 2026-04-24
 
 ### Added
 
-- Initial multi-format Quarto extension (`hebstr-html`, `hebstr-typst`, `hebstr-docx`) with bundled Luciole + Fira Code fonts.
+- Initial release: HTML, Typst and Word formats with bundled Luciole and Fira Code fonts.
