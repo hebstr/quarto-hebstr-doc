@@ -1,0 +1,5 @@
+filetree:
+  paths:
+    "*.txt": "dead desc"
+    "src/m-*": "dash desc"
+    "READ.E*": "dot desc"

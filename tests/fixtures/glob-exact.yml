@@ -1,0 +1,4 @@
+filetree:
+  paths:
+    "src/main.lua": "exact desc"
+    "src/*.lua": "glob desc"

@@ -47,6 +47,11 @@
 
 - `scripts/build_template.py` rebuilds `template.dotx` from the reference document Quarto's Pandoc ships, through substitutions that must each match exactly once, so the binary has a recipe that can be read, changed and run again.
 
+- A `paths` key of the `filetree` sidecar can be a glob, so a file whose name carries a date or a version keeps its description across releases without the sidecar being edited.
+  Only `*` is special, matching within one path segment; every other character stays literal, which is why the keys are globs rather than the Lua patterns `exclude` and `highlight` take: `-` and `.` are magic in a Lua pattern, and existing keys such as `fig-flowchart` would have stopped matching themselves.
+  An exact key wins over a glob, and a conflict between globs resolves on the first key in byte order with a warning, a YAML mapping reaching Lua with no declaration order to fall back on.
+  A glob that takes no rendered entry warns like a dead exact key, a glob having no single path whose existence on disk could be tested.
+
 ### Changed
 
 - The `{{< script >}}` shortcode renders in HTML only and emits nothing in Typst and DOCX.

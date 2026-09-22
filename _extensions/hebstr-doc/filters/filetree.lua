@@ -405,25 +405,38 @@ local function to_inlines(key, value)
   return nil
 end
 
+local function glob_pattern(key)
+  local escaped = key:gsub("[%^%$%(%)%%%.%[%]%+%-%?]", "%%%0")
+  return "^" .. escaped:gsub("%*", "[^/]*") .. "$"
+end
+
 local function read_annotations(config)
-  local out = {}
+  local out, globs = {}, {}
   local paths = config["paths"]
   if not paths then
-    return out
+    return out, globs
   end
   if pandoc.utils.type(paths) ~= "table" then
     warn(
       "paths must be a mapping of path to annotation, got a " .. pandoc.utils.type(paths) .. " ; annotations ignored"
     )
-    return out
+    return out, globs
   end
   for key, value in pairs(paths) do
     local inlines = to_inlines(key, value)
     if inlines then
-      out[strip_slash(key)] = inlines
+      key = strip_slash(key)
+      if key:find("*", 1, true) then
+        globs[#globs + 1] = { key = key, pattern = glob_pattern(key), inlines = inlines }
+      else
+        out[key] = inlines
+      end
     end
   end
-  return out
+  table.sort(globs, function(a, b)
+    return a.key < b.key
+  end)
+  return out, globs
 end
 
 local function keeps(name, relpath, opts)
@@ -631,6 +644,39 @@ local function report_dead_keys(annotations, root, rendered)
   end
 end
 
+local function apply_globs(annotations, globs, rendered)
+  local paths = {}
+  for relpath in pairs(rendered) do
+    if not annotations[relpath] then
+      paths[#paths + 1] = relpath
+    end
+  end
+  table.sort(paths)
+
+  local used = {}
+  for _, relpath in ipairs(paths) do
+    local hits = {}
+    for _, glob in ipairs(globs) do
+      if relpath:find(glob.pattern) then
+        hits[#hits + 1] = glob.key
+        if #hits == 1 then
+          annotations[relpath] = glob.inlines
+          used[glob.key] = true
+        end
+      end
+    end
+    if #hits > 1 then
+      warn(relpath .. " matches several globs, using " .. hits[1] .. ": " .. table.concat(hits, ", "))
+    end
+  end
+
+  for _, glob in ipairs(globs) do
+    if not used[glob.key] then
+      warn("annotation glob describes no rendered entry: " .. glob.key)
+    end
+  end
+end
+
 return {
   ["filetree"] = function(args, kwargs, meta)
     if #args > 0 then
@@ -678,13 +724,14 @@ return {
       depth = 2
     end
 
+    local annotations, globs = read_annotations(config)
     local opts = {
       exclude = patterns("exclude"),
       highlight = patterns("highlight"),
       hidden = to_bool("hidden", opt("hidden", "false"), false),
       mode = to_mode(opt("mode", "static"), "static"),
       depth = depth,
-      annotations = read_annotations(config),
+      annotations = annotations,
       rendered = {},
     }
 
@@ -702,6 +749,7 @@ return {
 
     local nodes = scan(root_path, "", scan_depth, opts)
     report_dead_keys(opts.annotations, root_path, opts.rendered)
+    apply_globs(opts.annotations, globs, opts.rendered)
 
     if #nodes == 0 then
       warn("no entry to show under " .. root .. " ; check exclude, hidden and depth")

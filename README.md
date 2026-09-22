@@ -125,7 +125,10 @@ Document frontmatter is never read: `exclude` and `highlight` hold Lua patterns,
 
 Descriptions accept inline Markdown, so a path or a command can render as code.
 A trailing slash on a `paths` key is optional.
-A `paths` key that never appears in the tree, whether absent from disk or dropped by `exclude`, `hidden` or `depth`, raises a render warning naming it.
+A `*` in a `paths` key makes it a glob: `*` matches any run of characters within one path segment, never a `/`, and every other character is literal, so `docs/*_report.html` describes a dated file under any date.
+An exact key wins over a glob.
+When several globs match one entry, the first key in byte order applies and a render warning names the entry and the competing keys.
+A `paths` key that never appears in the tree, whether absent from disk or dropped by `exclude`, `hidden` or `depth`, raises a render warning naming it; a glob does too when no rendered entry takes its description.
 Quote every description: YAML reads a bare `no`, `yes`, `on`, `off`, `true` or `false` as a boolean, and the shortcode drops the annotation with a warning naming the key.
 A bare `~` reaches the shortcode as an empty string and is dropped silently.
 

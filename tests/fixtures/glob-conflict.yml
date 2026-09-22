@@ -1,0 +1,4 @@
+filetree:
+  paths:
+    "src/main.*": "second desc"
+    "src/*.lua": "first desc"
