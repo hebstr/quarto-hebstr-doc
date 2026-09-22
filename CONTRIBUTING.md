@@ -142,4 +142,6 @@ The stylesheet rules live in `stylelint.config.mjs`.
 - `scripts/`: the script included by `example.qmd`, and the Word template build and check scripts.
 - `tests/`: the Lua test suite and the render test scripts.
 - `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo site), `release.yml` (releases).
+- `.github/dependabot.yml`: monthly update pull requests for the GitHub Actions and the npm packages.
+  The `prek.toml` hooks are updated by hand with `prek update --cooldown-days 7`.
 - `prek.toml`, `package.json`, `stylelint.config.mjs`, `stylua.toml`, `.luarc.json`: tooling configuration.
