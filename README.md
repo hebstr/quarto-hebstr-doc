@@ -7,8 +7,8 @@
 
 A Quarto theme for HTML, Typst (PDF), and Word (DOCX) output.
 
-> **Status (v1.4.0):** HTML is operational.
-> Typst and DOCX are declared but not yet validated.
+> **Status (v1.5.0):** HTML and Word output are supported.
+> Typst is declared but not yet validated.
 
 ## Installation
 
@@ -16,16 +16,14 @@ A Quarto theme for HTML, Typst (PDF), and Word (DOCX) output.
 quarto add hebstr/quarto-hebstr-doc
 ```
 
-The HTML format draws figures on the `svglite` device, which `quarto add` does not install:
+The HTML format renders figures with the `svglite` R package, which must be installed separately:
 
 ```r
 install.packages("svglite")
 ```
 
-Any document running an R chunk needs it, whether or not that chunk draws.
-knitr resolves the device when it opens a chunk, so one that only prints a table fails the same way, on `there is no package called 'svglite'`.
-A document with no R chunk at all is unaffected.
-To stay on R's built-in cairo device instead, override both keys, the second dropping the `svglite`-only font arguments that `svg()` would reject:
+Any document with an R chunk needs it, even if no chunk draws a figure.
+To use R's built-in SVG device instead:
 
 ```yaml
 knitr:
@@ -43,9 +41,10 @@ format: hebstr-doc-html
 ---
 ```
 
-The format targets the single self-contained document, so it sets `embed-resources: true` and every asset, fonts included, is inlined into the `.html`.
-A project layout renders fine but pays that cost per page: measured on a two-page website, 3.6 MB per page against 31 KB with the option off, and `site_libs/` is written either way, so the assets are duplicated rather than moved.
-Turn it off in the project config when the output is a website or a book:
+The formats are `hebstr-doc-html`, `hebstr-doc-docx` and `hebstr-doc-typst`.
+
+The HTML format sets `embed-resources: true`, producing a single self-contained file.
+For a website or a book, turn it off in `_quarto.yml`, otherwise every page embeds all assets:
 
 ```yaml
 format:
@@ -57,26 +56,25 @@ format:
 
 ### `script`
 
-Injects an external file as a code block with the code-window chrome, so the script stays a file on disk, not a copy in the document.
+Includes an external file as a foldable code block, with its filename as header.
 
 ```markdown
 {{< script scripts/demo.R >}}
 ```
 
-  | Attribute  | Default                 | Effect                                                                                                                                                                                 |
-  | ---------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | `lang`     | from the file extension | Highlighting language, and the label shown in the title bar. An extension the shortcode does not map yields no language and no title bar                                               |
-  | `filename` | the path                | Label shown on the code-fold summary                                                                                                                                                   |
-  | `suffix`   | none                    | Appended to the summary label                                                                                                                                                          |
-  | `numbers`  | `true`                  | Line numbers. `true`/`yes`/`on`/`1` and their negatives are all accepted, case-insensitively; anything else warns and falls back to `true`                                             |
-  | `lines`    | whole file              | Range to include: `10-20`, `10-`, `-20`. A bare `12` is read as `12-`. A spec that is not a range, or one that ends before it starts, warns and reads the whole file                   |
-  | `dedent`   | none                    | Leading spaces to strip, at most this many. A line indented by less is dedented as far as its own indentation allows; tabs are never touched. A non-numeric value warns and is ignored |
+  | Attribute  | Default                 | Effect                                                                |
+  | ---------- | ----------------------- | --------------------------------------------------------------------- |
+  | `lang`     | from the file extension | Highlighting language, shown in the header                            |
+  | `filename` | the path                | Label of the fold summary                                             |
+  | `suffix`   | none                    | Text appended to the label                                            |
+  | `numbers`  | `true`                  | Line numbers (`true`/`false`, `yes`/`no`, `on`/`off`, `1`/`0`)        |
+  | `lines`    | whole file              | Line range: `10-20`, `10-` or `-20`                                   |
+  | `dedent`   | none                    | Number of leading spaces to remove from each line                     |
 
-The path is the only positional argument; a second one warns and is ignored, as does an attribute outside the table above.
+Invalid arguments raise a render warning and fall back to the default.
 
-Typst and DOCX render nothing at all.
-The block is built from code folding, the code-window title bar and a JavaScript summary rewriter, none of which those formats carry, so the call drops instead of degrading to a bare listing; the surrounding prose is untouched.
-A document that wants the file printed in every format holds a plain code fence, which the shortcode does not replace.
+The shortcode renders in HTML only and produces nothing in Typst and Word.
+To show a file in every format, use a regular code block.
 
 ### `filetree`
 
@@ -86,7 +84,7 @@ Renders a directory tree read from disk at render time.
 {{< filetree >}}
 ```
 
-Configuration lives in a `filetree.yml` sidecar at the project root:
+Configure it in a `filetree.yml` file at the project root:
 
 ```yaml
 filetree:
@@ -103,55 +101,53 @@ filetree:
     "rproject.toml": "project dependencies"
 ```
 
-  | Key         | Default  | Effect                                                                                                                                                                                                                           |
-  | ----------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | `root`      | `.`      | Directory to walk, relative to the project root, wherever in the project the document sits                                                                                                                                       |
-  | `depth`     | `2`      | Levels shown without interaction. In `static`, deeper directories collapse to `…`; in `dynamic`, they become collapsed folders that expand on click. A non-numeric value warns and falls back to `2`                             |
-  | `mode`      | `static` | `static` renders the full tree to `depth`; `dynamic` makes folders collapsible native `<details>` (no JavaScript), with `depth` as the level open on load. Any other value warns and falls back to `static`                      |
-  | `exclude`   | none     | [Lua patterns](https://www.lua.org/manual/5.4/manual.html#6.4.1) matched against each path relative to `root`, directories included and without a trailing slash (`^output$`, not `^output/`). Escape literals with `%`, not `\` |
-  | `highlight` | none     | Lua patterns; matching entries render bold                                                                                                                                                                                       |
-  | `hidden`    | `false`  | Include dotfiles. `true`/`yes`/`on`/`1` and their negatives are all accepted, case-insensitively; anything else warns and falls back to `false`                                                                                  |
-  | `paths`     | none     | Descriptions, keyed by path                                                                                                                                                                                                      |
+  | Key         | Default  | Effect                                                                                                     |
+  | ----------- | -------- | -------------------------------------------------------------------------------------------------------    |
+  | `root`      | `.`      | Directory to list, relative to the project root                                                            |
+  | `depth`     | `2`      | Number of levels shown; deeper directories collapse to `…`                                                 |
+  | `mode`      | `static` | `dynamic` makes folders collapsible, with `depth` levels open on load                                      |
+  | `exclude`   | none     | [Lua patterns](https://www.lua.org/manual/5.4/manual.html#6.4.1) of paths to leave out, relative to `root` |
+  | `highlight` | none     | Lua patterns of paths to show in bold                                                                      |
+  | `hidden`    | `false`  | Include hidden files                                                                                       |
+  | `paths`     | none     | Descriptions, keyed by path                                                                                |
 
-Every key except `paths` is also a shortcode attribute, overriding the sidecar for that one call: `{{< filetree root="src" depth=1 >}}`.
-Attributes are the only call-site syntax; a positional argument or an unknown attribute warns.
-As attributes, `exclude` and `highlight` take `|`-separated patterns with no escaping; a pattern matching a literal `|` belongs in the sidecar.
-Descriptions are read from the sidecar only.
-`annotations` (default `filetree.yml`) sets the sidecar path and must stay inside the project: an absolute path, a drive letter, or a `..` climbing out warns, and the call runs unconfigured.
-The constraint is deliberately not mirrored on `root`, which may point anywhere, including a sibling package in a monorepo: the sidecar is opened and read, whereas `root` is only listed, so it yields entry names and never file contents.
-`root` and `annotations` resolve from the project root, not the calling document, so one sidecar serves every document in the project.
-Outside a project, a single-file render falls back to the document's own directory for both.
-Document frontmatter is never read: `exclude` and `highlight` hold Lua patterns, which Pandoc would corrupt by parsing as inline Markdown.
+Patterns match paths without a trailing slash (`^output$`, not `^output/`), and special characters are escaped with `%`, not `\`.
 
-Descriptions accept inline Markdown, so a path or a command can render as code.
-A trailing slash on a `paths` key is optional.
-A `*` in a `paths` key makes it a glob: `*` matches any run of characters within one path segment, never a `/`, and every other character is literal, so `docs/*_report.html` describes a dated file under any date.
-An exact key wins over a glob.
-When several globs match one entry, the first key in byte order applies and a render warning names the entry and the competing keys.
-A `paths` key that never appears in the tree, whether absent from disk or dropped by `exclude`, `hidden` or `depth`, raises a render warning naming it; a glob does too when no rendered entry takes its description.
-Quote every description: YAML reads a bare `no`, `yes`, `on`, `off`, `true` or `false` as a boolean, and the shortcode drops the annotation with a warning naming the key.
-A bare `~` reaches the shortcode as an empty string and is dropped silently.
+Every key except `paths` can also be set on the shortcode, overriding the sidecar for that call:
 
-HTML renders a nested list on a dark surface in both light and dark modes, styled by the `.filetree` rules in `theme-base.scss`.
-In `dynamic` mode each expandable folder is a native `<details>` element that expands without JavaScript, its Material folder icon switching to the open variant while expanded; a childless folder renders flat, the disclosure widget having nothing to reveal.
-Each entry carries a [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme) icon, resolved by exact name, then extension, then a generic document; a directory resolves by name (only `.github` so far), then a generic folder.
-Icons ship under `_extensions/hebstr-doc/icons/` and are inlined per entry, so the page makes no outside request and only the icons used are embedded.
-Override one with a `background-image` on `.ft-i-<key> .ft-name::before` in a `custom.scss` placed last in `theme:`.
-The combinator has to be the descendant one: `ft-i-<key>` sits on the list item, and in `dynamic` mode the name is nested one `<details><summary>` deeper.
-An expanded folder swaps to the Material open variant through a rule scoped to `.filetree-dynamic`, so overriding a folder icon there takes a second declaration that carries the key class through: `.ft-i-<key> details[open] > summary .ft-name::before`.
-Dropping the key class loses on specificity whatever the `theme:` order, where the collapsed-state override above only ties and is settled by loading last.
-Five invariant SCSS variables drive the surface: `$filetree-bg`, `$filetree-fg`, `$filetree-muted`, `$filetree-highlight`, `$filetree-guide`.
-Icons are decorative and never the sole carrier of meaning: directories keep their trailing slash, a highlighted entry is wrapped in `<strong>`, and the `…` marker carries a spelled-out label for assistive technology.
+```markdown
+{{< filetree root="src" depth=1 mode=dynamic >}}
+```
 
-Typst and DOCX fall back to a plain bullet list.
+As attributes, `exclude` and `highlight` take patterns separated by `|`.
+`annotations` sets the path of the sidecar, which must be inside the project.
+Paths resolve from the project root, or from the document's directory when rendering outside a project.
+The document front matter is not read, because Markdown parsing would alter patterns written there.
+
+Descriptions accept inline Markdown.
+Quote every description, since YAML reads unquoted `yes`, `no`, `true` or `false` as booleans.
+A `*` in a key matches any characters within one path segment, so `docs/*_report.html` describes a dated file under any date; an exact key takes precedence.
+When several wildcard keys match the same entry, the first in byte order applies and a warning names them.
+A key that matches nothing in the rendered tree raises a warning.
+
+In HTML, the tree is shown on a dark background in both colour schemes, with [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme) icons chosen by file name, then extension.
+To replace an icon, add a rule to your `custom.scss`:
+
+```scss
+.ft-i-markdown .ft-name::before {
+  background-image: url("my-icon.svg");
+}
+```
+
+In `dynamic` mode, an open folder also needs `.ft-i-<key> details[open] > summary .ft-name::before`.
+The colours are set by `$filetree-bg`, `$filetree-fg`, `$filetree-muted`, `$filetree-highlight` and `$filetree-guide`.
+
+Typst and Word render the tree as a bulleted list.
 
 ## Annexes
 
-Quarto numbers figures, tables, equations and listings, and has no appendix among them: `crossref: appendix-title` letters the chapters of a book project and reaches nothing else.
-The extension declares a custom `anx` crossref type, so an annexe is captioned *Annexe n.*, referenced as `@anx-...`, and counted in a sequence of its own.
-
-A chunk cannot carry that label directly: the knitr engine builds a float only from a label matching `^#?(fig|tbl)-` and drops any other before it reaches Pandoc.
-An annexe is therefore authored with one of those two as a carrier prefix, which `filters/crossref-anx.lua` strips once the float node exists.
+The extension adds an `anx` cross-reference type for annexes, captioned *Annexe n.*, numbered separately and referenced as `@anx-<name>`.
+Since knitr only creates floats from `fig-` and `tbl-` labels, a chunk declares an annexe with one of these prefixes, which the extension removes:
 
 ````markdown
 ```{r}
@@ -164,17 +160,16 @@ vif_table
 See @anx-vif.
 ````
 
-  | Form         | Label                   | Caption read from            |
+  | Form         | Label                   | Caption                      |
   | ------------ | ----------------------- | ---------------------------- |
   | Table chunk  | `tbl-anx-<name>`        | `tbl-cap`                    |
   | Figure chunk | `fig-anx-<name>`        | `fig-cap`                    |
-  | Fenced div   | `anx-<name>` on the div | the last paragraph inside it |
+  | Fenced div   | `anx-<name>`            | last paragraph of the div    |
 
-The three share one counter, and the reference always drops the carrier: `@anx-vif`, never `@tbl-anx-vif`.
-The carrier earns its place twice over: it decides which caption key is read, and it leaves the block an ordinary table or figure, still visible and still captioned, should the filter ever be removed.
+References always omit the prefix: `@anx-vif`, not `@tbl-anx-vif`.
 
-The prefix is French because the type was built for French documents; a document overrides it by redeclaring the type.
-A document-level `crossref:` block replaces the format's own rather than merging into it, so repeat the two keys that block also carries:
+To use another prefix, redeclare the type in the document.
+A document-level `crossref:` replaces the format's settings, so repeat `title-delim` and `tbl-title`:
 
 ```yaml
 crossref:
@@ -190,9 +185,7 @@ crossref:
 
 ## Customization
 
-### Frontmatter
-
-Common overrides in `_quarto.yml`:
+### Front matter
 
 ```yaml
 format:
@@ -207,60 +200,35 @@ format:
       margin-width: 300px
 ```
 
-HTML figures render as SVG (`fig-format: svg`) through the `svglite` device (`dev: svglite`), which **requires the `svglite` R package** in the rendering library.
-It writes figure labels as `<text>` elements, so they stay selectable and searchable and the file runs several times lighter, which compounds under `embed-resources: true`.
-Fall back to R's built-in cairo device, which needs no extra package but bakes every label into vector paths, with `knitr: { opts_chunk: { dev: svg, dev.args: null } }` in the document YAML.
-Render as raster with `knitr: { opts_chunk: { dev: png, dev.args: null } }` instead.
-`fig-format: png` on its own leaves the device on `svglite`, the format's explicit `dev` taking precedence over it.
-Typst and DOCX are unaffected.
+### Figures
+
+HTML figures render as SVG with `svglite`, which keeps text selectable.
+To render PNG instead:
+
+```yaml
+knitr:
+  opts_chunk:
+    dev: png
+    dev.args: null
+```
+
+Setting `fig-format: png` alone has no effect, as the format's `dev` setting takes precedence.
 
 ### Figure fonts
 
-A plotting device resolves R's own font families, not `mainfont`, so a figure would otherwise land beside Luciole body text on whatever the render machine resolves for the generic `sans`.
-The format aliases the two generics to the document fonts:
+In HTML figures, R's generic `sans` and `mono` families map to Luciole and Fira Code.
+Plots that name a font explicitly are not affected.
 
-```yaml
-dev.args:
-  system_fonts:
-    sans: "Luciole"
-    mono: "Fira Code"
-```
+Install Luciole and Fira Code on the machine that renders the document, including CI runners and servers; otherwise figures silently use a fallback font.
 
-The alias only decides what the **generic** `sans` and `mono` resolve to, which is what a plot that named no font receives.
-A plot that asks for a family explicitly (`par(family=)`, ggplot's `base_family=`) resolves through a different path and is left alone, so this changes the undecided case and overrides nothing.
+An SVG figure cannot use the page's web fonts, so figure text depends on the fonts installed on the reader's machine, and readers without Luciole see a substitute.
 
-Two things to know:
-
-**A figure never reaches the page's webfonts.** Quarto inserts each SVG as `<img src="data:image/svg+xml;...">`, and an SVG loaded through `<img>` is an isolated document: the `@font-face` rules in `fonts.css` do not cross into it, whatever family name the figure carries.
-Figure text is therefore resolved against the **reader's** installed fonts, not against the webfonts the page downloads for its body text.
-A reader without Luciole sees a substitute in the figures while the prose around them renders correctly, unless the figure carries a face of its own, which `fonts/register.R` below supplies.
-
-`svglite` pins each string's width with `textLength` and `lengthAdjust='spacingAndGlyphs'`, so a substitution keeps the layout and changes only the glyph shapes.
-
-The bundled `fonts/register.R` closes this gap: where it is sourced, it embeds the Luciole regular and bold faces into every svglite figure as `@font-face` blocks carrying a base64 WOFF2 `src:`, which an isolated SVG document *can* read since the data never leaves it.
-That costs roughly 114 KB per figure, and covers those two faces only: italic figure text, and anything monospaced that the `mono` alias sends to Fira Code, still resolves against the reader's fonts.
-The form to keep away from is `svglite::font_face(local = <family>, embed = TRUE)`: that one resolves the family through `systemfonts::font_info()` and embeds whichever file it lands on, a system TTF where one is installed, at many times the weight of the WOFF2.
-`embed = TRUE` alongside `woff2 = <path>` stays on the WOFF2 and is a shorter route to the same bytes; the script encodes the URI itself to keep the `;charset=utf-8` token that form adds out of a binary payload.
-
-**It also reads the render machine's installed fonts.** `svglite` writes the family it actually matched, never the one requested, so on a machine without Luciole the SVG names that machine's fallback and carries its metrics (`Noto Sans` on a typical desktop, `Liberation Sans` on a stock GitHub runner).
-The figure then claims a family nobody asked for, and even a reader who *has* Luciole sees the fallback.
-
-Naming the family in the plot (`par(family=)`, ggplot's `base_family=`) does **not** protect against this.
-It settles which family is asked for, not whether the machine can supply it: an explicit request for an absent font falls back exactly like the generic does.
-
-This bites hardest where the render machine is not the authoring one, a CI job or a server, since the substitution is silent and lands in the published artefact.
-Install Luciole and Fira Code there: the alias resolves through `systemfonts`, so the two families have to sit on whichever machine runs the render, not only on the one where the document is written.
-Measured on a fontconfig restricted to DejaVu, the alias writes `DejaVu Math TeX Gyre` into the SVG.
-
-**`dev.args` is replaced, not merged.** A chunk setting it for another purpose loses the alias entirely and falls back.
-Either repeat `system_fonts` in that call, or give the font in plot terms, which is what `example.qmd` does for its transparent-background figure.
-The embedded faces are not lost the same way: `fonts/register.R` adds them from a knitr option hook, which runs after the chunk's own value is resolved and merges into it.
+A chunk that sets `dev.args` replaces the format's value and loses the font mapping: repeat `system_fonts` in that chunk or set the font in the plot, for example with ggplot2's `base_family`.
 
 ### Figures that follow the light/dark toggle
 
-Use Quarto's `renderings` cell option: emit one plot per mode and Quarto tags them `.light-content` / `.dark-content`, which the body class selects at runtime.
-Give the device a transparent background so the page background shows through, and set the ink per mode.
-The cell may carry a plain `label` but no `fig-cap` or `fig-`-prefixed label (`renderings` is incompatible with cell-level crossref options), so wrap it in a fenced div that supplies the id and caption:
+Use Quarto's `renderings` option to produce one plot per colour scheme, with a transparent background.
+`renderings` does not support `fig-cap` or a `fig-` label, so put the chunk in a fenced div that carries them:
 
 ````markdown
 ::: {#fig-example}
@@ -278,34 +246,30 @@ Caption goes here.
 :::
 ````
 
-`ink` requires ggplot2 4.0 and does not reach tick labels or gridlines, which need explicit `axis.text`, `panel.grid` and `axis.ticks` colours.
-Both renderings stay in the DOM, so switching modes costs no reload.
+The `ink` argument requires ggplot2 4.0 and does not colour axis text or grid lines, which need `axis.text`, `panel.grid` and `axis.ticks`.
 See the Figure section of [`example.qmd`](example.qmd).
 
 ### Tables that follow the light/dark toggle
 
-`gt` tables need nothing: the theme restyles them in dark mode on its own.
-A `gt` table resolves its palette in R and writes it into a `<style>` block scoped by the table's own generated id, so left alone it renders as a light card on a dark page, and no ordinary stylesheet rule can outrank an id-weighted selector.
-The dark theme therefore carries a marked override, and it is deliberately one-sided: in light a table keeps whatever palette its R code chose.
+`gt` tables need no configuration: in dark mode, the theme replaces their colours.
+Colours set in R with `gt::tab_options()` apply in light mode only.
+To adjust the dark rendering, override `$primary-back` (table background), `$primary-surface` (column labels, striped rows, notes), `$body-color` (text) and `$neutral` (cell borders).
 
-Four variables move it.
-Text and the rules that structure the table follow `$body-color`, and the hairlines between cells are drawn from `$neutral`.
-The two surfaces are the page's own pair, so a table reads in dark as it does in light: whatever a light table leaves on the page background (column labels, striped rows, footnotes) takes `$primary-surface`, the colour the page itself is painted with, and the table ground takes `$primary-back`, the tint the TOC sidebar is painted with.
-Re-tinting a table in dark mode means overriding those in your own `custom.scss` rather than styling the table in R: a colour passed to `gt::tab_options()` is what the override replaces.
-`gt` will not take a CSS variable either, validating every colour option through `html_color()` and rejecting `var()`, `currentColor` and `inherit`.
-See the `gt` section of [`example.qmd`](example.qmd), which asks for a light palette in R and lets the dark bundle replace it.
+`reactable` tables without a `theme` argument get the same treatment.
+A table with `reactableTheme()` keeps its colours; use CSS variables to follow the toggle:
 
-A `reactable` table is covered too, on the same one-sided terms, and only where its author left it alone.
-A widget with no `theme` argument takes the two page surfaces, `$primary-surface` for the ground and `$primary-back` for the striped rows, plus the theme's hairlines on its borders, search box and column filters.
-A widget carrying any `reactableTheme()` keeps every colour that theme sets, and that is the route worth taking: unlike `gt`, `reactable` passes its theme strings through untouched, so `reactableTheme(color = "var(--bs-body-color)", backgroundColor = "var(--primary-surface)", stripedColor = "var(--primary-back)")` follows the toggle from the R side and needs no override at all.
-Left on the hex colours `reactableTheme()` is usually given, a widget renders its own light palette on a dark page.
+```r
+reactable::reactableTheme(
+  color = "var(--bs-body-color)",
+  backgroundColor = "var(--primary-surface)",
+  stripedColor = "var(--primary-back)"
+)
+```
 
-That opt-out covers the six colours `reactableTheme()` names directly (`color`, `backgroundColor`, `borderColor`, `borderWidth`, `stripedColor`, `highlightColor`) and stops there.
-The search box, the column filters and the page controls are reachable from R through style lists alone, which arrive as inline styles and outrank any stylesheet, so the dark theme dresses them whether the widget is themed or not.
+The search box, filters and pagination are styled by the theme in either case.
+Tables from other packages are not adapted.
 
-A table drawn by any other package is not covered.
-
-### Brand colors via `_brand.yml`
+### Brand colours with `_brand.yml`
 
 ```yaml
 color:
@@ -318,7 +282,7 @@ See [Quarto Brand](https://quarto.org/docs/authoring/brand.html) for the full sc
 
 ### SCSS overrides
 
-Create a `custom.scss` and place it last in the `theme:` key:
+Create a `custom.scss` and add it last to both theme lists:
 
 ```yaml
 format:
@@ -328,18 +292,15 @@ format:
       dark:  [theme-dark.scss,  theme-base.scss, custom.scss]
 ```
 
-The overridable variables are the `!default` declarations in `theme-light.scss`, `theme-dark.scss` and `theme-base.scss`; [CONTRIBUTING.md](CONTRIBUTING.md) lists all 47 under surface 2 of the public API, with the file each is declared in, and carries the SemVer policy that protects them.
+[CONTRIBUTING.md](CONTRIBUTING.md#public-api-surface) lists the 47 variables you can override.
 
 ### Text alignment
 
-Body paragraphs are justified, which matches what the Typst and DOCX sides of the extension already did, and hyphenated (`hyphens: auto`).
-The two go together: a justified line makes its right edge flush by widening the spaces between its words, and hyphenation is what lets it break a word instead, so the spaces stay close to their natural width.
-Hyphenation follows the document language and the reader's browser, which is where the dictionary lives; without one the text still justifies, on wider spaces.
-Prose dense in inline code is where this shows most, a `<code>` span being both long and unbreakable.
+Body text is justified and hyphenated.
+Hyphenation depends on the document language and on the reader's browser.
+Content in the margin column stays left-aligned.
 
-Content in the margin column is left alone: a `.column-margin` block, an `.aside` and a footnote under `reference-location: margin` all stay ragged-right, justification having no measure to work with at that width.
-
-The rule is `#quarto-document-content p`, and an override has to repeat that id:
+To align body text left, the rule must include the `#quarto-document-content` id:
 
 ```scss
 #quarto-document-content p {
@@ -347,43 +308,37 @@ The rule is `#quarto-document-content p`, and an override has to repeat that id:
 }
 ```
 
-A bare `p { text-align: left }` does not work, in a `custom.scss` or in a document `<style>` alike.
-The id weighs (1,0,1) against (0,0,1), and load order settles only a tie, so the shorter form loses wherever it is placed.
-This is the same specificity trap the `gt` section above describes, seen from the other side: there the id belongs to the table, here it belongs to the theme.
+A plain `p { text-align: left }` has no effect.
 
 ### Figure captions
 
-A figure carrying a cross-reference label is a Quarto float, and its caption sits at the bottom, left-aligned.
-A figure without one is not a float, and its caption takes the same typography (0.95rem, bold, `var(--caption-color)`) but is centred, as is any float caption the document moves to the top with `fig-cap-location: top`.
-Table and annexe captions are centred for the same reason, their caption being on top by default.
-The Word output applies the same rule by position, described below.
+Captions of cross-referenced figures sit below the figure and are left-aligned.
+Captions of unlabelled figures, and captions placed on top (tables, annexes, or `fig-cap-location: top`), are centred.
 
 ### Word output
 
-`hebstr-doc-docx` renders against `template.dotx`, built from Pandoc's own reference document so that every style Pandoc writes is defined in it.
-The text is set in Aptos, and Word versions that lack Aptos fall back to Calibri.
-Body paragraphs are justified and hyphenated, and headings are numbered by the template itself, which is why the format turns `number-sections` off.
-Hyphenation stops at body prose: headings, captions, lists, footnotes and single-paragraph table cells never break a word, while block quotes and the paragraphs of a multi-paragraph cell, set in styles based on `Body Text`, do.
-Body paragraphs are set in `Body Text`, with the first after a heading in `First Paragraph` and list items in `Compact`, both based on it, so restyle prose there rather than in `Normal`: every other style inherits from `Normal`, and the `flextable` cells that use it carry their own direct formatting.
-The title block stands alone on the first page, which carries no page number, the table of contents opens the second, and the body starts on the page after it.
-The table of contents takes its title from the document language, "Table of contents" in English and "Table des matières" in French, and `language: toc-title-document:` in `_quarto.yml` or the front matter overrides it.
-Word offers to update the table of contents when the document opens: its entries and page numbers are a field no renderer fills, so a document opened without accepting that offer shows the heading alone.
+`hebstr-doc-docx` uses the bundled `template.dotx`:
 
-The page is A4 with 2.5 cm margins, a text width of 6.2958 in.
-That width is a contract rather than a detail: the `hebstr` R package reads it through `docx_page_width()` to size Word tables, so any change to the template's geometry is recorded in the changelog.
+- text in Aptos, with Calibri as fallback;
+- body text justified and hyphenated, in the `Body Text` style, which you modify to restyle paragraphs;
+- headings numbered by the template, which is why the format sets `number-sections: false`;
+- the title block on the first page and the table of contents on the second, titled in the document language;
+- A4 pages with 2.5 cm margins, for a text width of 6.2958 in.
 
-Float captions are styled by where they sit, as in HTML.
-A caption above its content takes the `Table Caption` style, centred, and one below takes `Image Caption`, left-aligned.
-Tables and annexes are captioned on top by default and figures at the bottom, so a figure moved with `fig-cap-location: top` reads like a table caption.
-A float whose content is a table is set at body level, caption then table, rather than inside the one-cell table Quarto builds around a float, where Word would crush its columns; figures stay inside it.
-A caption can carry a second line, neither bold nor as large, by following its title with `<br>` and a span of class `quarto-float-subcaption`, which is the markup `hebstr::str_fig()` writes; in Word that line is a paragraph of its own, in `Table Caption Subtitle` or `Image Caption Subtitle`, under a title set in `Table Caption Title` or `Image Caption Title` so the two lines sit close:
+Word offers to update the table of contents when the document is opened; it stays empty until the update is accepted.
+To change its title, set `language: toc-title-document:` in `_quarto.yml`.
+
+The `hebstr` R package sizes tables from this text width, so the changelog records any change to it.
+
+Captions are styled by position, as in HTML: `Table Caption` above the content, `Image Caption` below.
+A caption can carry a second line, written as `<br>` followed by a `quarto-float-subcaption` span, the form `hebstr::str_fig()` produces:
 
 ```r
 #| label: fig-mass
 #| fig-cap: "Body mass by species<br><span class='quarto-float-subcaption'>Adult penguins only.</span>"
 ```
 
-To render against a template of your own, keep the style names the extension's DOCX filter writes: `Table Caption`, `Image Caption`, `Table Caption Title`, `Image Caption Title`, `Table Caption Subtitle`, `Image Caption Subtitle`, `Figure` and `Captioned Figure`.
+To use your own template, keep the styles the extension relies on: `Table Caption`, `Image Caption`, `Table Caption Title`, `Image Caption Title`, `Table Caption Subtitle`, `Image Caption Subtitle`, `Figure` and `Captioned Figure`.
 
 ```yaml
 format:
@@ -393,14 +348,11 @@ format:
 
 ### Code highlighting
 
-Code blocks use a dark surface in both light and dark modes, and R gets five tokens Pandoc's stock definition does not emit: the package name in front of `::` or `:::`, `library`/`require`/`requireNamespace` read as keywords rather than as ordinary calls, the argument separator, the `=` of a named argument, and brackets of every shape.
-This runs at render time in HTML and DOCX; Typst highlights through `code.tmTheme` instead and is unaffected.
+Code blocks have a dark background in both colour schemes.
+In HTML and Word, R code also highlights package names before `::`, `library()` and similar calls, argument separators, named-argument `=`, and brackets.
+Brackets use the `.re` class, which is gold in every language.
 
-Brackets carry one caveat worth knowing before you restyle anything.
-Skylighting exposes a closed set of token types and maps brackets to one that emits no span at all, so reaching them means borrowing `.re`, which nominally marks region markers.
-That borrowing is not scoped to R: `.re` renders in the namespace gold in every language the theme touches.
-
-Token colours are not exposed as variables yet, so overriding one means a rule in your `custom.scss`:
+Token colours are not exposed as variables; override them in `custom.scss`:
 
 ```scss
 code span .im {
@@ -408,12 +360,12 @@ code span .im {
 }
 ```
 
-The classes are Pandoc's: `.im` (imports and namespaces), `.re` (brackets, borrowed), `.kw` / `.cf` (keywords), `.fu` (function calls), `.st` (strings), `.dv` / `.fl` (numbers), `.op` / `.ot` / `.sc` (operators and punctuation), `.co` (comments).
+Classes: `.im` (imports and namespaces), `.re` (brackets), `.kw` / `.cf` (keywords), `.fu` (function calls), `.st` (strings), `.dv` / `.fl` (numbers), `.op` / `.ot` / `.sc` (operators and punctuation), `.co` (comments).
 
 ## Example
 
 Source: [example.qmd](example.qmd).
-Live demo at [hebstr.github.io/quarto-hebstr-doc](https://hebstr.github.io/quarto-hebstr-doc/).
+Live demo: [hebstr.github.io/quarto-hebstr-doc](https://hebstr.github.io/quarto-hebstr-doc/).
 
 ```bash
 quarto render example.qmd
@@ -421,5 +373,5 @@ quarto render example.qmd
 
 ## License
 
-[MIT](LICENSE.md), except two files that stay under the GPL: `_extensions/hebstr-doc/syntax/r.xml`, which derives from the KDE Kate highlighting module for R ([GPL v2](_extensions/hebstr-doc/syntax/RSyntax.LICENSE)), and `_extensions/hebstr-doc/template.dotx`, which derives from the reference document Pandoc ships ([GPL v2 or later](_extensions/hebstr-doc/template.LICENSE)).
-Bundled fonts and icons keep their own licences; [LICENSE.md](LICENSE.md) lists all of them.
+[MIT](LICENSE.md), except two files under the GPL: `_extensions/hebstr-doc/syntax/r.xml` ([GPL v2](_extensions/hebstr-doc/syntax/RSyntax.LICENSE)) and `_extensions/hebstr-doc/template.dotx` ([GPL v2 or later](_extensions/hebstr-doc/template.LICENSE)).
+Bundled fonts and icons keep their own licences, listed in [LICENSE.md](LICENSE.md).

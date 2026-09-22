@@ -6,11 +6,11 @@ filetree:
     "scripts": "R scripts the example injects with the `script` shortcode"
     "example.qmd": "feature showcase, rendered to example.html"
     "README.md": "installation, shortcodes and customization"
-    "CHANGELOG.md": "versioned public API surface"
+    "CHANGELOG.md": "release notes"
     "CONTRIBUTING.md": "versioning policy and release process"
     "LICENSE.md": "MIT, plus the licences of the bundled third-party assets"
-    "package.json": "pinned lint/format toolchain for the SCSS, HTML and JS (stylelint, prettier)"
-    "stylelint.config.mjs": "SCSS lint rules, tuned for Quarto region markers"
+    "package.json": "pinned versions of the stylesheet linter and formatter"
+    "stylelint.config.mjs": "stylesheet lint rules"
   highlight:
     - "^README%.md$"
   exclude:

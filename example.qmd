@@ -17,15 +17,12 @@ source("_extensions/hebstr-doc/fonts/register.R")
 
 # Typography and headings
 
-Only `hebstr-doc-html` ships on `main`; Typst and DOCX land once validated.
-
-Body text is [**Luciole**](https://luciole-vision.com) (sans-serif, low-vision).
-Inline `code()` is [**Fira Code**](https://github.com/tonsky/FiraCode) with ligatures.
+Body text is set in [**Luciole**](https://luciole-vision.com), a typeface designed for readers with low vision.
+Inline `code()` is set in [**Fira Code**](https://github.com/tonsky/FiraCode).
 
 ## Level 2 heading
 
-Headings are numbered down to level 4 (`number-depth: 4`).
-The cross-reference title delimiter is a literal dot (e.g. *Figure 1.1*).
+Headings are numbered down to level 4.
 
 ### Level 3 heading
 
@@ -53,12 +50,8 @@ Ordered:
 
 # Figure {#sec-figure}
 
-@fig-penguins is **ggplot2** on `palmerpenguins`, under the shared knitr options (`echo`, `message`, `warning` all off) and the HTML format's own `dev: svglite`, which Typst and DOCX do not carry.
-
-The chunk emits two plots; `renderings: [light, dark]` tags them `.light-content` / `.dark-content`, and the body class picks one at runtime.
-`renderings` rejects `fig-cap` and `fig-`-prefixed labels as cell options, so the fenced div carries the crossref id and caption.
-A transparent device background (`dev.args`) shows the page through, so only the ink varies per mode.
-Setting `dev.args` replaces the format's own value rather than extending it, which drops the `system_fonts` alias that would otherwise supply the document font, so the theme names `base_family` itself.
+@fig-penguins follows the colour scheme: the chunk produces one plot per scheme with `renderings: [light, dark]`, on a transparent background.
+Switch the scheme with the toggle to see the other version.
 
 ::: {#fig-penguins}
 ```{r}
@@ -102,16 +95,11 @@ p + theme_hebstr(ink = "#e8e8e8", grid = "#4d4d4d")
 Bill length vs flipper length by species (palmerpenguins).
 :::
 
-Both renderings stay in the DOM: mode switches need no reload.
-
 # Table
 
-`tbl-cap-location: top` puts a caption above its table; `tbl-title: "Table"` stays language-neutral.
-Only the `gt` table below carries one.
+Table captions are placed above the table.
 
 ## Markdown table
-
-A simple aggregation rendered as a Markdown table.
 
 ```{r}
 #| label: penguins-count
@@ -127,12 +115,8 @@ palmerpenguins::penguins |>
 
 ## gt
 
-`gt` resolves a table's palette in R and writes it into a `<style>` block scoped by the table's generated id, so a table renders on the colours its code resolved whatever scheme the page is in.
-@tbl-penguins-gt asks for a deliberate light palette: a pale blue table ground with white striped rows, bold column labels over a rule, and no vertical hairlines.
-The blue is `#F0FAFF`, a step off the `#F2FAFF` that `primary-back` compiles to in light.
-
-Dark is where the one scheme-specific `scss:rules` region of `theme-dark.scss` takes over and replaces it wholesale.
-No colour written into that `<style>` block survives, and the two surfaces it replaces them with are the page's own pair: what the light table leaves on the page background (column labels, striped rows, the source note) lands on `primary-surface`, and the table ground on `primary-back`.
+@tbl-penguins-gt sets a light palette in R.
+In dark mode, the theme replaces it with its own colours.
 
 ```{r}
 #| label: tbl-penguins-gt
@@ -183,11 +167,8 @@ palmerpenguins::penguins |>
 
 ## reactable
 
-`reactable` accepts a CSS variable where `gt` rejects one, so the widget below names the theme's own tokens from R and needs no override to follow the toggle.
-It lands on the theme's two page surfaces from one declaration, `primary-surface` for the ground and `primary-back` for the striped rows, in both schemes.
-The six colours `reactableTheme()` names directly are the whole of that route; its search box and column filters are reachable only through style lists, so the dark theme dresses those itself.
-
-A widget left unthemed is covered too, taking the same two surfaces, and any `reactableTheme()` at all opts out of that half.
+This widget uses the theme's CSS variables in `reactableTheme()`, so it follows the colour scheme.
+A widget without a theme gets the same colours by default.
 
 ```{r}
 #| label: penguins-reactable
@@ -214,7 +195,7 @@ palmerpenguins::penguins |>
 
 # Code block
 
-`echo: true` overrides the default to exercise highlighting, folding, and the copy-on-hover button (HTML), plus the `code.tmTheme` TextMate theme Typst applies via `#set raw(theme: …)` in `template.typ`.
+Code is hidden by default; this chunk sets `echo: true` to show it, with syntax highlighting and a copy button.
 
 ```{r}
 #| label: penguins-summary
@@ -236,8 +217,8 @@ palmerpenguins::penguins |>
 
 # Code window
 
-These blocks exercise the embedded [`mcanouil/quarto-code-window`](https://github.com/mcanouil/quarto-code-window) filter.
-The extension sets `style: default` (plain filename header, no window chrome); with `auto-filename: true`, blocks without a `filename=` show the language name as the label.
+Code blocks carry a header, provided by the embedded [`code-window`](https://github.com/mcanouil/quarto-code-window) extension.
+Without a `filename` attribute, the header shows the language.
 
 ```python
 def greet(name: str) -> str:
@@ -256,17 +237,13 @@ quarto render example.qmd
 
 # Injected script
 
-The `script` shortcode (in-tree `filters/add-code-files.lua`) injects `scripts/demo_penguins.R` verbatim.
-It emits a code block with the `cell-code` class, so `code-fold` wraps it in a collapsed `<details>`; the filename header expands it.
-`filters/add-code-files.js` rewrites the `<summary>` text to the filename (from [`shafayetShafee/add-code-files`](https://github.com/shafayetShafee/add-code-files), MIT).
-
-Inline chunks and externalised scripts both render as `code-window`, scripts folded behind their filename.
+The `script` shortcode includes `scripts/demo_penguins.R` as a folded code block; click the filename to expand it.
 
 {{< script scripts/demo_penguins.R >}}
 
 # Tabset {#sec-tabs}
 
-Tabs use the `.panel-tabset` div class; `tab-surface` (`theme-base.scss`) sets the panel fill, a tint of `primary` that covers both modes with one value.
+A `.panel-tabset` div creates the tabs.
 
 ::: {.panel-tabset}
 ## Adelie
@@ -311,19 +288,11 @@ palmerpenguins::penguins |>
 
 # File tree
 
-The `filetree` shortcode (in-tree `filters/filetree.lua`) walks this repository from disk at render time.
-`mode` picks the rendering: `static` (default) collapses directories past `depth` to `…`; `dynamic` (here) expands and collapses folders on click, with `depth` setting the open depth on load.
-
-Descriptions come from the `filetree.yml` sidecar, keyed by path.
-An unused key raises a render warning naming it, whether the path is absent from disk or dropped by `exclude`, `hidden` or `depth`.
+The `filetree` shortcode lists this repository at render time.
+With `mode=dynamic`, folders open and close on click.
+Descriptions come from the `filetree.yml` file.
 
 {{< filetree mode=dynamic >}}
-
-HTML renders a nested list styled by the `.filetree` rules in `theme-base.scss`.
-In `dynamic` mode each expandable folder is a native `<details>` that toggles without JavaScript, its Material icon switching to the open-folder variant while expanded; a childless folder renders flat.
-The surface stays dark in both colour modes, like the code windows.
-Each entry resolves a Material Icon Theme icon by exact filename, then extension, then a generic fallback: `README.md` matches on name, `CHANGELOG.md` falls through to the Markdown icon, `example.qmd` matches on extension.
-Typst and DOCX receive a plain bullet list.
 
 # Equation
 
@@ -335,7 +304,7 @@ $$
   \hat{\beta} = (X^\top X)^{-1} X^\top y
 $$ {#eq-ols}
 
-Textual equations (@eq-text):
+Display math with text (@eq-text):
 
 $$
   \frac{\text{upper text}}{\text{lower text}} \text{ beside text}
@@ -343,7 +312,7 @@ $$ {#eq-text}
 
 # Footnote
 
-Footnotes collect at the document end under a `.footnotes` section.[^footnote-demo]
+Footnotes are collected at the end of the document.[^footnote-demo]
 
 [^footnote-demo]: The footnote body.
     Markdown works here: *emphasis*, `code()`, and [links](https://quarto.org).
@@ -390,9 +359,8 @@ Callouts use `callout-appearance: simple`.
 
 # Annexes
 
-Quarto ships no appendix prefix among its crossref types, so the extension declares a custom `anx` float (`crossref: custom:` in `_extension.yml`) and reaches it from a chunk through `filters/crossref-anx.lua`.
-The knitr engine builds a float only from a `fig-` or `tbl-` label, so an annexe is authored as `tbl-anx-…` or `fig-anx-…`, and the filter drops that carrier prefix at `pre-quarto`.
-What is left is a float referenced as `@anx-…` and captioned *Annexe n.*; the three forms below share one counter.
+Annexes are numbered separately and referenced as `@anx-…`.
+A table chunk labelled `tbl-anx-…`, a figure chunk labelled `fig-anx-…` and a fenced div labelled `anx-…` all produce an annexe.
 
 ```{r}
 #| label: tbl-anx-mass
@@ -409,8 +377,6 @@ palmerpenguins::penguins |>
   )
 ```
 
-The carrier also decides which caption key is read: `tbl-cap` above, `fig-cap` below.
-
 ```{r}
 #| label: fig-anx-mass-spread
 #| fig-cap: "Body mass spread by species."
@@ -426,11 +392,10 @@ ggplot2::ggplot(
   ggplot2::theme_minimal(base_size = 12)
 ```
 
-A hand-written div carries no prefix to strip, so the filter leaves it alone and Quarto numbers it in the same sequence.
-It is the form for content that is neither a table nor a figure.
+A fenced div holds content that is neither a table nor a figure.
 
 ::: {#anx-notes}
-Regression diagnostics, model assumptions and any other supporting material go here as ordinary blocks.
+Regression diagnostics, model assumptions and other supporting material.
 
 Free-form annexe written as a fenced div.
 :::

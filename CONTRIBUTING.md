@@ -1,30 +1,25 @@
 # Contributing to hebstr-doc
 
-This document covers the SemVer policy, the public API surface, and the release procedure for `hebstr-doc`.
-For the SCSS layering and the override form, see [README.md](README.md); the public API surface below enumerates the variables it exposes and defines what of it is versioned.
+This document defines the public API surface, the versioning policy, the release procedure and the local checks for `hebstr-doc`.
 
 ## Public API surface
 
-A change is "API-affecting" only if it touches one of these surfaces:
+A change affects the public API only if it touches one of these surfaces:
 
 1. **Format names** declared in `_extension.yml`: `hebstr-doc-html`, `hebstr-doc-typst`, `hebstr-doc-docx`.
-2. **SCSS variables** with `!default` in `theme-light.scss`, `theme-dark.scss`, or `theme-base.scss`, enumerated below.
-3. **CSS custom properties** exposed under `:root` in `theme-base.scss`, each named after the SCSS variable it mirrors with `--` instead of `$`.
-   The mapping is partial: typography defaults, the layout-chrome variables, and `$body-bg` / `$body-color` are consumed at compile time and have no `:root` counterpart.
-4. **Frontmatter keys** wired through `_extension.yml` (`mainfont`, `monofont`, `linestretch`, `grid.*`, etc.).
-5. **Shortcodes** registered in `_extension.yml`: currently `{{< script path >}}` and `{{< filetree >}}`, including the `filetree.yml` sidecar schema the latter reads.
-6. **Bundled fonts** (Luciole, Fira Code, Font Awesome 7 Free, shipped as its Solid face): removing or replacing a font is API-affecting because consumer SCSS may reference the family name.
-7. **`quarto-required`** version constraint in `_extension.yml`.
-8. **Render-time R packages** the format requires through `_extension.yml` (currently `svglite`, wired as the HTML `knitr.opts_chunk.dev`): adding one makes a previously-working consumer render fail until it is installed.
-9. **Shipped consumer-facing scripts**: currently `fonts/register.R`, which a project sources by path from its `.Rprofile` or a setup chunk.
-   Moving or renaming it breaks that call site.
-   It registers the bundled faces with `systemfonts` when the machine lacks them, and embeds Luciole regular and bold into svglite figures as web fonts through a `knitr::opts_hooks` entry; that second half is skipped when `knitr` or `svglite` is absent, and the script returns before either half when `systemfonts` is, so none of the three becomes a requirement beyond surface 8.
-10. **Crossref types** declared under `crossref: custom:` in `_extension.yml`: currently `anx`, together with the `tbl-anx-` / `fig-anx-` carrier convention `filters/crossref-anx.lua` reads.
-    Renaming the key or the carrier breaks every `@anx-…` reference and every annexe label in a consumer document.
-    The `Annexe` prefix it ships is not part of the surface: a document overrides it by redeclaring the type.
+2. **SCSS variables** declared with `!default` in `theme-light.scss`, `theme-dark.scss` or `theme-base.scss`, listed below.
+3. **CSS custom properties** under `:root` in `theme-base.scss`, each named after its SCSS variable (`--primary` for `$primary`).
+   Not every variable has one: typography defaults, layout chrome, `$body-bg` and `$body-color` are compile-time only.
+4. **Front matter options** set in `_extension.yml` (`mainfont`, `monofont`, `linestretch`, `grid.*`, and so on).
+5. **Shortcodes**: `{{< script >}}` and `{{< filetree >}}`, including the `filetree.yml` schema.
+6. **Bundled fonts**: Luciole, Fira Code and Font Awesome 7 Free (Solid).
+7. **`quarto-required`** in `_extension.yml`.
+8. **Required R packages**: currently `svglite`, the device of the HTML format.
+9. **Shipped scripts** that projects call by path: currently `fonts/register.R`.
+10. **Cross-reference types**: currently `anx`, with its `tbl-anx-` and `fig-anx-` label prefixes.
+    The `Annexe` caption prefix is not part of the surface.
 
-The 47 variables of surface 2, grouped as they are declared.
-A group declared in `theme-light.scss` + `theme-dark.scss` carries one value per colour scheme, so an override supplies both; a group declared in `theme-base.scss` is scheme-invariant and is overridden once.
+The 47 SCSS variables of surface 2:
 
   | Group             | Declared in                            | Variables                                                                                                                                     |
   | ----------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -39,163 +34,111 @@ A group declared in `theme-light.scss` + `theme-dark.scss` carries one value per
   | Filetree          | `theme-base.scss`                      | `$filetree-{bg,fg,muted,highlight,guide}`                                                                                                     |
   | Layout chrome     | `theme-light.scss` + `theme-dark.scss` | `$navbar-bg`, `$navbar-fg`, `$navbar-hl`, `$sidebar-bg`, `$sidebar-fg`, `$sidebar-hl`, `$footer-bg`, `$footer-fg`                             |
 
-Two groups carry a constraint beyond their name.
-Layout chrome only takes effect in a project layout (website, book), a single-document render having no navbar, sidebar or footer, and its values must be Sass-resolvable colours: Quarto's Bootstrap layer calls `theme-contrast()` on them, so a CSS `color-mix(...)` there fails the compile rather than falling back.
-Code chrome and filetree are deliberately dark in both schemes, being editor chrome; overriding them per scheme means overriding them in your own layer, not in theirs.
+Variables declared in both scheme files take one value per colour scheme; those in `theme-base.scss` apply to both.
+Layout chrome only applies to websites and books, and must be a Sass colour (hex, named, `tint-color()`, `shade-color()`): a CSS `color-mix()` breaks the build.
+Code chrome and filetree colours are dark in both schemes by design.
 
-Changes to private internals (rule selectors, computed colour-mix knobs that are not exposed as variables, internal helpers, file reorganisation that does not move public resources) are **not** API-affecting.
-The `rhebstr` class that `filters/r-syntax.lua` adds to R code blocks is one of these: it exists so Pandoc resolves the bundled R syntax definition, it sits alongside the `r` class rather than replacing it, and it carries no promise.
-The syntax colours themselves are internal for the same reason, being literals in `scss:rules` rather than `!default` variables; that is a gap rather than a decision, and closing it would add to surface 2.
-Body text alignment and figure-caption alignment sit in that same gap, and one of them is sharper than a missing variable: `#quarto-document-content p` is id-weighted, so a consumer's existing `p { text-align: left }` is outranked rather than merely unsupported, and the override has to repeat the id.
-A rule that can silently defeat a consumer's own stylesheet is not covered by "rule selectors" above, whatever its file; it is why the justification default ships as MINOR under the row below rather than as a PATCH-class internal, and why README documents the override form.
+Everything else is internal: selectors, unexposed colour computations, helper classes such as `rhebstr`, and the file layout inside the extension.
+Syntax token colours are internal for now, as they are not exposed as variables.
 
-## SemVer policy
+## Versioning policy
 
-Versioning follows [Semantic Versioning 2.0.0](https://semver.org), applied to the public API surface above.
-While the extension is on a `0.x.y` line, MINOR bumps may include breaking changes if explicitly flagged in the changelog; from `1.0.0` onward, the rules below are strict.
+Versions follow [Semantic Versioning 2.0.0](https://semver.org), applied to the public API surface above.
 
-  | Bump      | Triggers                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-  | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | **MAJOR** | Renaming or removing a public SCSS variable, CSS custom property, format name, shortcode, or crossref type. Removing a frontmatter key. Replacing a bundled font with one that has a different family name. Raising `quarto-required` to a version that drops support for previously-supported users. Moving or renaming a shipped consumer-facing script. Adding a render-time R package requirement that no documented frontmatter override opts out of. |
-  | **MINOR** | Adding a new public SCSS variable, CSS custom property, format, frontmatter key, shortcode, or crossref type. Adding a bundled font or a shipped consumer-facing script. Lowering `quarto-required`. Adding a render-time R package requirement that a documented frontmatter override opts out of. Visual changes that consumers can opt out of via existing variables.                                                                                   |
-  | **PATCH** | Fix that does not alter the public API. Internal refactors. Documentation. Visual fixes that bring the rendered output closer to the documented behaviour.                                                                                                                                                                                                                                                                                                 |
+  | Bump      | Triggers                                                                                                                                                                                                                                                                                                                                             |
+  | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                            |
+  | **MAJOR** | Renaming or removing a public SCSS variable, CSS custom property, format, shortcode or cross-reference type. Removing a front matter option. Replacing a bundled font with a different family. Raising `quarto-required` beyond what existing users have. Moving or renaming a shipped script. Requiring a new R package with no documented opt-out. |
+  | **MINOR** | Adding a public SCSS variable, CSS custom property, format, front matter option, shortcode, cross-reference type, bundled font or shipped script. Lowering `quarto-required`. Requiring a new R package with a documented opt-out. Visual changes that can be reverted through existing variables.                                                   |
+  | **PATCH** | Fixes that do not change the public API. Internal refactoring. Documentation. Visual fixes that bring the output in line with the documentation.                                                                                                                                                                                                     |
 
-When in doubt, ask: "Could a consumer's existing `_quarto.yml` or `custom.scss` stop working after this change?"
-If yes, it is at least MINOR (with a deprecation note) or MAJOR (without a fallback).
+To classify a change, ask whether an existing `_quarto.yml` or `custom.scss` could stop working after it.
+If it could, the change is MINOR when a documented fallback exists, with a note in the changelog, and MAJOR otherwise.
 
-**No-consumer clause.** The strict table above is a contract with installed consumers, and the extension currently has none.
-Until it has known consumers, a breaking change to the public API surface may ship under a MINOR release when flagged in the changelog, rather than forcing a MAJOR bump.
-The first MAJOR is reserved for the first break that would reach an actual installed consumer.
+**No-consumer clause.** While the extension has no known installed users, a breaking change may ship in a MINOR release if the changelog flags it as breaking.
+The first MAJOR release is reserved for the first break that would affect an actual user.
 
 ## Release procedure
 
-Releases are git-tag-driven; the `release.yml` workflow turns each `v*` tag into a GitHub Release with auto-generated notes.
+Git tags drive releases: `release.yml` creates a GitHub Release for each `v*` tag.
 
 1. Update `version` in `_extensions/hebstr-doc/_extension.yml`.
-2. Move `## [Unreleased]` entries in `CHANGELOG.md` under a new `## [X.Y.Z] - YYYY-MM-DD` heading; add a fresh empty `## [Unreleased]` on top.
-3. Commit with message `vX.Y.Z` (or similar).
-4. Tag annotated: `git tag -a vX.Y.Z -m "vX.Y.Z"`.
-5. Push commit and tag: `git push && git push --tags`.
-6. The `release.yml` workflow opens a GitHub Release; copy the relevant CHANGELOG section into the release body if the auto-generated notes are too terse.
+2. In `CHANGELOG.md`, move the `## [Unreleased]` entries under `## [X.Y.Z] - YYYY-MM-DD` and add an empty `## [Unreleased]` above it.
+3. Commit.
+4. Create an annotated tag: `git tag -a vX.Y.Z -m "vX.Y.Z"`.
+5. Push the commit and the tag: `git push && git push --tags`.
+6. Check the GitHub Release created by `release.yml`, and paste the changelog section into it if needed.
 
-Consumers pin via `quarto add hebstr/quarto-hebstr-doc@vX.Y.Z`, and the tag alone is what makes that form resolvable: GitHub serves a source archive for every tag, and Quarto downloads `archive/refs/tags/vX.Y.Z.tar.gz` from it.
-Without a modifier, `quarto add hebstr/quarto-hebstr-doc` takes `archive/refs/heads/main.tar.gz`, so an unpinned consumer tracks `main` and receives every push whether it is tagged or not.
-The literal `@latest` resolves the same way as the bare form, not to the last published version (`githubLatestUrlProvider` in Quarto's bundle; verified against Quarto 1.10.18).
-The GitHub Release that `release.yml` opens is therefore for readers, not for the installer: Quarto queries GitHub's releases API for TinyTeX and for nothing else.
-Tag anyway, and tag before telling a consumer to pin: it is the only thing that makes an install reproducible.
+Users pin a release with `quarto add hebstr/quarto-hebstr-doc@vX.Y.Z`, which downloads the tagged source archive.
+`quarto add hebstr/quarto-hebstr-doc`, with or without `@latest`, installs the current `main` branch, not the latest release.
 
-## Local validation
+## Local checks
 
-`example.qmd` at the repo root is the canonical local validation surface.
-After editing the theme:
+### Render
+
+`example.qmd` is the reference document for visual checks:
 
 ```bash
 quarto render example.qmd --to hebstr-doc-html
 ```
 
-That render needs the `svglite` package, which the HTML format sets as the knitr device, plus what `example.qmd` itself loads (`ggplot2`, `dplyr`, `gt`, `reactable`, `palmerpenguins`, `sessioninfo`).
-Its setup chunk sources `_extensions/hebstr-doc/fonts/register.R`, so the bundled faces are registered on a machine that lacks them and the figures do not fall back silently.
+It requires the R packages `svglite`, `ggplot2`, `dplyr`, `gt`, `reactable`, `palmerpenguins` and `sessioninfo`.
+It does not cover every rule of the theme: check unlabelled figures and margin content in a separate test document.
+Typst and Word are not yet rendered from `example.qmd`.
 
-Currently HTML only: `hebstr-doc-typst` and `hebstr-doc-docx` are declared in `_extension.yml` but not yet validated, and `example.qmd` will declare all three once they are.
-That gap hides rendering keys as well as a format: `link-citations: true` sits in the `docx:` block, and no local render and no CI step exercises it.
-The three DOCX-only filters of that block are rendered in CI, because their unit tests cover the AST edit alone and would stay green if the wiring stopped resolving: `tests/docx-cell.sh` asserts the cells `filters/docx-cell-paragraph.lua` closes, and `tests/docx-template.sh` the captions `filters/docx-caption.lua` restyles, the table floats it takes out of their wrapper, and the page break `filters/docx-toc-break.lua` sets after the table of contents.
-What neither reaches is the outcome itself, Word opening and laying out the file: LibreOffice converts documents Word refuses and breaks justified lines differently, so that half is owed to a real Word install.
+### Word template
 
-`template.dotx` is a binary, rebuilt rather than edited by hand: change `scripts/build_template.py`, run it, then check what it wrote.
+`template.dotx` is generated; do not edit it in Word.
+Change `scripts/build_template.py`, rebuild, then check the result:
 
 ```bash
 uv run scripts/build_template.py
 Rscript scripts/check-docx.R _extensions/hebstr-doc/template.dotx
 ```
 
-`scripts/check-docx.R` takes any `.docx` or `.dotx` and asserts what a Word reader depends on: every referenced style defined, every table cell closed by a paragraph, no unreferenced media, a text width of 6.2958 in, hyphenation on, and Calibri declared as the fallback of Aptos.
-Run it on a rendered document as well as on the template, since Pandoc decides what of the template reaches the output; it needs the `officer` R package.
+`scripts/check-docx.R` accepts any `.docx` or `.dotx` and requires the `officer` and `xml2` R packages.
+Changes to Word output should also be checked in Word itself: LibreOffice does not render or validate documents the way Word does.
 
-The document does not instantiate every selector the theme ships, and a clean render is therefore not proof that a rule applies.
-It holds no figure without a cross-reference label and no `.column-margin` content, so the caption rules for a non-float figure and the margin exemption on justified prose are compiled but never matched.
-A rule whose DOM shape is missing from this document has to be checked against a throwaway `.qmd` rendered beside it, and the computed style read rather than the selector eyeballed: a rule can compile, reach the page and still lose on specificity.
+### Tests
 
-The in-tree Lua filters carry a [luaunit](https://github.com/bluebird75/luaunit) suite under `tests/`, which CI runs as its own step:
+The Lua filters have a [luaunit](https://github.com/bluebird75/luaunit) test suite:
 
 ```bash
 quarto pandoc lua tests/run.lua
 ```
 
-A change to `filters/*.lua` is expected to keep that suite green and to add a fixture when it adds behaviour.
-
-A second CI step covers what that suite cannot reach, the R syntax definition actually winning over the one Quarto bundles:
+Four scripts render test documents through the extension and check the output:
 
 ```bash
-bash tests/r-syntax-tokens.sh
+bash tests/r-syntax-tokens.sh   # R syntax highlighting
+bash tests/anx-float.sh         # annexe cross-references
+bash tests/docx-cell.sh         # Word table cells
+bash tests/docx-template.sh     # Word styles, captions and table of contents
 ```
 
-It renders `tests/r-syntax-probe.qmd` through the extension and asserts seven tokens in the HTML, one per divergence from the definition Quarto bundles, so a Quarto upgrade that reordered syntax-definition resolution fails here rather than silently reverting R code blocks to Pandoc's stock colours.
-The probe is staged at the repo root for the render and removed afterwards.
-
-A third step does the same for the `anx` crossref type:
-
-```bash
-bash tests/anx-float.sh
-```
-
-It renders `tests/anx-float-probe.qmd` and asserts the three authoring forms of an annexe against the HTML: the carrier prefix stripped, the custom float class applied, one counter shared by the three, and a `@anx-` reference resolved.
-A float that stopped reaching the type would lose its number and its caption while the render still exited 0, which is what the assertions exist to catch.
-This probe is staged and removed the same way.
-
-A fourth step renders DOCX, and it asserts the one property no render reports on its own:
-
-```bash
-bash tests/docx-cell.sh
-```
-
-It renders `tests/docx-cell-probe.qmd`, a `gt` table inside a cross-referenced float, and counts the table cells whose last block-level element is not a `w:p`, which must be none.
-Word refuses to open a document holding one and names no usable location, while LibreOffice converts the same file without complaint, so the breach is invisible to every tool on a Linux machine.
-The assertion is structural rather than lexical, read off the parsed `word/document.xml` through the `python3` that GitHub's runner ships preinstalled.
-This probe is staged and removed like the other two.
-It no longer reaches the open cell it was written for: `filters/docx-caption.lua` takes its float out of the wrapper table, so the count holds whether `filters/docx-cell-paragraph.lua` runs or not.
-
-A fifth step renders the Word template itself:
-
-```bash
-bash tests/docx-template.sh
-```
-
-It renders `tests/docx-template-probe.qmd`, which carries a title block, a footnote, a figure captioned at the bottom with a subtitle line, a figure moved to the top, a Markdown table, a `gt` table with a subtitle line and an annexe.
-`scripts/check-docx.R` then reads the output, and a structural pass asserts every float caption: a single paragraph-properties element with no direct alignment, `Table Caption` above its content and `Image Caption` below (`Table Caption Title` or `Image Caption Title` when a subtitle follows), each subtitle in a paragraph of its own under the matching `Table Caption Subtitle` or `Image Caption Subtitle`, and the five captions in the positions the probe asks for.
-The same pass asserts that no table float is left inside a table cell, where Word crushes it, and that each of the probe's cross-references resolves to a bookmark.
-It also reads the table of contents: titled "Table of contents" from the language rather than Pandoc's hard-coded default, followed by a page break before the body, and carried by a document whose settings ask Word to recalculate fields on open and whose styles define `TOC1` to `TOC9`.
-Last, it resolves hyphenation style by style along `basedOn`: on for `Body Text` and `First Paragraph`, off for `Normal`, `Compact`, `Heading 1`, `Image Caption` and `Footnote Text`.
-It needs the `officer` R package on top of what the render uses, and its probe is staged and removed like the others.
+CI runs all of them, plus the pre-commit hooks and a `lua-language-server --check` pass.
 
 ## Pre-commit hooks
 
-The repo ships a [`prek`](https://github.com/j178/prek) config (`prek.toml`): YAML/large-file/merge-conflict checks, secret scanning (gitleaks), R format/lint (air, jarl), Typst (typstyle), Lua (StyLua), shell format/lint (shfmt, shellcheck), CSS/SCSS lint (stylelint), format of the CSS/SCSS plus the HTML and JS the extension ships (prettier), and prose-lint.
-The same hooks run in CI (`render.yml`), alongside six gates that are not hooks: the five test steps above and a `lua-language-server --check` type pass.
-Running the hooks locally therefore avoids most of a red build, not all of it.
+The repository uses [`prek`](https://github.com/j178/prek), configured in `prek.toml`.
+The hooks check YAML, large files, merge conflicts and secrets, and format or lint R, Typst, Lua, shell scripts, stylesheets, HTML and JavaScript.
 
-Both hooks resolve from `node_modules/.bin`, so install the pinned toolchain once before running them (stylelint 17 needs Node >= 20.19; CI pins 22):
+The stylesheet tools are pinned in `package.json` (Node 20.19 or later):
 
 ```bash
-npm ci                                   # restores the versions in package-lock.json
-prek install                             # install the git hook (runs on commit)
-prek run --all-files --skip prose-lint   # run everything once against the whole tree
+npm ci
+prek install
+prek run --all-files --skip prose-lint
 ```
 
-The `prose-lint` hook is a local-only tool; skip it as shown (CI skips it too).
-The SCSS rules live in `stylelint.config.mjs`, which extends `stylelint-config-standard-scss`: that base ruleset is what enforces hex shortening, one selector per line, lowercase `currentcolor`, a generic family on every `font-family`, and a namespaced `color.mix` over the global `mix`, so expect it to rewrite more than the three local rules describe.
-Those three deliberately disable `comment-whitespace-inside` (its autofix rewrites Quarto's `/*-- scss:defaults --*/` region markers, and Quarto then rejects the theme file), ban both `@import` and `@use`, and widen `selector-class-pattern` to accept the camelCase classes Pandoc emits (`.sourceCode`, `.numberSource`).
-`@import` is removed in Dart Sass 3.0.0 and a Quarto render swallows the deprecation warning, so the gate is the only signal.
-`@use` is banned because Quarto concatenates user layers without deduplicating, so a consumer whose own `custom.scss` loads the same module fails the render on a duplicate namespace.
-That closes the migration path `scss/no-global-function-names` suggests: reach for Bootstrap's `tint-color()` / `shade-color()` wrappers instead of `color.mix`, which also keeps the value typed as a colour for Quarto's SCSS analysis.
-Both hooks skip generated output (`_site/`, `_freeze/`, `*_files/`) and `_extensions/hebstr-doc/_extensions/`: the extensions embedded there are vendored upstream copies, and formatting them in place would drift from what `quarto add --embed` reinstalls.
-`stylelint` stops at `.css` and `.scss`, having nothing to say about the rest; `prettier` also matches `.html` and `.js`/`.mjs`/`.cjs`, which is what covers the JS the extension ships (`filters/toggle-position.html` as an inline fragment, `filters/add-code-files.js` as a dependency), and it skips `tests/fixtures/` on top, those sources being verbatim inputs like the ones the R and Lua hooks already leave alone.
+`prose-lint` is a local tool and is skipped in CI.
+The stylesheet rules live in `stylelint.config.mjs`.
+`@import` and `@use` are not allowed in theme files: use Bootstrap's `tint-color()` and `shade-color()` instead of the `sass:color` module.
 
-## Where things live
+## Repository layout
 
-- `_extensions/hebstr-doc/`: the extension itself (do not flatten).
-- `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (currently `mcanouil/code-window`).
-- `scripts/`: `demo_penguins.R`, which `example.qmd` injects; `build_template.py` and `check-docx.R`, the rebuild recipe and the invariant check of the DOCX template.
-- `tests/`: luaunit suite for the in-tree Lua filters, entrypoint `run.lua`, plus the four render probes `r-syntax-tokens.sh`, `anx-float.sh`, `docx-cell.sh` and `docx-template.sh` with the `.qmd` each renders.
-- Repo root: `prek.toml`, `stylua.toml`, `.styluaignore` and `.luarc.json` configure the commit hooks (R, Typst, Lua, shell, CSS/HTML/JS, secrets, prose) and the LuaLS type check.
-- `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo deploy), `release.yml` (releases).
-- `package.json` + `package-lock.json` + `stylelint.config.mjs`: the pinned stylelint/prettier toolchain and the SCSS rules it enforces; `node_modules/` is gitignored.
+- `_extensions/hebstr-doc/`: the extension.
+- `_extensions/hebstr-doc/_extensions/`: embedded third-party extensions (`mcanouil/code-window`).
+- `scripts/`: the script included by `example.qmd`, and the Word template build and check scripts.
+- `tests/`: the Lua test suite and the render test scripts.
+- `.github/workflows/`: `render.yml` (CI), `pages.yml` (demo site), `release.yml` (releases).
+- `prek.toml`, `package.json`, `stylelint.config.mjs`, `stylua.toml`, `.luarc.json`: tooling configuration.
