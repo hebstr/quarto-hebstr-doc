@@ -52,6 +52,9 @@
   An exact key wins over a glob, and a conflict between globs resolves on the first key in byte order with a warning, a YAML mapping reaching Lua with no declaration order to fall back on.
   A glob that takes no rendered entry warns like a dead exact key, a glob having no single path whose existence on disk could be tested.
 
+- `{{< filetree >}}` resolves ten more file families to a specific icon, vendored from Material Icon Theme at the same v5.37.0 tag: `table` (`xlsx`, `xlsm`, `xls`, `ods`, `csv`, `tsv`), `powerpoint` (`pptx`, `ppt`, `potx`, `odp`), `pdf`, `svg`, `bibliography` (`bib`), `console` (`sh`, `bash`, `zsh`), `log`, `database` (`sql`, `db`, `sqlite`, `duckdb`, `parquet`, `feather`), `xml` (`xml`, `csl`) and `rust` (`rs`).
+  An `.svg` file now takes the dedicated `svg` icon rather than the generic `image` one, as it does upstream; `duckdb` is the one extension upstream maps to nothing.
+
 ### Changed
 
 - The `{{< script >}}` shortcode renders in HTML only and emits nothing in Typst and DOCX.

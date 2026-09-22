@@ -100,7 +100,23 @@ function TestFiletree:test_icon_key_resolves_per_file_type()
   local sc = support.load_shortcode(FILTER, { formats = { ["html:js"] = true }, script_file = FILTER })
   local div = sc["filetree"](support.args(), kwargs({ root = "tests/fixtures/icons", hidden = "true" }), {})
   local html = div.content[1].text
-  for _, key in ipairs({ "ft-i-toml", "ft-i-lock", "ft-i-tune", "ft-i-r", "ft-i-javascript" }) do
+  for _, key in ipairs({
+    "ft-i-toml",
+    "ft-i-lock",
+    "ft-i-tune",
+    "ft-i-r",
+    "ft-i-javascript",
+    "ft-i-table",
+    "ft-i-powerpoint",
+    "ft-i-pdf",
+    "ft-i-svg",
+    "ft-i-bibliography",
+    "ft-i-console",
+    "ft-i-log",
+    "ft-i-database",
+    "ft-i-xml",
+    "ft-i-rust",
+  }) do
     lu.assertStrContains(html, key)
   end
   -- The classes emit regardless of a readable icon ; this proves the SVGs are
