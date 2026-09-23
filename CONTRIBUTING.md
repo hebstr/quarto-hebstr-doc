@@ -83,7 +83,7 @@ quarto render example.qmd --to hebstr-doc-html
 ```
 
 It requires the R packages `svglite`, `ggplot2`, `dplyr`, `gt`, `reactable`, `palmerpenguins` and `sessioninfo`.
-It does not cover every rule of the theme: check unlabelled figures and margin content in a separate test document.
+It does not cover every rule of the theme: check anything it does not show in a separate test document.
 Typst and Word are not yet rendered from `example.qmd`.
 
 ### Word template

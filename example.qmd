@@ -95,6 +95,19 @@ p + theme_hebstr(ink = "#e8e8e8", grid = "#4d4d4d")
 Bill length vs flipper length by species (palmerpenguins).
 :::
 
+A figure without a cross-reference label keeps its caption but gets no number.
+
+```{r}
+#| label: penguins-mass-histogram
+#| fig-cap: "Body mass distribution (palmerpenguins)."
+#| fig-height: 3
+
+ggplot(palmerpenguins::penguins, aes(x = body_mass_g)) +
+  geom_histogram(bins = 30, na.rm = TRUE) +
+  labs(x = "Body mass (g)", y = "Count") +
+  theme_minimal(base_size = 12, base_family = "Luciole")
+```
+
 # Table
 
 Table captions are placed above the table.
@@ -215,6 +228,16 @@ palmerpenguins::penguins |>
   arrange(desc(mean_mass_g))
 ```
 
+Printed output of a chunk whose code stays hidden gets a `default` header, since `collapse: true` merges it into a block with no language.
+With `collapse: false`, as in this chunk, it shows as plain output on the same dark surface.
+
+```{r}
+#| label: penguins-mass-summary
+#| collapse: false
+
+summary(palmerpenguins::penguins$body_mass_g)
+```
+
 # Code window
 
 Code blocks carry a header, provided by the embedded [`code-window`](https://github.com/mcanouil/quarto-code-window) extension.
@@ -316,6 +339,15 @@ Footnotes are collected at the end of the document.[^footnote-demo]
 
 [^footnote-demo]: The footnote body.
     Markdown works here: *emphasis*, `code()`, and [links](https://quarto.org).
+
+# Margin note
+
+A `.column-margin` div places its content in the margin column, next to the paragraph it follows.
+Body text is justified; margin content stays left-aligned.
+
+::: {.column-margin}
+A margin note, written as a `.column-margin` div, with enough text to wrap over several lines in the narrow column.
+:::
 
 # Callouts
 
