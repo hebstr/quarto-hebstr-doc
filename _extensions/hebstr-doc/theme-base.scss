@@ -76,7 +76,7 @@ body {
 // Hyphenation is what keeps justification from stretching word spaces. It
 // engages wherever the reader's browser carries a dictionary for the document
 // language, and falls back to wider spaces where none is installed.
-#quarto-document-content p {
+#quarto-document-content p:not(:where(figure p)) {
   text-align: justify;
   hyphens: auto;
 }
@@ -511,6 +511,23 @@ pre {
     background-color: var(--code-background-color);
     color: var(--code-comment-color);
     padding: 1rem;
+  }
+}
+
+.cell-output > pre {
+  background-color: var(--code-background-color);
+  color: var(--code-foreground-color);
+  border-radius: 12px;
+  padding: 1em;
+  margin: 1em 0;
+  line-height: 1.4;
+  font-size: 0.9rem;
+
+  > code {
+    background-color: transparent !important;
+    color: inherit;
+    padding: 0 !important;
+    font-size: inherit;
   }
 }
 

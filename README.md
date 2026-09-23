@@ -298,12 +298,12 @@ format:
 
 Body text is justified and hyphenated.
 Hyphenation depends on the document language and on the reader's browser.
-Content in the margin column stays left-aligned.
+Content in the margin column stays left-aligned, and figures keep their `fig-align`.
 
 To align body text left, the rule must include the `#quarto-document-content` id:
 
 ```scss
-#quarto-document-content p {
+#quarto-document-content p:not(:where(figure p)) {
   text-align: left;
 }
 ```

@@ -5,6 +5,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed
+
+- The embedded `code-window` extension is updated from 1.1.5 to 1.5.1, and code blocks change in two ways:
+  - a code block with no language gets a header labelled `default`; add `code-window-enabled="false"` to the block to keep it plain;
+  - the output of an executed cell keeps its dark code block but loses its copy button; set `cell-output: true` under `extensions: code-window:` to show it in a code window labelled `default`, with a copy button.
+
+  The update also brings the `collapse` and `lines-label` options and checks the `code-window` settings for errors.
+  See the [code-window changelog](https://github.com/mcanouil/quarto-code-window/blob/1.5.1/CHANGELOG.md).
+
+### Fixed
+
+- Figures follow `fig-align` again in HTML.
+  Since 1.5.0, body justification also applied to the image of a figure built with `renderings` or of an unlabelled figure with a caption, which left it aligned to the left.
+  The body text override in [Text alignment](README.md#text-alignment) now excludes figures; the previous form still works but also moves those figures to the left.
+
 ## [1.5.0] - 2026-09-22
 
 ### Added
