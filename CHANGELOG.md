@@ -9,7 +9,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - The embedded `code-window` extension is updated from 1.1.5 to 1.5.1, and code blocks change in two ways:
   - a code block with no language gets a header labelled `default`; add `code-window-enabled="false"` to the block to keep it plain;
-  - the output of an executed cell keeps its dark code block but loses its copy button; set `cell-output: true` under `extensions: code-window:` to show it in a code window labelled `default`, with a copy button.
+  - printed output of a chunk whose code is hidden gets the same `default` header, with line numbers, because `collapse: true` merges it into a block with no language; set `collapse: false` on the chunk to show it as plain output on the dark code surface, without a header or a copy button.
 
   The update also brings the `collapse` and `lines-label` options and checks the `code-window` settings for errors.
   See the [code-window changelog](https://github.com/mcanouil/quarto-code-window/blob/1.5.1/CHANGELOG.md).
