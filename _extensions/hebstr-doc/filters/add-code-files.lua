@@ -17,6 +17,8 @@ local lang_from_ext = {
   css = "css",
   scss = "scss",
   typ = "typst",
+  log = "log",
+  txt = "txt",
 }
 
 local function warn(msg)

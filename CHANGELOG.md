@@ -5,6 +5,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- The `script` shortcode recognises `.log` and `.txt` files, and labels their code header `log` or `txt`.
+
 ### Changed
 
 - The embedded `code-window` extension is updated from 1.1.5 to 1.5.1, and code blocks change in two ways:

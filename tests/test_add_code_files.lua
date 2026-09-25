@@ -19,6 +19,15 @@ function TestAddCodeFiles:test_reads_file_into_codeblock()
   lu.assertTrue(cb.classes:includes("cell-code"))
 end
 
+function TestAddCodeFiles:test_log_and_txt_extensions_set_the_header_label()
+  local sc = support.load_shortcode(FILTER, HTML)
+  for path, lang in pairs({ ["tests/fixtures/run.log"] = "log", ["tests/fixtures/indented.txt"] = "txt" }) do
+    local cb = sc["script"](support.args(path), support.kwargs({})).content[1]
+    lu.assertEquals(cb.classes[1], lang)
+    lu.assertEquals(cb.attributes.filename, lang)
+  end
+end
+
 function TestAddCodeFiles:test_lines_range_selects_a_slice()
   local sc = support.load_shortcode(FILTER, HTML)
   local div = sc["script"](support.args("tests/fixtures/hello.R"), support.kwargs({ lines = "2-2" }))
