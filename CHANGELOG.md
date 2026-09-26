@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as defined in [CONTRIBUTING.md](CONTRIBUTING.md).
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
@@ -80,7 +80,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - **Breaking:** the SCSS variables `$surface-default` and `$figure-shadow`, and their CSS custom properties `--surface-default` and `--figure-shadow`.
   No rule used either, so overriding them had no effect.
-  Shipped as a minor release under the no-consumer clause of [CONTRIBUTING.md](CONTRIBUTING.md).
+  Shipped as a minor release under the no-consumer clause of `CONTRIBUTING.md`.
 
 ### Fixed
 
@@ -199,12 +199,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ## [1.0.0] - 2026-04-29
 
 First stable release.
-The public API surface is versioned as described in [CONTRIBUTING.md](CONTRIBUTING.md).
+The public API surface is versioned as described in `CONTRIBUTING.md`.
 
 ### Added
 
 - SCSS variables for the navbar, sidebar and footer of websites and books: `$navbar-bg`, `$navbar-fg`, `$navbar-hl`, `$sidebar-bg`, `$sidebar-fg`, `$sidebar-hl`, `$footer-bg`, `$footer-fg`.
-- [CONTRIBUTING.md](CONTRIBUTING.md), with the public API surface, versioning policy and release procedure.
+- `CONTRIBUTING.md`, with the public API surface, versioning policy and release procedure.
 
 ### Changed
 

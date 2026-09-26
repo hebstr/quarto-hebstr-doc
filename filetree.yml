@@ -7,7 +7,6 @@ default:
     "example.qmd": "feature showcase, rendered to example.html"
     "README.md": "installation, shortcodes and customization"
     "CHANGELOG.md": "release notes"
-    "CONTRIBUTING.md": "versioning policy and release process"
     "LICENSE.md": "MIT, plus the licences of the bundled third-party assets"
     "package.json": "pinned versions of the stylesheet linter and formatter"
     "stylelint.config.mjs": "stylesheet lint rules"

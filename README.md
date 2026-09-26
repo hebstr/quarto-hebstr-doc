@@ -311,7 +311,7 @@ format:
       dark:  [theme-dark.scss,  theme-base.scss, custom.scss]
 ```
 
-[CONTRIBUTING.md](CONTRIBUTING.md#public-api-surface) lists the 47 variables you can override.
+The variables you can override are the `!default` declarations in the `scss:defaults` sections of `theme-light.scss`, `theme-dark.scss` and `theme-base.scss`.
 
 ### Text alignment
 
