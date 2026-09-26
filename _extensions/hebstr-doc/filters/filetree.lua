@@ -411,7 +411,7 @@ local function read_sidecar(path, profile)
     return nil
   end
   local block = doc.meta[profile]
-  if not block then
+  if block == nil then
     local names = {}
     for name in pairs(doc.meta) do
       names[#names + 1] = name

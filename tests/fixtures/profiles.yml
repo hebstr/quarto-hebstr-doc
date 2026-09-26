@@ -16,3 +16,5 @@ doc:
     "src/main.lua": "doc desc"
 
 scalar: true
+
+disabled: false

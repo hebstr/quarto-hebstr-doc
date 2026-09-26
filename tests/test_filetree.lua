@@ -75,14 +75,17 @@ function TestFiletree:test_unknown_profile_warns_and_renders_nothing()
   local out, warnings = profile_html(support.args("nope"))
   lu.assertEquals(#out, 0)
   lu.assertStrContains(warnings, "no profile 'nope'")
-  lu.assertStrContains(warnings, "profiles found: default, doc, scalar")
+  lu.assertStrContains(warnings, "profiles found: default, disabled, doc, scalar")
 end
 
 function TestFiletree:test_scalar_profile_renders_without_paths()
-  local div, warnings = profile_html(support.args("scalar"))
-  lu.assertStrContains(div.content[1].text, "README.md")
-  lu.assertNotStrContains(div.content[1].text, "ft-desc")
-  lu.assertEquals(warnings, "")
+  for _, name in ipairs({ "scalar", "disabled" }) do
+    local div, warnings = profile_html(support.args(name))
+    lu.assertEquals(div.t, "Div", name)
+    lu.assertStrContains(div.content[1].text, "README.md")
+    lu.assertNotStrContains(div.content[1].text, "ft-desc")
+    lu.assertEquals(warnings, "", name)
+  end
 end
 
 function TestFiletree:test_legacy_filetree_key_is_not_a_default()
