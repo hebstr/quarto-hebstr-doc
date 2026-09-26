@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-09-26
+
 ### Added
 
 - The `script` shortcode recognises `.log` and `.txt` files, and labels their code header `log` or `txt`.
