@@ -8,8 +8,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Added
 
 - The `script` shortcode recognises `.log` and `.txt` files, and labels their code header `log` or `txt`.
+- `filetree.yml` holds several named profiles, and `{{< filetree name >}}` renders the profile `name`.
+  See [`filetree`](README.md#filetree).
 
 ### Changed
+
+- **Breaking:** `filetree.yml` no longer has a `filetree:` key: its top-level keys are profiles, and `{{< filetree >}}` renders the one named `default`.
+  Rename `filetree:` to `default:` in an existing file; until then the shortcode renders nothing and raises a warning.
 
 - The embedded `code-window` extension is updated from 1.1.5 to 1.5.1, and code blocks change in two ways:
   - a code block with no language gets a header labelled `default`; add `code-window-enabled="false"` to the block to keep it plain;

@@ -39,11 +39,75 @@ function TestFiletree:test_html_branch_emits_rawblock()
   lu.assertFalse(div.classes:includes("filetree-dynamic"))
 end
 
-function TestFiletree:test_positional_args_are_warned_and_ignored()
-  local sc = support.load_shortcode(FILTER, { formats = { ["html:js"] = false } })
-  sc["filetree"](support.args("stray"), kwargs({ root = "tests/fixtures/tree" }), {})
-  local joined = table.concat(support.warnings, "\n")
-  lu.assertStrContains(joined, "positional arguments are ignored")
+local function described(name, desc)
+  return '<span class="ft-name">' .. name .. '</span><span class="ft-desc">' .. desc .. "</span>"
+end
+
+local PROFILES = "tests/fixtures/profiles.yml"
+
+local function profile_html(args, sidecar)
+  local sc = support.load_shortcode(FILTER, { formats = { ["html:js"] = true }, script_file = FILTER })
+  local out = sc["filetree"](args, kwargs({ root = "tests/fixtures/tree", annotations = sidecar or PROFILES }), {})
+  return out, table.concat(support.warnings, "\n")
+end
+
+function TestFiletree:test_bare_call_reads_the_default_profile()
+  local div, warnings = profile_html(support.args())
+  local html = div.content[1].text
+  lu.assertStrContains(html, described("<strong>README.md</strong>", "default desc"))
+  lu.assertStrContains(html, '<span class="ft-name"><strong>src/</strong></span>')
+  lu.assertStrContains(html, "ft-more")
+  lu.assertNotStrContains(html, "doc desc")
+  lu.assertEquals(warnings, "")
+end
+
+function TestFiletree:test_positional_name_selects_a_profile_without_inheriting_default()
+  local div, warnings = profile_html(support.args("doc"))
+  local html = div.content[1].text
+  lu.assertStrContains(html, described("main.lua", "doc desc"))
+  lu.assertStrContains(html, "deep.lua")
+  lu.assertNotStrContains(html, "README.md")
+  lu.assertNotStrContains(html, "ft-hl")
+  lu.assertEquals(warnings, "")
+end
+
+function TestFiletree:test_unknown_profile_warns_and_renders_nothing()
+  local out, warnings = profile_html(support.args("nope"))
+  lu.assertEquals(#out, 0)
+  lu.assertStrContains(warnings, "no profile 'nope'")
+  lu.assertStrContains(warnings, "profiles found: default, doc, scalar")
+end
+
+function TestFiletree:test_scalar_profile_renders_without_paths()
+  local div, warnings = profile_html(support.args("scalar"))
+  lu.assertStrContains(div.content[1].text, "README.md")
+  lu.assertNotStrContains(div.content[1].text, "ft-desc")
+  lu.assertEquals(warnings, "")
+end
+
+function TestFiletree:test_legacy_filetree_key_is_not_a_default()
+  local out, warnings = profile_html(support.args(), "tests/fixtures/legacy-shape.yml")
+  lu.assertEquals(#out, 0)
+  lu.assertStrContains(warnings, "no profile 'default'")
+  lu.assertStrContains(warnings, "profiles found: filetree")
+end
+
+function TestFiletree:test_named_profile_without_sidecar_renders_nothing()
+  local out, warnings = profile_html(support.args("doc"), NO_SIDECAR)
+  lu.assertEquals(#out, 0)
+  lu.assertStrContains(warnings, "profile 'doc' not rendered, sidecar not found")
+end
+
+function TestFiletree:test_invalid_profile_name_warns_and_renders_nothing()
+  local out, warnings = profile_html(support.args("../doc"))
+  lu.assertEquals(#out, 0)
+  lu.assertStrContains(warnings, "profile name must hold only")
+end
+
+function TestFiletree:test_extra_positional_args_are_warned_and_ignored()
+  local div, warnings = profile_html(support.args("doc", "stray"))
+  lu.assertStrContains(div.content[1].text, "doc desc")
+  lu.assertStrContains(warnings, "other positional arguments are ignored: stray")
 end
 
 function TestFiletree:test_missing_root_warns_and_returns_empty()
@@ -132,10 +196,6 @@ local function glob_html(sidecar)
     {}
   )
   return div.content[1].text, table.concat(support.warnings, "\n")
-end
-
-local function described(name, desc)
-  return '<span class="ft-name">' .. name .. '</span><span class="ft-desc">' .. desc .. "</span>"
 end
 
 function TestFiletree:test_glob_key_annotates_matching_entries()

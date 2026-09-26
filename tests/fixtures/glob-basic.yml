@@ -1,4 +1,4 @@
-filetree:
+default:
   paths:
     "src/*.lua": "glob desc"
     "src/nested/*": "nested desc"

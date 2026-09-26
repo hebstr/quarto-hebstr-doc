@@ -1,4 +1,4 @@
-filetree:
+default:
   depth: 2
   paths:
     "_extensions": "the extension itself, as `quarto add` installs it"

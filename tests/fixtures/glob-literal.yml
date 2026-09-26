@@ -1,4 +1,4 @@
-filetree:
+default:
   paths:
     "*.txt": "dead desc"
     "src/m-*": "dash desc"

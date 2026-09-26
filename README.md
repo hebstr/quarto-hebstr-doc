@@ -87,7 +87,7 @@ Renders a directory tree read from disk at render time.
 Configure it in a `filetree.yml` file at the project root:
 
 ```yaml
-filetree:
+default:
   depth: 2
   hidden: false
   exclude:
@@ -112,6 +112,25 @@ filetree:
   | `paths`     | none     | Descriptions, keyed by path                                                                                |
 
 Patterns match paths without a trailing slash (`^output$`, not `^output/`), and special characters are escaped with `%`, not `\`.
+
+Each top-level key of `filetree.yml` is a profile.
+`{{< filetree >}}` renders the `default` profile, and any other profile is rendered by passing its name:
+
+```yaml
+default:
+  depth: 2
+docs:
+  root: "docs"
+  depth: 1
+```
+
+```markdown
+{{< filetree docs >}}
+```
+
+Profiles are independent: a profile does not inherit the keys of `default`.
+A profile name holds only letters, digits, `_` and `-`.
+An unknown profile renders nothing and raises a warning listing the profiles found.
 
 Every key except `paths` can also be set on the shortcode, overriding the sidecar for that call:
 

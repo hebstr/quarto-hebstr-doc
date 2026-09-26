@@ -359,11 +359,11 @@ end
 -- Pandoc parses YAML metadata scalars as inline Markdown, which silently mangles
 -- Lua patterns (`__pycache__` becomes `pycache`). Config values are read from the
 -- raw text; only `paths` goes through pandoc.read, where Markdown is intended.
-local function read_raw_config(text)
+local function read_raw_config(text, profile)
   local out, list = {}, nil
   local inside = false
   for line in (text .. "\n"):gmatch("(.-)\n") do
-    if line:match("^filetree%s*:%s*$") then
+    if not inside and line:match("^([%w_-]+)%s*:%s*$") == profile then
       inside = true
     -- Blank and comment lines are YAML formatting: they neither close the block
     -- nor end a sequence, and `pandoc.read` accepts them in the same file.
@@ -392,9 +392,15 @@ local function read_raw_config(text)
   return out
 end
 
-local function read_sidecar(path)
+local DEFAULT_PROFILE = "default"
+
+local function read_sidecar(path, profile)
   local fh = io.open(path)
   if not fh then
+    if profile ~= DEFAULT_PROFILE then
+      warn("profile '" .. profile .. "' not rendered, sidecar not found: " .. path)
+      return false
+    end
     return nil
   end
   local text = fh:read("a")
@@ -404,12 +410,19 @@ local function read_sidecar(path)
     warn("cannot parse " .. path .. ": " .. tostring(doc))
     return nil
   end
-  if not doc.meta["filetree"] then
-    warn(path .. ": no top-level 'filetree' key, config ignored")
-    return nil
+  local block = doc.meta[profile]
+  if not block then
+    local names = {}
+    for name in pairs(doc.meta) do
+      names[#names + 1] = name
+    end
+    table.sort(names)
+    local found = #names > 0 and table.concat(names, ", ") or "none"
+    warn(path .. ": no profile '" .. profile .. "', tree not rendered ; profiles found: " .. found)
+    return false
   end
-  local config = read_raw_config(text)
-  config.paths = doc.meta["filetree"].paths
+  local config = read_raw_config(text, profile)
+  config.paths = pandoc.utils.type(block) == "table" and block.paths or nil
   return config
 end
 
@@ -704,12 +717,17 @@ end
 
 return {
   ["filetree"] = function(args, kwargs, meta)
-    if #args > 0 then
-      local given = {}
-      for _, arg in ipairs(args) do
-        given[#given + 1] = pandoc.utils.stringify(arg)
+    local profile = #args > 0 and pandoc.utils.stringify(args[1]) or DEFAULT_PROFILE
+    if #args > 1 then
+      local extra = {}
+      for i = 2, #args do
+        extra[#extra + 1] = pandoc.utils.stringify(args[i])
       end
-      warn("positional arguments are ignored, use attributes: " .. table.concat(given, " "))
+      warn("only the profile name is read, other positional arguments are ignored: " .. table.concat(extra, " "))
+    end
+    if not profile:match("^[%w_-]+$") then
+      warn("profile name must hold only letters, digits, '_' and '-', tree not rendered: " .. profile)
+      return {}
     end
 
     local unknown = {}
@@ -728,7 +746,16 @@ return {
     if not within_project then
       warn("annotations must be a path inside the project, config ignored: " .. sidecar)
     end
-    local config = (within_project and read_sidecar(in_project(sidecar))) or {}
+    local config = {}
+    if within_project then
+      local read = read_sidecar(in_project(sidecar), profile)
+      if read == false then
+        return {}
+      end
+      config = read or config
+    elseif profile ~= DEFAULT_PROFILE then
+      return {}
+    end
 
     local function opt(name, default)
       return kw(kwargs, name, config[name]) or default
