@@ -33,10 +33,10 @@ function TestRSyntax:test_language_class_comes_before_r()
   lu.assertTrue(out.classes:includes("cw-auto"))
 end
 
--- Typst re-emits a raw fence and highlights it itself, where an unknown
--- language name leaves the block uncoloured.
-function TestRSyntax:test_typst_is_left_alone()
-  local f = support.load_filter(FILTER, { formats = { typst = true } })
+-- A writer that highlights nothing, or hands the fence to the target, leaves the
+-- block uncoloured under a language name it does not know.
+function TestRSyntax:test_a_format_pandoc_does_not_highlight_is_left_alone()
+  local f = support.load_filter(FILTER, { formats = { markdown = true } })
   lu.assertNil(f.CodeBlock(block("r")))
 end
 

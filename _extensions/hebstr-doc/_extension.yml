@@ -1,5 +1,5 @@
 title: hebstr-doc
-description: "A multi-format Quarto theme (HTML, Typst, DOCX)"
+description: "A multi-format Quarto theme (HTML, DOCX)"
 author: hebstr
 version: 1.6.0
 quarto-required: ">=1.9.36"
@@ -14,7 +14,6 @@ contributes:
       number-depth: 4
       toc: true
       toc-depth: 4
-      colorlinks: true
       default-image-extension: png
       crossref:
         title-delim: "\\."
@@ -83,31 +82,12 @@ contributes:
         - at: pre-quarto
           path: filters/crossref-anx.lua
         - at: post-quarto
-          path: _extensions/mcanouil/code-window/_modules/hotfix/typst-title-fix.lua
-        - at: post-quarto
           path: filters/r-syntax.lua
       extensions:
         code-window:
           enabled: true
           auto-filename: true
           style: default
-    typst:
-      mainfont: "Luciole"
-      toc-title: " "
-      font-paths: fonts
-      papersize: a4
-      margin:
-        x: 1.5cm
-        y: 1.5cm
-      keep-typ: false
-      include-in-header: template.typ
-      filters:
-        - at: pre-quarto
-          path: _extensions/mcanouil/code-window/main.lua
-        - at: pre-quarto
-          path: filters/crossref-anx.lua
-        - at: post-quarto
-          path: _extensions/mcanouil/code-window/_modules/hotfix/typst-title-fix.lua
     docx:
       reference-doc: template.dotx
       link-citations: true

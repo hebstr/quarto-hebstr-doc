@@ -37,13 +37,6 @@ hooks = [
 ]
 
 [[repos]]
-repo = "https://github.com/typstyle-rs/pre-commit-typstyle"
-rev = "v0.15.1"
-hooks = [
-  { id = "typstyle", args = ["-i", "-l", "100"] }
-]
-
-[[repos]]
 repo = "https://github.com/JohnnyMorganz/StyLua"
 rev = "v2.5.2"
 hooks = [

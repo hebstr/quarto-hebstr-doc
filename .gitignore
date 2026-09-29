@@ -4,9 +4,7 @@
 /_site/
 /_freeze/
 /*_files/
-/*.typ
 /*.html
-/*.pdf
 /*.docx
 
 # Render probes staged at the root by tests/*.sh

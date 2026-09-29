@@ -5,10 +5,10 @@
 [![Release](https://img.shields.io/github/v/release/hebstr/quarto-hebstr-doc?label=release)](https://github.com/hebstr/quarto-hebstr-doc/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
-A Quarto theme for HTML, Typst (PDF), and Word (DOCX) output.
+A Quarto theme for HTML and Word (DOCX) output.
 
 > **Status (v1.6.0):** HTML and Word output are supported.
-> Typst is declared but not yet validated.
+> For a PDF, export the Word output from Word.
 
 ## Installation
 
@@ -41,7 +41,7 @@ format: hebstr-doc-html
 ---
 ```
 
-The formats are `hebstr-doc-html`, `hebstr-doc-docx` and `hebstr-doc-typst`.
+The formats are `hebstr-doc-html` and `hebstr-doc-docx`.
 
 The HTML format sets `embed-resources: true`, producing a single self-contained file.
 For a website or a book, turn it off in `_quarto.yml`, otherwise every page embeds all assets:
@@ -73,8 +73,8 @@ Includes an external file as a foldable code block, with its filename as header.
 
 Invalid arguments raise a render warning and fall back to the default.
 
-The shortcode renders in HTML only and produces nothing in Typst and Word.
-To show a file in every format, use a regular code block.
+The shortcode renders in HTML only and produces nothing in Word.
+To show a file in both formats, use a regular code block.
 
 ### `filetree`
 
@@ -161,7 +161,7 @@ To replace an icon, add a rule to your `custom.scss`:
 In `dynamic` mode, an open folder also needs `.ft-i-<key> details[open] > summary .ft-name::before`.
 The colours are set by `$filetree-bg`, `$filetree-fg`, `$filetree-muted`, `$filetree-highlight` and `$filetree-guide`.
 
-Typst and Word render the tree as a bulleted list.
+Word renders the tree as a bulleted list.
 
 ## Annexes
 

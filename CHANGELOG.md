@@ -5,6 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Removed
+
+- **Breaking:** the `hebstr-doc-typst` format is dropped, with the `template.typ` preamble and the `code.tmTheme` code theme it read.
+  HTML and Word are the two output formats; for a PDF, export the Word output from Word.
+
 ## [1.6.0] - 2026-09-26
 
 ### Added

@@ -12,9 +12,9 @@
 
 local LANG = "rhebstr"
 
--- Formats where pandoc does the highlighting. Typst is excluded because its
--- writer re-emits a raw fence and lets Typst highlight it, where an unknown
--- language name would leave the block uncoloured.
+-- Formats where pandoc does the highlighting, and the only two the extension
+-- declares. A writer that re-emits a raw fence and lets the target highlight it
+-- would leave the block uncoloured under a language name it does not know.
 local function highlighted_by_pandoc()
   return quarto.doc.is_format("html") or quarto.doc.is_format("docx")
 end
