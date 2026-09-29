@@ -1,0 +1,4 @@
+default:
+  exclude:
+    - "[a"
+    - "README%.md[a"

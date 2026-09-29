@@ -10,6 +10,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - **Breaking:** the `hebstr-doc-typst` format is dropped, with the `template.typ` preamble and the `code.tmTheme` code theme it read.
   HTML and Word are the two output formats; for a PDF, export the Word output from Word.
 
+### Fixed
+
+- A comment at the end of a line in `filetree.yml` is no longer read as part of the value.
+  An `exclude` or `highlight` pattern written with a trailing comment used to match nothing, without a warning.
+
+- An empty description under `paths` raises a warning naming the key, instead of being ignored in silence or rendering an empty element.
+
+- Two `paths` keys that differ only by a trailing slash raise a warning, and the one that survives no longer depends on the order the file happens to be read in.
+
+- A named profile whose `filetree.yml` cannot be parsed renders nothing, as it already did when the file was missing, instead of rendering an unconfigured tree.
+
+- A profile written on one line (`default: { depth: 3 }`) or under a quoted name raises a warning instead of losing every key but `paths` in silence.
+  Write each key on its own line under the unquoted profile name.
+
 ## [1.6.0] - 2026-09-26
 
 ### Added

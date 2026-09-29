@@ -1,0 +1,7 @@
+default:
+  depth: 3 # three levels
+  exclude:
+    - "^README%.md$" # quoted item
+    - ^#nothing # unquoted item whose own hash is not a comment
+  highlight:
+    - "^src$" # the sources

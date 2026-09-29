@@ -290,6 +290,23 @@ local function to_patterns(value)
   return split(value)
 end
 
+local function strip_comment(text)
+  local quote = nil
+  for i = 1, #text do
+    local char = text:sub(i, i)
+    if quote then
+      if char == quote then
+        quote = nil
+      end
+    elseif char == '"' or char == "'" then
+      quote = char
+    elseif char == "#" and (i == 1 or text:sub(i - 1, i - 1):match("%s")) then
+      return (text:sub(1, i - 1):gsub("%s+$", ""))
+    end
+  end
+  return text
+end
+
 local function unquote(text)
   text = text:match("^%s*(.-)%s*$")
   local quote = text:sub(1, 1)
@@ -373,12 +390,13 @@ local function read_raw_config(text, profile)
     elseif inside then
       local item = line:match("^%s*%-%s*(.+)$")
       if item and list then
-        list[#list + 1] = unquote(item)
+        list[#list + 1] = unquote(strip_comment(item))
       else
         local key, value = line:match("^%s+([^:]+):%s*(.*)$")
         list = nil
         if key and raw_keys[unquote(key)] then
           key = unquote(key)
+          value = strip_comment(value)
           if value ~= "" then
             out[key] = unquote(value)
           elseif list_keys[key] then
@@ -389,7 +407,7 @@ local function read_raw_config(text, profile)
       end
     end
   end
-  return out
+  return out, inside
 end
 
 local DEFAULT_PROFILE = "default"
@@ -407,7 +425,12 @@ local function read_sidecar(path, profile)
   fh:close()
   local ok, doc = pcall(pandoc.read, "---\n" .. text .. "\n---\n", "markdown")
   if not ok then
-    warn("cannot parse " .. path .. ": " .. tostring(doc))
+    local reason = "cannot parse " .. path .. ": " .. tostring(doc)
+    if profile ~= DEFAULT_PROFILE then
+      warn("profile '" .. profile .. "' not rendered, " .. reason)
+      return false
+    end
+    warn(reason)
     return nil
   end
   local block = doc.meta[profile]
@@ -421,8 +444,18 @@ local function read_sidecar(path, profile)
     warn(path .. ": no profile '" .. profile .. "', tree not rendered ; profiles found: " .. found)
     return false
   end
-  local config = read_raw_config(text, profile)
-  config.paths = pandoc.utils.type(block) == "table" and block.paths or nil
+  local config, found = read_raw_config(text, profile)
+  local mapping = pandoc.utils.type(block) == "table"
+  if mapping and not found then
+    warn(
+      path
+        .. ": profile '"
+        .. profile
+        .. "' is not written as an indented block, so only its paths are read ; put each key on its own line under the"
+        .. " profile name, unquoted"
+    )
+  end
+  config.paths = mapping and block.paths or nil
   return config
 end
 
@@ -430,13 +463,14 @@ end
 -- null, so an annotation can reach here as something Plain would reject.
 local function to_inlines(key, value)
   local vtype = pandoc.utils.type(value)
+  if (vtype == "Inlines" and #value == 0) or (vtype == "string" and value == "") then
+    warn("paths key '" .. key .. "': annotation is empty, key ignored")
+    return nil
+  end
   if vtype == "Inlines" then
     return value
   end
   if vtype == "string" then
-    if value == "" then
-      return nil
-    end
     return { pandoc.Str(value) }
   end
   warn("paths key '" .. key .. "': annotation is a " .. vtype .. ", not text ; quote the value in the sidecar")
@@ -460,14 +494,26 @@ local function read_annotations(config)
     )
     return out, globs
   end
-  for key, value in pairs(paths) do
-    local inlines = to_inlines(key, value)
+  local keys = {}
+  for key in pairs(paths) do
+    keys[#keys + 1] = key
+  end
+  table.sort(keys)
+
+  local seen = {}
+  for _, key in ipairs(keys) do
+    local inlines = to_inlines(key, paths[key])
     if inlines then
-      key = strip_slash(key)
-      if key:find("*", 1, true) then
-        globs[#globs + 1] = { key = key, pattern = glob_pattern(key), inlines = inlines }
+      local stripped = strip_slash(key)
+      if seen[stripped] then
+        warn("paths key '" .. stripped .. "' is described more than once, keeping the first: " .. key .. " ignored")
       else
-        out[key] = inlines
+        seen[stripped] = true
+        if stripped:find("*", 1, true) then
+          globs[#globs + 1] = { key = stripped, pattern = glob_pattern(stripped), inlines = inlines }
+        else
+          out[stripped] = inlines
+        end
       end
     end
   end

@@ -1,0 +1,7 @@
+flow: { depth: 3 }
+
+"quoted":
+  depth: 3
+
+block:
+  depth: 3

@@ -1,0 +1,7 @@
+default:
+  exclude:
+    - "^src/"
+  paths:
+    "nope.md": "absent desc"
+    "src/main.lua": "dropped desc"
+    "README.md": "live desc"
