@@ -5,10 +5,7 @@
 [![Release](https://img.shields.io/github/v/release/hebstr/quarto-hebstr-doc?label=release)](https://github.com/hebstr/quarto-hebstr-doc/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
-A Quarto theme for HTML and Word (DOCX) output.
-
-> **Status (v1.6.0):** HTML and Word output are supported.
-> For a PDF, export the Word output from Word.
+A Quarto theme for HTML and Word output.
 
 ## Installation
 
@@ -44,7 +41,7 @@ format: hebstr-doc-html
 The formats are `hebstr-doc-html` and `hebstr-doc-docx`.
 
 The HTML format sets `embed-resources: true`, producing a single self-contained file.
-For a website or a book, turn it off in `_quarto.yml`, otherwise every page embeds all assets:
+For a website or a book, turn it off in `_quarto.yml`; otherwise every page embeds all assets:
 
 ```yaml
 format:
@@ -56,7 +53,7 @@ format:
 
 ### `script`
 
-Includes an external file as a foldable code block, with its filename as header.
+Includes an external file as a foldable code block, with its filename as the header.
 
 ```markdown
 {{< script scripts/demo.R >}}
@@ -236,7 +233,7 @@ Setting `fig-format: png` alone has no effect, as the format's `dev` setting tak
 ### Figure fonts
 
 In HTML figures, R's generic `sans` and `mono` families map to Luciole and Fira Code.
-Plots that name a font explicitly are not affected.
+A plot that names a font explicitly keeps that font.
 
 Install Luciole and Fira Code on the machine that renders the document, including CI runners and servers; otherwise figures silently use a fallback font.
 
@@ -285,8 +282,8 @@ reactable::reactableTheme(
 )
 ```
 
-The search box, filters and pagination are styled by the theme in either case.
-Tables from other packages are not adapted.
+The theme styles the search box, filters and pagination in either case.
+It does not adapt tables from other packages.
 
 ### Brand colours with `_brand.yml`
 
@@ -311,7 +308,7 @@ format:
       dark:  [theme-dark.scss,  theme-base.scss, custom.scss]
 ```
 
-The variables you can override are the `!default` declarations in the `scss:defaults` sections of `theme-light.scss`, `theme-dark.scss` and `theme-base.scss`.
+Override the `!default` declarations of the `scss:defaults` sections in `theme-light.scss`, `theme-dark.scss` and `theme-base.scss`.
 
 ### Text alignment
 
@@ -344,7 +341,7 @@ Captions of unlabelled figures, and captions placed on top (tables, annexes, or 
 - the title block on the first page and the table of contents on the second, titled in the document language;
 - A4 pages with 2.5 cm margins, for a text width of 6.2958 in.
 
-Word offers to update the table of contents when the document is opened; it stays empty until the update is accepted.
+Word offers to update the table of contents when you open the document; the table stays empty until you accept.
 To change its title, set `language: toc-title-document:` in `_quarto.yml`.
 
 The `hebstr` R package sizes tables from this text width, so the changelog records any change to it.
@@ -368,10 +365,10 @@ format:
 ### Code highlighting
 
 Code blocks have a dark background in both colour schemes.
-In HTML and Word, R code also highlights package names before `::`, `library()` and similar calls, argument separators, named-argument `=`, and brackets.
+In HTML and Word, the highlighting of R code also covers package names before `::`, `library()` and similar calls, argument separators, named-argument `=`, and brackets.
 Brackets use the `.re` class, which is gold in every language.
 
-Token colours are not exposed as variables; override them in `custom.scss`:
+The extension does not expose token colours as variables; override them in `custom.scss`:
 
 ```scss
 code span .im {
