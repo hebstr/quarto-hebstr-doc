@@ -3,8 +3,8 @@
   "private": true,
   "description": "Pinned lint/format toolchain for this extension's stylesheets and shipped HTML/JS",
   "devDependencies": {
-    "prettier": "3.9.9",
-    "stylelint": "17.15.0",
+    "prettier": "3.9.10",
+    "stylelint": "17.16.0",
     "stylelint-config-standard-scss": "17.0.0"
   }
 }
