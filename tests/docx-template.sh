@@ -126,6 +126,12 @@ for style_id, wanted_sz in (("BodyText", "22"), ("Compact", "22"), ("ListItem", 
             f" not {wanted_sz}"
         )
 
+# A level-1 heading opens a page of its own, which is what makes the paragraph
+# docx-toc-break.lua inserts a no-op in a body opening on one.
+for style_id, wanted_break in (("Heading1", True), ("Heading2", False), ("TOCHeading", True)):
+    if (inherited(style_id, f"{W}pPr/{W}pageBreakBefore") is not None) != wanted_break:
+        failures.append(f"{style_id} {'does not break' if wanted_break else 'breaks'} the page before it")
+
 missing_toc = [f"TOC{level}" for level in range(1, 10) if f"TOC{level}" not in styles]
 if missing_toc:
     failures.append(f"the template defines no {', '.join(missing_toc)} style, so those entries fall back to Normal")

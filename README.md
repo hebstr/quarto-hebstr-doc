@@ -340,6 +340,7 @@ Captions of unlabelled figures, and captions placed on top (tables, annexes, or 
 - list items at body size, whether the list is written tight or with a blank line between items;
 - references at 9 pt, in the `Bibliography` style;
 - headings numbered by the template, which is why the format sets `number-sections: false`;
+- each level-1 heading on a new page;
 - the title block on the first page and the table of contents on the second, titled in the document language;
 - A4 pages with 2.5 cm margins, for a text width of 6.2958 in.
 

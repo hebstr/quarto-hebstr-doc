@@ -5,8 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-10-24
+
 ### Changed
 
+- A level-1 heading opens a new page in Word, as the table of contents already did.
 - Word references render at 9 pt, the `Bibliography` style carrying its own size instead of the document default.
 
 ### Fixed

@@ -273,6 +273,7 @@ def build_styles(styles):
     for level, spec in HEADINGS.items():
         ind = f'<w:ind w:left="{spec["ind"]}" w:hanging="{spec["ind"]}"/>' if spec["ind"] else ""
         numbering = num_pr(level) if level <= 8 else ""
+        page_break = "<w:pageBreakBefore/>" if level == 1 else ""
         hidden = "" if level == 1 else '<w:uiPriority w:val="9"/><w:semiHidden/><w:unhideWhenUsed/>'
         styles = replace_style(
             styles,
@@ -285,7 +286,8 @@ def build_styles(styles):
                 next_="BodyText",
                 link=f"Heading{level}Char",
                 extra=hidden,
-                ppr=f"<w:keepNext/><w:keepLines/>{numbering}<w:spacing {spec['spacing']}/>{ind}"
+                ppr=f"<w:keepNext/><w:keepLines/>{page_break}{numbering}"
+                f"<w:spacing {spec['spacing']}/>{ind}"
                 f'<w:outlineLvl w:val="{level - 1}"/>',
                 rpr=spec["rpr"],
             ),
