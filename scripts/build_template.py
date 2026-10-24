@@ -427,39 +427,51 @@ def build_styles(styles):
             next_="Bibliography",
             ppr='<w:tabs><w:tab w:val="left" w:pos="709"/></w:tabs><w:spacing w:after="0"/>'
             '<w:ind w:left="709" w:hanging="709"/>',
+            rpr=sz(18),
         ),
     )
 
     # A paragraph style, since Word keeps a character style's b val=0 bold in a bold paragraph
     subtitle_rpr = '<w:b w:val="0"/><w:bCs w:val="0"/>' + color("555555") + sz(18)
-    added = "".join(
-        # A title followed by a subtitle, so the gap between the two lines is not the caption's own
-        style(
-            "paragraph",
-            f"{sid}Title",
-            f"{name} Title",
-            based_on=sid,
-            custom=True,
-            ppr='<w:keepNext/><w:spacing w:after="0"/>',
+    added = (
+        "".join(
+            # A title followed by a subtitle, so the gap between the lines is not the caption's
+            style(
+                "paragraph",
+                f"{sid}Title",
+                f"{name} Title",
+                based_on=sid,
+                custom=True,
+                ppr='<w:keepNext/><w:spacing w:after="0"/>',
+            )
+            + style(
+                "paragraph",
+                f"{sid}Subtitle",
+                f"{name} Subtitle",
+                based_on=sid,
+                custom=True,
+                ppr='<w:spacing w:before="0"/>',
+                rpr=subtitle_rpr,
+            )
+            for sid, name in (("TableCaption", "Table Caption"), ("ImageCaption", "Image Caption"))
         )
         + style(
             "paragraph",
-            f"{sid}Subtitle",
-            f"{name} Subtitle",
-            based_on=sid,
+            "ListItem",
+            "List Item",
+            based_on="Compact",
             custom=True,
-            ppr='<w:spacing w:before="0"/>',
-            rpr=subtitle_rpr,
+            ppr='<w:spacing w:before="120" w:after="120"/>',
         )
-        for sid, name in (("TableCaption", "Table Caption"), ("ImageCaption", "Image Caption"))
-    ) + style(
-        "paragraph",
-        "Footer",
-        "footer",
-        based_on="Normal",
-        extra='<w:uiPriority w:val="99"/><w:unhideWhenUsed/>',
-        ppr='<w:spacing w:before="0" w:after="0"/><w:jc w:val="center"/>',
-        rpr=sz(20),
+        + style(
+            "paragraph",
+            "Footer",
+            "footer",
+            based_on="Normal",
+            extra='<w:uiPriority w:val="99"/><w:unhideWhenUsed/>',
+            ppr='<w:spacing w:before="0" w:after="0"/><w:jc w:val="center"/>',
+            rpr=sz(20),
+        )
     )
     toc_extra = '<w:uiPriority w:val="39"/><w:unhideWhenUsed/>'
     added += style(

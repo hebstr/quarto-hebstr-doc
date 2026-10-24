@@ -3,11 +3,21 @@ title: "DOCX template probe"
 subtitle: "Reference document and float captions"
 author: "hebstr"
 format: hebstr-doc-docx
+bibliography: tests/docx-template-probe.bib
 ---
 
 # Section
 
-An opening paragraph, long enough to wrap, so the body style and its justification reach the output, with a footnote.[^1]
+An opening paragraph, long enough to wrap, so the body style and its justification reach the output, with a footnote[^1] and a citation [@hebstr2026].
+
+## Lists
+
+1. A loose item, written with a blank line between items, long enough to wrap over more than one line so its size and its line spacing both reach the output.
+
+2. A second loose item, which Pandoc writes as a paragraph carrying numbering and no style of its own.
+
+- A tight item, which Pandoc writes as a `Compact` paragraph.
+- A second tight item.
 
 ## Figures
 

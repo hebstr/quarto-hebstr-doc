@@ -5,6 +5,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed
+
+- Word references render at 9 pt, the `Bibliography` style carrying its own size instead of the document default.
+
+### Fixed
+
+- A list written with a blank line between its items no longer renders one point larger than the prose in Word, and keeps its line spacing.
+  Pandoc leaves such an item without a paragraph style, which fell through to the document default of 12 pt; the items now take a `List Item` style, sized like the body text and spaced like the loose form they come from.
+  A custom `reference-doc` has one more style to carry.
+
 ## [1.7.0] - 2026-10-24
 
 ### Added

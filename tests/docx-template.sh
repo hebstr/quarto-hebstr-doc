@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Asserts, on a real `quarto render` to DOCX, what template.dotx and
-# filters/docx-caption.lua owe a Word reader.
+# Asserts, on a real `quarto render` to DOCX, what template.dotx,
+# filters/docx-caption.lua and filters/docx-list-style.lua owe a Word reader.
 # The Lua suite proves the filter restyles a caption handed to it; it cannot
 # prove a caption ever reaches it. That rests on two undocumented Quarto
 # behaviours: floats are rendered before the post-render stage, and their
@@ -36,6 +36,7 @@ python3 - "$rendered" <<'PY'
 import sys
 import zipfile
 import xml.etree.ElementTree as ET
+from collections import Counter
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 CAPTION_STYLES = ("TableCaption", "ImageCaption", "TableCaptionTitle", "ImageCaptionTitle")
@@ -47,7 +48,7 @@ EXPECTED = [
     ("Table", "TableCaptionTitle", None, "TableCaptionSubtitle"),
     ("Annexe", "TableCaption", None, None),
 ]
-EXPECTED_ANCHORS = {"fig-bottom", "fig-top", "tbl-md", "tbl-gt", "anx-probe"}
+EXPECTED_ANCHORS = {"fig-bottom", "fig-top", "tbl-md", "tbl-gt", "anx-probe", "ref-hebstr2026"}
 
 
 def style(paragraph):
@@ -88,14 +89,19 @@ for cell in root.iter(W + "tc"):
 styles = {s.get(W + "styleId"): s for s in ET.fromstring(zipfile.ZipFile(sys.argv[1]).read("word/styles.xml")).iter(W + "style")}
 
 
-def hyphenates(style_id):
+def inherited(style_id, path):
     while style_id in styles:
-        node = styles[style_id].find(f"{W}pPr/{W}suppressAutoHyphens")
+        node = styles[style_id].find(path)
         if node is not None:
-            return node.get(W + "val") in ("0", "false", "off")
+            return node
         based = styles[style_id].find(W + "basedOn")
         style_id = None if based is None else based.get(W + "val")
-    return True
+    return None
+
+
+def hyphenates(style_id):
+    node = inherited(style_id, f"{W}pPr/{W}suppressAutoHyphens")
+    return True if node is None else node.get(W + "val") in ("0", "false", "off")
 
 
 for style_id, wanted_hyphens in (
@@ -109,6 +115,16 @@ for style_id, wanted_hyphens in (
 ):
     if hyphenates(style_id) != wanted_hyphens:
         failures.append(f"{style_id} {'hyphenates' if not wanted_hyphens else 'does not hyphenate'}, body prose alone should")
+
+# A loose list item and the bibliography carry no size of their own, so both
+# would fall through Normal to the 12 pt of the document defaults.
+for style_id, wanted_sz in (("BodyText", "22"), ("Compact", "22"), ("ListItem", "22"), ("Bibliography", "18")):
+    node = inherited(style_id, f"{W}rPr/{W}sz")
+    if node is None or node.get(W + "val") != wanted_sz:
+        failures.append(
+            f"{style_id} resolves to {'no size' if node is None else node.get(W + 'val') + ' half-points'},"
+            f" not {wanted_sz}"
+        )
 
 missing_toc = [f"TOC{level}" for level in range(1, 10) if f"TOC{level}" not in styles]
 if missing_toc:
@@ -131,6 +147,17 @@ else:
     first = next((el for el in children[toc + 1 :] if el.tag in (W + "p", W + "tbl")), None)
     if first is None or not any(br.get(W + "type") == "page" for br in first.iter(W + "br")):
         failures.append("the body does not open on a new page after the table of contents")
+
+# Pandoc skips its own body style wherever the paragraph already carries
+# properties, so a loose list item reaches the output numbered and styleless
+# unless filters/docx-list-style.lua names its style.
+items = Counter(style(p) for p in root.iter(W + "p") if p.find(f"{W}pPr/{W}numPr") is not None)
+if items[None]:
+    failures.append(f"{items[None]} numbered paragraph(s) carry no style, so they take the document default size")
+if (items["ListItem"], items["Compact"]) != (2, 2):
+    failures.append(f"list items found {dict(items)}, expected 2 under ListItem and 2 under Compact")
+if not any(style(p) == "Bibliography" for p in root.iter(W + "p")):
+    failures.append("no Bibliography paragraph in the output, so the citation reached no reference list")
 
 bookmarks = {b.get(W + "name") for b in root.iter(W + "bookmarkStart")}
 anchors = {h.get(W + "anchor") for h in root.iter(W + "hyperlink") if h.get(W + "anchor")}
@@ -189,14 +216,16 @@ if found != EXPECTED:
 if failures:
     print("FAIL  " + "\nFAIL  ".join(failures), file=sys.stderr)
     print(
-        "      The float Quarto renders no longer reaches\n"
-        "      filters/docx-caption.lua, or no longer matches what it reads.",
+        "      What Quarto and Pandoc render no longer reaches\n"
+        "      filters/docx-caption.lua or filters/docx-list-style.lua,\n"
+        "      or no longer matches what they read.",
         file=sys.stderr,
     )
     sys.exit(1)
 
 print(
     f"ok    {len(found)} float captions styled by position, subtitle on its own line,"
-    f" table floats at body level, {len(anchors)} cross-references resolved"
+    f" table floats at body level, {len(anchors)} cross-references resolved,"
+    f" {items['ListItem'] + items['Compact']} list items sized by a named style"
 )
 PY

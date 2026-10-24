@@ -337,6 +337,8 @@ Captions of unlabelled figures, and captions placed on top (tables, annexes, or 
 
 - text in Aptos, with Calibri as fallback;
 - body text justified and hyphenated, in the `Body Text` style, which you modify to restyle paragraphs;
+- list items at body size, whether the list is written tight or with a blank line between items;
+- references at 9 pt, in the `Bibliography` style;
 - headings numbered by the template, which is why the format sets `number-sections: false`;
 - the title block on the first page and the table of contents on the second, titled in the document language;
 - A4 pages with 2.5 cm margins, for a text width of 6.2958 in.
@@ -354,7 +356,7 @@ A caption can carry a second line, written as `<br>` followed by a `quarto-float
 #| fig-cap: "Body mass by species<br><span class='quarto-float-subcaption'>Adult penguins only.</span>"
 ```
 
-To use your own template, keep the styles the extension relies on: `Table Caption`, `Image Caption`, `Table Caption Title`, `Image Caption Title`, `Table Caption Subtitle`, `Image Caption Subtitle`, `Figure` and `Captioned Figure`.
+To use your own template, keep the styles the extension relies on: `Table Caption`, `Image Caption`, `Table Caption Title`, `Image Caption Title`, `Table Caption Subtitle`, `Image Caption Subtitle`, `Figure`, `Captioned Figure` and `List Item`.
 
 ```yaml
 format:

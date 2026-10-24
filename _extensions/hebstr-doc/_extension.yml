@@ -102,6 +102,8 @@ contributes:
           path: filters/docx-cell-paragraph.lua
         - at: post-quarto
           path: filters/collab-comments.lua
+        - at: post-quarto
+          path: filters/docx-list-style.lua
         - at: post-render
           path: filters/docx-caption.lua
         - at: post-render
