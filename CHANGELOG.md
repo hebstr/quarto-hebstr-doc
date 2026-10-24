@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-24
+
 ### Added
 
 - Word comments imported from a reviewed `.docx` are carried back into the Word output, so a reviewer's remarks survive every later render.
