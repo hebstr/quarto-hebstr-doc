@@ -19,6 +19,7 @@ local function make_quarto(opts)
       add_html_dependency = function(dep)
         M.deps[#M.deps + 1] = dep
       end,
+      input_file = opts.input_file,
     },
     log = {
       warning = function(msg)

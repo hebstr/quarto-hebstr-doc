@@ -5,6 +5,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- Word comments imported from a reviewed `.docx` are carried back into the Word output, so a reviewer's remarks survive every later render.
+  Set `docx-comments: true` under a `collab-comments:` block in the document; without it the filter does nothing.
+  The comment store is written by the `collab-comments` editor extension, which stays installed on its own; the filter forked here is the `docx` half of [MikeLydeamore/collab-comments](https://github.com/MikeLydeamore/collab-comments) at `v1.1.0`, with its HTML export and preview bridge dropped.
+  A document declaring the extension drops its own `filters:` line, with the editor open on it so the store re-anchors: removing those lines shifts every stored comment in the body.
+
 ### Removed
 
 - **Breaking:** the `hebstr-doc-typst` format is dropped, with the `template.typ` preamble and the `code.tmTheme` code theme it read.

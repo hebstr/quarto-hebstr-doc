@@ -31,6 +31,7 @@ Bundled assets keep the licence they arrived under, each with its own text along
 | Font Awesome Free | `_extensions/hebstr-doc/fonts/FontAwesome.LICENSE` | CC-BY 4.0 + SIL OFL 1.1 |
 | Material Icon Theme | `_extensions/hebstr-doc/icons/MaterialIconTheme.LICENSE` | MIT |
 | add-code-files (JS) | `_extensions/hebstr-doc/filters/add-code-files.LICENSE` | MIT |
+| collab-comments (Lua filter) | `_extensions/hebstr-doc/filters/collab-comments.LICENSE` | MIT |
 | code-window (embedded extension) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/LICENSE` | MIT |
 | quarto-lua-modules (vendored by code-window) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/_vendor/quarto-lua-modules/LICENSE` | MIT |
 | quarto-wizard schema validator (vendored by code-window) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/_vendor/quarto-wizard/LICENSE` | MIT |

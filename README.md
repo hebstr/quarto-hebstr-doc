@@ -362,6 +362,29 @@ format:
     reference-doc: my-template.dotx
 ```
 
+### Word comments
+
+A reviewer's comments on a Word export can be carried back into every later Word render.
+Import them in the editor with the `collab-comments` extension, which writes a `.comments/collab-comments.json` store at the project root, then ask for them in the document:
+
+```yaml
+collab-comments:
+  docx-comments: true
+  show-resolved: false
+```
+
+Without that block nothing happens, and the document needs no `filters:` line: the extension declares the filter itself.
+Drop an existing one with the editor open on the document, so the extension re-anchors the store as the lines move: a stored range is an absolute line number, and removing two lines of front matter shifts every comment in the body.
+
+A stored comment is anchored on the literal source text it selected, so it survives an edit elsewhere and follows the editor extension when the selected line moves.
+What it cannot survive is the selected text itself being rewritten.
+Every comment the render cannot place is named on stderr with its source line and the reason, and the render still succeeds, so the count of those lines is what to read after an editing pass.
+
+A selection has to occur exactly once in the rendered document, and sit on a single source line.
+The render places it inside a list, a table cell, a bold run or a link, and beside a citation, a code span or a formula; it refuses to cut one of those in two.
+
+The filter is a fork of the Word half of [MikeLydeamore/collab-comments](https://github.com/MikeLydeamore/collab-comments), whose HTML export and live preview are not included.
+
 ### Code highlighting
 
 Code blocks have a dark background in both colour schemes.

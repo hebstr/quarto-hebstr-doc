@@ -10,6 +10,7 @@ package.path = here .. "/?.lua;" .. package.path
 
 local lu = require("luaunit")
 require("test_add_code_files")
+require("test_collab_comments")
 require("test_crossref_anx")
 require("test_docx_caption")
 require("test_docx_cell_paragraph")
