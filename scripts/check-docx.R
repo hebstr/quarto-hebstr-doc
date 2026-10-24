@@ -17,6 +17,8 @@ ns <- c(
 )
 ns_r <- "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 
+builtin_styles <- c("CommentReference", "CommentText")
+
 report <- \(ok, label, detail = character()) {
   cat(if (ok) "ok    " else "FAIL  ", label, "\n", sep = "")
   if (!ok && length(detail)) {
@@ -44,13 +46,13 @@ check_styles <- \(dir) {
       ns
     )
     values <- xml_attr(refs, "w:val", ns)
-    values[!values %in% defined]
+    values[!values %in% c(defined, builtin_styles)]
   }))
   counts <- table(missing)
 
   report(
     !length(missing),
-    "every w:pStyle, w:rStyle and w:tblStyle resolves to a defined style",
+    "every w:pStyle, w:rStyle and w:tblStyle resolves to a defined or built-in style",
     paste0(names(counts), " (", counts, " references)")
   )
 }
