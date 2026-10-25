@@ -12,6 +12,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
   Figures now leave that wrapper, as tables already did since 1.5.0, and the caption of a panel float, which Quarto writes outside any wrapper, is styled from the body.
   A layout row of two columns or more keeps its table, where the same mismatch still narrows each panel.
 
+- Two sub-captions of one float no longer come out aligned differently in Word.
+  A layout row of two columns or more keeps its table, and Pandoc wrote that table's column alignment onto every paragraph of its cells, where it outranked the caption and figure styles: a caption left inside the row read left while its lifted sibling read centred.
+  Such a row now carries no alignment of its own, and a table written by the author keeps the alignment they gave it.
+
 ## [1.7.1] - 2026-10-24
 
 ### Changed

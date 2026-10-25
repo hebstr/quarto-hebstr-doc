@@ -191,7 +191,23 @@ function TestDocxCaption:test_a_layout_row_of_one_cell_leaves_its_wrapper()
 end
 
 function TestDocxCaption:test_a_layout_row_of_several_cells_keeps_its_table()
-  lu.assertNil(docx().Table(layout_row({ { image() }, { image() } })))
+  local out = docx().Table(layout_row({ { image() }, { image() } }))
+  lu.assertEquals(out.t, "Table")
+  lu.assertEquals(#out.bodies[1].body[1].cells, 2)
+end
+
+function TestDocxCaption:test_a_layout_row_of_several_cells_loses_its_column_alignment()
+  local out = docx().Table(layout_row({ { image() }, { image() } }))
+  lu.assertEquals(out.colspecs[1][1], pandoc.AlignDefault)
+  lu.assertEquals(out.colspecs[2][1], pandoc.AlignDefault)
+end
+
+function TestDocxCaption:test_a_table_outside_a_layout_keeps_its_table_and_alignment()
+  local cells =
+    { pandoc.Cell({ pandoc.Plain({ pandoc.Str("a") }) }), pandoc.Cell({ pandoc.Plain({ pandoc.Str("b") }) }) }
+  local specs = { { pandoc.AlignLeft, 0.5 }, { pandoc.AlignLeft, 0.5 } }
+  local tbl = pandoc.Table({ long = {}, short = {} }, specs, pandoc.TableHead(), { row(cells) }, pandoc.TableFoot())
+  lu.assertNil(docx().Table(tbl))
 end
 
 function TestDocxCaption:test_a_cell_holding_no_layout_cell_keeps_its_table()

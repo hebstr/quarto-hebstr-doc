@@ -38,6 +38,11 @@
 -- keeps its identifier, from which Pandoc writes the bookmark cross-references
 -- point to, and `Table Caption` keeps the caption with what follows it.
 --
+-- A layout row of several cells has nothing to lift, and keeps its table with
+-- its column alignment cleared: Pandoc writes that alignment on every paragraph
+-- of the cells, where it outranks the caption and figure styles. An author's own
+-- table keeps the alignment they wrote.
+--
 -- The caption of a float laid out in panels is reached by a second pass: that
 -- float gets no wrapper of its own, so its caption sits at body level, where
 -- the `Table` handler never sees it.
@@ -168,6 +173,28 @@ local function holds_layout_cell(blocks)
   return false
 end
 
+local function layout_row(tbl)
+  for _, body in ipairs(tbl.bodies) do
+    for _, row in ipairs(body.body) do
+      for _, cell in ipairs(row.cells) do
+        if holds_layout_cell(cell.contents) then
+          return true
+        end
+      end
+    end
+  end
+  return false
+end
+
+local function unalign(tbl)
+  local specs = {}
+  for i, spec in ipairs(tbl.colspecs) do
+    specs[i] = { pandoc.AlignDefault, spec[2] }
+  end
+  tbl.colspecs = specs
+  return tbl
+end
+
 local function Table(tbl)
   if not quarto.doc.is_format("docx") then
     return nil
@@ -185,13 +212,19 @@ local function Table(tbl)
     end,
   })
   if not found then
-    if single_cell(tbl) and holds_layout_cell(cell_blocks(tbl)) then
+    if not layout_row(tbl) then
+      return nil
+    end
+    if single_cell(tbl) then
       return cell_blocks(tbl)
     end
-    return nil
+    return unalign(tbl)
   end
   if single_cell(out) then
     return cell_blocks(out)
+  end
+  if layout_row(out) then
+    return unalign(out)
   end
   return out
 end
