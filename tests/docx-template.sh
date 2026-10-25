@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # Asserts, on a real `quarto render` to DOCX, what template.dotx,
-# filters/docx-caption.lua and filters/docx-list-style.lua owe a Word reader.
+# filters/docx-caption.lua, filters/docx-list-style.lua and
+# filters/docx-layout-flatten.lua owe a Word reader.
 # The Lua suite proves the filter restyles a caption handed to it; it cannot
 # prove a caption ever reaches it. That rests on two undocumented Quarto
 # behaviours: floats are rendered before the post-render stage, and their
@@ -48,6 +49,8 @@ EXPECTED = [
     ("(a) First panel.", "ImageCaption", "CaptionedFigure", None),
     ("(b) Second panel.", "ImageCaption", "CaptionedFigure", None),
     ("Figure", "ImageCaptionTitle", None, "ImageCaptionSubtitle"),
+    ("Figure", "ImageCaption", "CaptionedFigure", None),
+    ("Figure", "ImageCaption", "CaptionedFigure", None),
     ("Table", "TableCaption", None, None),
     ("Table", "TableCaptionTitle", None, "TableCaptionSubtitle"),
     ("Annexe", "TableCaption", None, None),
@@ -56,6 +59,8 @@ EXPECTED_ANCHORS = {
     "fig-bottom",
     "fig-top",
     "fig-panels",
+    "fig-left",
+    "fig-right",
     "tbl-md",
     "tbl-gt",
     "anx-probe",
@@ -263,8 +268,9 @@ if failures:
     print("FAIL  " + "\nFAIL  ".join(failures), file=sys.stderr)
     print(
         "      What Quarto and Pandoc render no longer reaches\n"
-        "      filters/docx-caption.lua or filters/docx-list-style.lua,\n"
-        "      or no longer matches what they read.",
+        "      filters/docx-caption.lua, filters/docx-list-style.lua or\n"
+        "      filters/docx-layout-flatten.lua, or no longer matches what\n"
+        "      they read.",
         file=sys.stderr,
     )
     sys.exit(1)

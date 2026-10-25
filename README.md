@@ -357,6 +357,10 @@ A caption can carry a second line, written as `<br>` followed by a `quarto-float
 #| fig-cap: "Body mass by species<br><span class='quarto-float-subcaption'>Adult penguins only.</span>"
 ```
 
+A two-column block written as `::: {layout-ncol=2}` comes out one part after another in Word, each at full width, where HTML keeps the columns side by side.
+Word lays such a block out as a table whose columns are narrower than a figure placed in them, which cuts the figure off, so the block is flattened instead.
+A layout declared as a chunk option (`#| layout-ncol`) keeps its columns.
+
 To use your own template, keep the styles the extension relies on: `Table Caption`, `Image Caption`, `Table Caption Title`, `Image Caption Title`, `Table Caption Subtitle`, `Image Caption Subtitle`, `Figure`, `Captioned Figure` and `List Item`.
 
 ```yaml

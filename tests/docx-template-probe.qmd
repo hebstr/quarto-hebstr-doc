@@ -51,6 +51,24 @@ plot(1:3)
 plot(2:4)
 ```
 
+::: {layout-ncol=2}
+```{r}
+#| label: fig-left
+#| fig-cap: "Left of a layout row."
+#| fig-height: 2
+
+plot(1:3)
+```
+
+```{r}
+#| label: fig-right
+#| fig-cap: "Right of a layout row."
+#| fig-height: 2
+
+plot(2:4)
+```
+:::
+
 ## Tables
 
 ::: {#tbl-md}
@@ -75,6 +93,6 @@ gt::gt(head(mtcars[, 1:3], 3))
 knitr::kable(head(mtcars[, 1:2], 2))
 ```
 
-Cross-references to @fig-bottom, @fig-top, @fig-panels, @tbl-md, @tbl-gt and @anx-probe.
+Cross-references to @fig-bottom, @fig-top, @fig-panels, @fig-left, @fig-right, @tbl-md, @tbl-gt and @anx-probe.
 
 [^1]: A footnote.
