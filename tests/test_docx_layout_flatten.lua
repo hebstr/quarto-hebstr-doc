@@ -27,6 +27,12 @@ function TestDocxLayoutFlatten:test_a_layout_row_loses_the_key_that_builds_the_t
   lu.assertEquals(pandoc.utils.stringify(out.content[1]), "left")
 end
 
+function TestDocxLayoutFlatten:test_a_chunk_row_loses_its_key_like_a_fenced_one()
+  local out = docx().Div(row({ ["layout-nrow"] = "2" }, { "cell" }))
+  lu.assertNil(out.attributes["layout-nrow"])
+  lu.assertEquals(out.classes, pandoc.List({ "cell" }))
+end
+
 function TestDocxLayoutFlatten:test_every_layout_key_goes()
   local out = docx().Div(row({
     ["layout"] = "[[1,1]]",
@@ -50,5 +56,11 @@ function TestDocxLayoutFlatten:test_a_div_carrying_no_layout_is_left_alone()
 end
 
 function TestDocxLayoutFlatten:test_another_format_keeps_its_layout()
-  lu.assertNil(html().Div(row({ ["layout-ncol"] = "2" })))
+  local div = row({ ["layout-ncol"] = "2" })
+  lu.assertNil(html().Div(div))
+  lu.assertEquals(div.attributes["layout-ncol"], "2")
+end
+
+function TestDocxLayoutFlatten:test_no_float_handler_so_a_promoted_row_keeps_its_table()
+  lu.assertNil(docx().FloatRefTarget)
 end

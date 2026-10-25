@@ -12,9 +12,12 @@
 -- docx-caption.lua lifts, so an image comes out at the size it has outside a
 -- row. The juxtaposition is what it costs, and HTML keeps it.
 --
--- The chunk form (`#| layout-ncol`) is out of reach here, Quarto carrying that
--- option inside a FloatRefTarget custom node rather than on the Div, which is
--- why docx-caption.lua keeps its own alignment reset for a layout row.
+-- What bounds the filter is float promotion rather than the authoring form:
+-- the keys sit on a Div wherever Quarto left the layout container alone, and
+-- inside a FloatRefTarget custom node wherever it promoted that container to a
+-- float, which a fenced row carrying a float id and a labelled chunk whose
+-- subcaptions make it a parent float both are. Those two keep their table,
+-- which is why docx-caption.lua keeps its own alignment reset for a layout row.
 
 local KEYS = { "layout", "layout-ncol", "layout-nrow", "layout-align", "layout-valign" }
 

@@ -14,7 +14,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - A figure placed in a two-column layout (`::: {layout-ncol=2}`) is no longer cut off in Word, and the text of such a block no longer starts to the right of the body margin.
   Quarto laid the block out as a table whose columns are narrower than the figure sitting in them, and whose cells inset their own content.
   Word output now places the parts of the block one after another, each at full width; HTML keeps the columns side by side.
-  A layout declared as a chunk option (`#| layout-ncol`) is unaffected and still comes out in columns.
+  A row Quarto turns into a float is unaffected and still comes out in columns, which a row carrying a float id and a chunk row with `fig-subcap` both are; any other chunk row is flattened like a fenced one.
 
 - Two sub-captions of one float no longer come out aligned differently in Word.
   Quarto lays sub-floats out in a table, and Pandoc wrote that table's column alignment onto every paragraph of its cells, where it outranked the caption and figure styles: a caption left inside the row read left while its lifted sibling read centred.
