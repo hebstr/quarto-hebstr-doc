@@ -30,8 +30,9 @@ quarto render "$staged" --to hebstr-doc-docx --quiet
 Rscript "${repo_root}/scripts/check-docx.R" "$rendered"
 
 # Caption position, nesting and bookmarks are structural, hence the parsed
-# tree rather than the markup. A table float must sit at body level: Word
-# crushes a table nested in the one-cell wrapper Quarto builds for a float.
+# tree rather than the markup. A float must sit at body level: Pandoc cuts the
+# one-cell wrapper Quarto builds for it out of its own nominal width, so Word
+# crushes a table nested in it and clips an image at the cell edge.
 python3 - "$rendered" <<'PY'
 import sys
 import zipfile
@@ -44,11 +45,22 @@ SUBTITLE_STYLES = ("TableCaptionSubtitle", "ImageCaptionSubtitle")
 EXPECTED = [
     ("Figure", "ImageCaptionTitle", "CaptionedFigure", "ImageCaptionSubtitle"),
     ("Figure", "TableCaption", "Figure", None),
+    ("(a) First panel.", "ImageCaption", "CaptionedFigure", None),
+    ("(b) Second panel.", "ImageCaption", "CaptionedFigure", None),
+    ("Figure", "ImageCaptionTitle", None, "ImageCaptionSubtitle"),
     ("Table", "TableCaption", None, None),
     ("Table", "TableCaptionTitle", None, "TableCaptionSubtitle"),
     ("Annexe", "TableCaption", None, None),
 ]
-EXPECTED_ANCHORS = {"fig-bottom", "fig-top", "tbl-md", "tbl-gt", "anx-probe", "ref-hebstr2026"}
+EXPECTED_ANCHORS = {
+    "fig-bottom",
+    "fig-top",
+    "fig-panels",
+    "tbl-md",
+    "tbl-gt",
+    "anx-probe",
+    "ref-hebstr2026",
+}
 
 
 def style(paragraph):
@@ -172,6 +184,33 @@ for anchor in sorted(anchors - bookmarks):
 if anchors != EXPECTED_ANCHORS:
     failures.append(f"cross-references found {sorted(anchors)}, expected {sorted(EXPECTED_ANCHORS)}")
 
+# A float bookmark bounds what a caption may pair with, and a caption met on
+# the way is another float's: the one closing a panel float is the caption of
+# the group, which no single image sits beside.
+def flow(parent):
+    return [
+        b
+        for b in parent
+        if b.tag in (W + "tbl", W + "bookmarkStart")
+        or (b.tag == W + "p" and next(b.iter(W + "r"), None) is not None)
+    ]
+
+
+def neighbour(seq, start, step):
+    i = start + step
+    while 0 <= i < len(seq):
+        el = seq[i]
+        if el.tag == W + "bookmarkStart":
+            return None
+        if style(el) in SUBTITLE_STYLES:
+            i += step
+            continue
+        if style(el) in CAPTION_STYLES:
+            return "caption"
+        return el if is_content(el) else None
+    return None
+
+
 for caption in root.iter(W + "p"):
     if style(caption) not in CAPTION_STYLES:
         continue
@@ -179,25 +218,26 @@ for caption in root.iter(W + "p"):
     full = blocks(parent)
     following = full[full.index(caption) + 1] if full.index(caption) + 1 < len(full) else None
     subtitle = following if following is not None and style(following) in SUBTITLE_STYLES else None
-    siblings = [b for b in full if style(b) not in SUBTITLE_STYLES]
-    i = siblings.index(caption)
+    seq = flow(parent)
+    i = seq.index(caption)
     label = "".join(t.text or "" for t in caption.iter(W + "t")).split("\xa0")[0]
-    after = siblings[i + 1] if i + 1 < len(siblings) else None
-    before = siblings[i - 1] if i > 0 else None
-    if after is not None and is_content(after):
-        top, content = True, after
-    elif before is not None and is_content(before):
+    before, after = neighbour(seq, i, -1), neighbour(seq, i, 1)
+    if before is not None and before != "caption":
         top, content = False, before
+    elif after is not None and after != "caption":
+        top, content = True, after
+    elif before == "caption":
+        top, content = False, None
     else:
         failures.append(f"{label}: a caption with no figure or table beside it")
         continue
 
     wanted = "TableCaption" if top else "ImageCaption"
-    image = style(content) if content.tag == W + "p" else None
+    image = style(content) if content is not None and content.tag == W + "p" else None
     found.append((label, style(caption), image, None if subtitle is None else style(subtitle)))
 
-    if content.tag == W + "tbl" and parent.tag != W + "body":
-        failures.append(f"{label}: table float nested in {parent.tag.removeprefix(W)}, not at body level")
+    if parent.tag != W + "body":
+        failures.append(f"{label}: float nested in {parent.tag.removeprefix(W)}, not at body level")
     titled = wanted + ("Title" if subtitle is not None else "")
     if style(caption) != titled:
         failures.append(f"{label}: caption {'above' if top else 'below'} its content is {style(caption)}, not {titled}")
@@ -231,7 +271,7 @@ if failures:
 
 print(
     f"ok    {len(found)} float captions styled by position, subtitle on its own line,"
-    f" table floats at body level, {len(anchors)} cross-references resolved,"
+    f" floats at body level, {len(anchors)} cross-references resolved,"
     f" {items['ListItem'] + items['Compact']} list items sized by a named style"
 )
 PY

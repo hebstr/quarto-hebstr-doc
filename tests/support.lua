@@ -39,10 +39,11 @@ function M.load_shortcode(relpath, opts)
   return dofile(relpath)
 end
 
--- Same, for a document filter. A filter file returns a list of filter tables;
--- the first is what a test calls directly, one AST element at a time.
-function M.load_filter(relpath, opts)
-  return M.load_shortcode(relpath, opts)[1]
+-- Same, for a document filter. A filter file returns a list of filter tables,
+-- one per pass; `pass` selects it, defaulting to the first, and a test calls it
+-- directly, one AST element at a time.
+function M.load_filter(relpath, opts, pass)
+  return M.load_shortcode(relpath, opts)[pass or 1]
 end
 
 -- Positional shortcode arguments: a list whose elements are Inlines, matching

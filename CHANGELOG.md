@@ -5,6 +5,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Fixed
+
+- A figure no longer comes out clipped on the right in Word, and a figure laid out in panels (`layout-nrow`, `layout-ncol`) now carries its overall caption styled like any other.
+  Quarto sizes an image against the page text column while Pandoc cuts the one-cell table it wraps every float in out of a narrower nominal width, so the image overflowed that cell and Word cut it at the edge.
+  Figures now leave that wrapper, as tables already did since 1.5.0, and the caption of a panel float, which Quarto writes outside any wrapper, is styled from the body.
+  A layout row of two columns or more keeps its table, where the same mismatch still narrows each panel.
+
 ## [1.7.1] - 2026-10-24
 
 ### Changed

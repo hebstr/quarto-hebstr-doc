@@ -9,6 +9,10 @@ local function docx()
   return support.load_filter(FILTER, { formats = { docx = true } })
 end
 
+local function body()
+  return support.load_filter(FILTER, { formats = { docx = true } }, 2)
+end
+
 local function caption(...)
   local inlines = { pandoc.RawInline("openxml", RAW_PPR) }
   for _, el in ipairs({ ... }) do
@@ -21,22 +25,38 @@ local function image()
   return pandoc.Plain({ pandoc.Image({}, "dot.png") })
 end
 
+local function row(cells)
+  return { attr = pandoc.Attr(), body = { pandoc.Row(cells) }, head = {}, row_head_columns = 0 }
+end
+
 local function wrapper(blocks, align)
   return pandoc.Table(
     { long = {}, short = {} },
     { { align or pandoc.AlignCenter, 1.0 } },
     pandoc.TableHead(),
-    { { attr = pandoc.Attr(), body = { pandoc.Row({ pandoc.Cell(blocks) }) }, head = {}, row_head_columns = 0 } },
+    { row({ pandoc.Cell(blocks) }) },
     pandoc.TableFoot()
   )
 end
 
-local function float(id, blocks)
-  return pandoc.Div(blocks, pandoc.Attr(id))
+local function layout_cell(blocks)
+  return pandoc.Div(blocks, pandoc.Attr("", { "cell-output-display", "quarto-layout-cell-subref" }))
 end
 
-local function contents(tbl)
-  return tbl.bodies[1].body[1].cells[1].contents
+local function layout_row(cells)
+  local specs = {}
+  for _ = 1, #cells do
+    specs[#specs + 1] = { pandoc.AlignLeft, 0.49 }
+  end
+  local row_cells = {}
+  for _, blocks in ipairs(cells) do
+    row_cells[#row_cells + 1] = pandoc.Cell({ layout_cell(blocks) })
+  end
+  return pandoc.Table({ long = {}, short = {} }, specs, pandoc.TableHead(), { row(row_cells) }, pandoc.TableFoot())
+end
+
+local function float(id, blocks)
+  return pandoc.Div(blocks, pandoc.Attr(id))
 end
 
 local function styles(blocks)
@@ -65,25 +85,28 @@ TestDocxCaption = {}
 
 function TestDocxCaption:test_a_caption_after_its_figure_is_an_image_caption()
   local out = docx().Table(wrapper({ image(), caption(pandoc.Str("Bottom")) }))
-  lu.assertEquals(styles(contents(out)), { "Captioned Figure", "Image Caption" })
-  lu.assertEquals(raw_openxml_count(contents(out)), 0)
+  lu.assertEquals(styles(out), { "Captioned Figure", "Image Caption" })
+  lu.assertEquals(raw_openxml_count(out), 0)
 end
 
 -- The DOCX writer forces `Compact` onto a Plain in a table cell, over any Div style.
 function TestDocxCaption:test_the_image_becomes_a_para_so_its_style_holds()
   local out = docx().Table(wrapper({ image(), caption(pandoc.Str("x")) }))
-  lu.assertEquals(contents(out)[1].content[1].t, "Para")
+  lu.assertEquals(out[1].content[1].t, "Para")
 end
 
 -- A figure moved to fig-cap-location: top reads like a table caption.
 function TestDocxCaption:test_a_caption_before_its_figure_is_a_table_caption()
   local out = docx().Table(wrapper({ caption(pandoc.Str("Top")), image() }))
-  lu.assertEquals(styles(contents(out)), { "Table Caption", "Figure" })
+  lu.assertEquals(styles(out), { "Table Caption", "Figure" })
 end
 
-function TestDocxCaption:test_a_figure_float_keeps_its_wrapper()
+-- Pandoc cuts the cell out of its own nominal width, so the image is clipped.
+function TestDocxCaption:test_a_figure_float_leaves_its_wrapper()
   local out = docx().Table(wrapper({ float("fig-x", { image(), caption(pandoc.Str("x")) }) }))
-  lu.assertEquals(out.t, "Table")
+  lu.assertEquals(#out, 1)
+  lu.assertEquals(out[1].t, "Div")
+  lu.assertEquals(out[1].identifier, "fig-x")
 end
 
 -- Word crushes a table nested in the wrapper's fixed-layout cell.
@@ -123,35 +146,56 @@ function TestDocxCaption:test_a_table_captioned_below_leaves_its_wrapper_in_orde
   lu.assertEquals(styles(out), { "Image Caption" })
 end
 
-function TestDocxCaption:test_a_float_mixing_a_table_and_prose_keeps_its_wrapper()
+function TestDocxCaption:test_a_float_mixing_a_table_and_prose_leaves_its_wrapper()
   local blocks =
     { caption(pandoc.Str("Table")), pandoc.RawBlock("openxml", "<w:tbl/>"), pandoc.Para({ pandoc.Str("Note") }) }
-  lu.assertEquals(docx().Table(wrapper({ float("tbl-x", blocks) })).t, "Table")
+  local out = docx().Table(wrapper({ float("tbl-x", blocks) }))
+  lu.assertEquals(out[1].t, "Div")
+  lu.assertEquals(pandoc.utils.stringify(out[1].content[3]), "Note")
 end
 
-function TestDocxCaption:test_raw_openxml_other_than_a_table_keeps_its_wrapper()
+function TestDocxCaption:test_raw_openxml_other_than_a_table_leaves_its_wrapper()
   local blocks = { caption(pandoc.Str("Table")), pandoc.RawBlock("openxml", "<w:p/>") }
-  lu.assertEquals(docx().Table(wrapper({ float("tbl-x", blocks) })).t, "Table")
+  local out = docx().Table(wrapper({ float("tbl-x", blocks) }))
+  lu.assertEquals(out[1].t, "Div")
+  lu.assertEquals(out[1].content[2].text, "<w:p/>")
 end
 
--- The centring moves to the image style, or it would reach the caption as a
--- direct alignment Word ranks above any style.
-function TestDocxCaption:test_a_centred_wrapper_loses_its_direct_alignment()
+-- A direct alignment would reach the caption, where Word ranks it above any
+-- style; the lift leaves no column to carry one.
+function TestDocxCaption:test_a_centred_wrapper_leaves_no_column_alignment_behind()
   local out = docx().Table(wrapper({ image(), caption(pandoc.Str("x")) }))
-  lu.assertEquals(out.colspecs[1][1], pandoc.AlignDefault)
+  lu.assertNil(out.colspecs)
+  lu.assertEquals(styles(out), { "Captioned Figure", "Image Caption" })
 end
 
-function TestDocxCaption:test_a_wrapper_aligned_otherwise_keeps_its_alignment()
+function TestDocxCaption:test_a_wrapper_aligned_otherwise_leaves_its_image_alone()
   local out = docx().Table(wrapper({ image(), caption(pandoc.Str("x")) }, pandoc.AlignLeft))
-  lu.assertEquals(out.colspecs[1][1], pandoc.AlignLeft)
-  lu.assertEquals(styles(contents(out)), { "Image Caption" })
+  lu.assertEquals(styles(out), { "Image Caption" })
 end
 
 -- knitr nests the float inside its cell output divs.
 function TestDocxCaption:test_a_caption_nested_in_divs_is_found()
   local nested = pandoc.Div({ pandoc.Div({ image(), caption(pandoc.Str("Nested")) }) })
   local out = docx().Table(wrapper({ nested }))
-  lu.assertEquals(styles(contents(out)), { "Captioned Figure", "Image Caption" })
+  lu.assertEquals(styles(out), { "Captioned Figure", "Image Caption" })
+end
+
+-- Quarto builds one single-cell table per row of a layout, and that row holds
+-- the panel's own wrapper rather than a caption of its own.
+function TestDocxCaption:test_a_layout_row_of_one_cell_leaves_its_wrapper()
+  local out = docx().Table(wrapper({ layout_cell({ image() }) }))
+  lu.assertEquals(#out, 1)
+  lu.assertEquals(out[1].t, "Div")
+  lu.assertEquals(out[1].content[1].t, "Plain")
+end
+
+function TestDocxCaption:test_a_layout_row_of_several_cells_keeps_its_table()
+  lu.assertNil(docx().Table(layout_row({ { image() }, { image() } })))
+end
+
+function TestDocxCaption:test_a_cell_holding_no_layout_cell_keeps_its_table()
+  lu.assertNil(docx().Table(wrapper({ pandoc.Para({ pandoc.Str("prose") }) })))
 end
 
 local function subcaption()
@@ -172,11 +216,11 @@ end
 -- Word keeps a character style's `w:b w:val="0"` bold inside a bold paragraph.
 function TestDocxCaption:test_a_subcaption_becomes_a_paragraph_of_its_own()
   local out = docx().Table(wrapper({ image(), subtitled() }))
-  lu.assertEquals(styles(contents(out)), { "Captioned Figure", "Image Caption Title", "Image Caption Subtitle" })
+  lu.assertEquals(styles(out), { "Captioned Figure", "Image Caption Title", "Image Caption Subtitle" })
 end
 
 function TestDocxCaption:test_the_title_and_subtitle_lose_the_blanks_around_the_break()
-  local blocks = contents(docx().Table(wrapper({ image(), subtitled() })))
+  local blocks = docx().Table(wrapper({ image(), subtitled() }))
   lu.assertEquals(pandoc.utils.stringify(blocks[2]), "Title")
   lu.assertEquals(#blocks[2].content[1].content, 1)
   lu.assertEquals(blocks[3].content[1].content[1].text, "Note")
@@ -192,14 +236,38 @@ end
 
 function TestDocxCaption:test_a_caption_without_a_subcaption_stays_one_paragraph()
   local out = docx().Table(wrapper({ image(), caption(pandoc.Str("Only"), pandoc.RawInline("html", "<br>")) }))
-  lu.assertEquals(styles(contents(out)), { "Captioned Figure", "Image Caption" })
+  lu.assertEquals(styles(out), { "Captioned Figure", "Image Caption" })
 end
 
 function TestDocxCaption:test_a_table_without_a_quarto_caption_is_left_alone()
   lu.assertNil(docx().Table(wrapper({ image(), pandoc.Para({ pandoc.Str("plain") }) })))
 end
 
+-- A float laid out in panels gets no wrapper of its own, so its caption is a
+-- body-level paragraph the Table pass never reaches.
+function TestDocxCaption:test_a_panel_float_caption_is_styled_at_body_level()
+  local out = body().Blocks(pandoc.Blocks({ image(), caption(pandoc.Str("Overall")) }))
+  lu.assertEquals(styles(out), { "Image Caption" })
+  lu.assertEquals(raw_openxml_count(out), 0)
+end
+
+function TestDocxCaption:test_a_panel_float_subcaption_becomes_a_paragraph_of_its_own()
+  local out = body().Blocks(pandoc.Blocks({ image(), subtitled() }))
+  lu.assertEquals(styles(out), { "Image Caption Title", "Image Caption Subtitle" })
+end
+
+-- The body pass leaves the image where it is: no column centred it.
+function TestDocxCaption:test_the_body_pass_leaves_the_blocks_beside_the_caption_alone()
+  local out = body().Blocks(pandoc.Blocks({ image(), caption(pandoc.Str("Overall")) }))
+  lu.assertEquals(out[1].t, "Plain")
+end
+
+function TestDocxCaption:test_blocks_without_a_caption_are_left_alone()
+  lu.assertNil(body().Blocks(pandoc.Blocks({ image(), pandoc.Para({ pandoc.Str("plain") }) })))
+end
+
 function TestDocxCaption:test_other_formats_are_left_alone()
-  local f = support.load_filter(FILTER, { formats = { html = true } })
-  lu.assertNil(f.Table(wrapper({ image(), caption(pandoc.Str("x")) })))
+  local opts = { formats = { html = true } }
+  lu.assertNil(support.load_filter(FILTER, opts).Table(wrapper({ image(), caption(pandoc.Str("x")) })))
+  lu.assertNil(support.load_filter(FILTER, opts, 2).Blocks(pandoc.Blocks({ image(), caption(pandoc.Str("x")) })))
 end

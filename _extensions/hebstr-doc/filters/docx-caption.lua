@@ -30,12 +30,17 @@
 -- or `Image Caption Title`, which drop the space after it and keep it with the
 -- subtitle: Word's contextual spacing only joins paragraphs of one style.
 --
--- A float whose content is a table leaves the wrapper altogether, its caption
--- and table set at the level the wrapper stood. Word lays out a table nested in
--- that cell against the wrapper's fixed layout and nominal grid, and crushes
--- it, where the same table at top level fits its content. The float's Div keeps
--- its identifier, from which Pandoc writes the bookmark cross-references point
--- to, and `Table Caption` keeps the caption with the table that follows it.
+-- A float wrapper of one cell leaves the document altogether, its caption and
+-- content set at the level the wrapper stood, and so does the one-column table
+-- Quarto builds for a layout row. Pandoc cuts that cell out of a fixed 7920
+-- twip nominal while Quarto sizes the content against the real text column, so
+-- a table is crushed and an image is clipped at the cell edge. The float's Div
+-- keeps its identifier, from which Pandoc writes the bookmark cross-references
+-- point to, and `Table Caption` keeps the caption with what follows it.
+--
+-- The caption of a float laid out in panels is reached by a second pass: that
+-- float gets no wrapper of its own, so its caption sits at body level, where
+-- the `Table` handler never sees it.
 --
 -- Runs post-render: the raw `<w:pPr>` only exists once Quarto's float renderer
 -- has run, which is after every post-quarto filter.
@@ -111,27 +116,10 @@ local function center_images(block, style)
   })
 end
 
-local function is_tabular(block)
-  if block.t == "Table" then
-    return true
-  elseif block.t == "RawBlock" then
-    return block.format == "openxml" and block.text:match("^%s*<w:tbl[%s/>]") ~= nil
-  elseif block.t == "Div" and #block.content > 0 then
-    for _, child in ipairs(block.content) do
-      if not is_tabular(child) then
-        return false
-      end
-    end
-    return true
-  end
-  return false
-end
-
 local function restyle(blocks, recenter)
   for i, block in ipairs(blocks) do
     if is_caption(block) then
       local top = i < #blocks
-      local tabular = #blocks > 1
       local out = pandoc.Blocks({})
       for j, sibling in ipairs(blocks) do
         if j == i then
@@ -141,16 +129,13 @@ local function restyle(blocks, recenter)
           if subtitle then
             out:insert(styled({ pandoc.Para(subtitle) }, role .. " Subtitle"))
           end
+        elseif recenter then
+          out:extend(center_images(sibling, top and "Figure" or "Captioned Figure"))
         else
-          tabular = tabular and is_tabular(sibling)
-          if recenter then
-            out:extend(center_images(sibling, top and "Figure" or "Captioned Figure"))
-          else
-            out:insert(sibling)
-          end
+          out:insert(sibling)
         end
       end
-      return out, tabular
+      return out
     end
   end
   return nil
@@ -166,32 +151,56 @@ local function single_cell(tbl)
     and #bodies[1].body[1].cells == 1
 end
 
+local function cell_blocks(tbl)
+  return tbl.bodies[1].body[1].cells[1].contents
+end
+
+local function holds_layout_cell(blocks)
+  for _, block in ipairs(blocks) do
+    if block.t == "Div" then
+      for _, class in ipairs(block.classes) do
+        if class:find("^quarto%-layout%-cell") then
+          return true
+        end
+      end
+    end
+  end
+  return false
+end
+
 local function Table(tbl)
   if not quarto.doc.is_format("docx") then
     return nil
   end
   local specs = tbl.colspecs
   local recenter = #specs == 1 and specs[1][1] == pandoc.AlignCenter
-  local found, tabular = false, false
+  local found = false
   local out = tbl:walk({
     Blocks = function(blocks)
-      local restyled, holds_table = restyle(blocks, recenter)
+      local restyled = restyle(blocks, recenter)
       if restyled then
-        found, tabular = true, holds_table == true
+        found = true
         return restyled
       end
     end,
   })
   if not found then
+    if single_cell(tbl) and holds_layout_cell(cell_blocks(tbl)) then
+      return cell_blocks(tbl)
+    end
     return nil
   end
-  if tabular and single_cell(out) then
-    return out.bodies[1].body[1].cells[1].contents
-  end
-  if recenter then
-    out.colspecs = { { pandoc.AlignDefault, specs[1][2] } }
+  if single_cell(out) then
+    return cell_blocks(out)
   end
   return out
 end
 
-return { { Table = Table } }
+local function Blocks(blocks)
+  if not quarto.doc.is_format("docx") then
+    return nil
+  end
+  return restyle(blocks, false)
+end
+
+return { { Table = Table }, { Blocks = Blocks } }
