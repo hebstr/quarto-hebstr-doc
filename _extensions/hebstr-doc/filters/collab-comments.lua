@@ -17,6 +17,11 @@
 -- exactly once, and the drift is named on stderr rather than costing the
 -- comment.
 --
+-- The straight apostrophe and the typographic one are one character wherever
+-- this filter compares text: the source side compares and counts normalised,
+-- and the rendered side picks between the stored literal and its twin whichever
+-- occurs exactly once. The form a source carries is therefore free.
+--
 -- Dropped at the fork: the HTML export, the live preview bridge and its
 -- descriptor discovery (`trusted_descriptor_directory`, `live_descriptor`,
 -- `config_script`), with the `collab-comments.js` and `collab-comments.css`
@@ -69,6 +74,10 @@ local function normalize(value)
   -- macOS exposes its temporary directory through both /var and /private/var.
   -- Node and Quarto can independently choose either spelling for the same inode.
   return normalized:gsub("^/private/var/", "/var/")
+end
+
+local function smart_apostrophe(value)
+  return ((value or ""):gsub("'", "\u{2019}"))
 end
 
 local function is_absolute(value)
@@ -307,17 +316,18 @@ local function stored_range_text(lines, comment)
     return nil, "invalid source range"
   end
   local selected = line:sub(from, to - 1)
-  if selected == "" or selected ~= comment.selectedText then
+  if selected == "" or smart_apostrophe(selected) ~= smart_apostrophe(comment.selectedText) then
     return nil, "stored selection is stale or not literal source text"
   end
-  return selected
+  return comment.selectedText
 end
 
 local function source_occurrences(lines, literal)
-  local text = table.concat(lines, "\n")
+  local text = smart_apostrophe(table.concat(lines, "\n"))
+  local needle = smart_apostrophe(literal)
   local count, from = 0, 1
   while true do
-    local start = text:find(literal, from, true)
+    local start = text:find(needle, from, true)
     if not start then
       break
     end
@@ -542,6 +552,45 @@ local function rendered_block_texts(doc)
   return result
 end
 
+local function rendered_occurrences(rendered_blocks, needle)
+  local count = 0
+  for _, text in ipairs(rendered_blocks) do
+    local from = 1
+    while true do
+      local start = text:find(needle, from, true)
+      if not start then
+        break
+      end
+      count = count + 1
+      -- Count overlapping rendered occurrences too; this must agree with
+      -- rewrite_block's literal scan below.
+      from = start + 1
+    end
+  end
+  return count
+end
+
+-- The needle is picked once, between the stored literal and its apostrophe twin,
+-- and the count returned here is the one the rewrite is held to: a rendered
+-- document is not uniformly typographic, a raw table block never passing through
+-- `smart`, so neither form can be imposed. A tie is refused rather than resolved
+-- by preferring a form, which is why the pick cannot be a rewrite of the needle.
+local function rendered_needle(rendered_blocks, literal)
+  local twin = smart_apostrophe(literal)
+  local stored = rendered_occurrences(rendered_blocks, literal)
+  if twin == literal then
+    return literal, stored
+  end
+  local normalized = rendered_occurrences(rendered_blocks, twin)
+  if stored == 1 and normalized == 1 then
+    return literal, stored + normalized
+  end
+  if normalized == 1 or normalized > stored then
+    return twin, normalized
+  end
+  return literal, stored
+end
+
 local function rewrite_block(block, candidates, used)
   local inlines = block.content
   local text = inline_text(inlines)
@@ -722,6 +771,11 @@ local function add_docx_comments(doc, input, workspace, show_resolved)
     return doc
   end
   local selected = exported_comments(workspace, input, show_resolved)
+  -- Count every rendered Para/Plain/Header before building a candidate,
+  -- including content in nested containers and tables. A match in an unsupported
+  -- rewrite structure still makes another match ambiguous, and the count is what
+  -- settles which spelling of the selection the rewrite then looks for.
+  local rendered_blocks = rendered_block_texts(doc)
   local raw_candidates = {}
   for _, comment in ipairs(selected) do
     local literal, reason, drift = selected_source_text(lines, comment)
@@ -732,12 +786,13 @@ local function add_docx_comments(doc, input, workspace, show_resolved)
         drift_warning(input, comment, drift)
       end
       local body = transcript(comment)
+      local selection, occurrences = rendered_needle(rendered_blocks, literal)
       table.insert(raw_candidates, {
         comment = comment,
-        selection = literal,
+        selection = selection,
         body = body,
         word_id = word_id(comment.id, body),
-        occurrences = 0,
+        occurrences = occurrences,
       })
     end
   end
@@ -752,25 +807,6 @@ local function add_docx_comments(doc, input, workspace, show_resolved)
     else
       candidate.index = #candidates + 1
       table.insert(candidates, candidate)
-    end
-  end
-  -- Count every rendered Para/Plain/Header before rewriting, including content
-  -- in nested containers and tables. A match in an unsupported rewrite
-  -- structure still makes another match ambiguous.
-  local rendered_blocks = rendered_block_texts(doc)
-  for _, text in ipairs(rendered_blocks) do
-    for _, candidate in ipairs(candidates) do
-      local from = 1
-      while true do
-        local start = text:find(candidate.selection, from, true)
-        if not start then
-          break
-        end
-        candidate.occurrences = candidate.occurrences + 1
-        -- Count overlapping rendered occurrences too; this must agree with
-        -- rewrite_block's literal scan above.
-        from = start + 1
-      end
     end
   end
   -- The rewrite walks the body rather than iterating its top level, so a

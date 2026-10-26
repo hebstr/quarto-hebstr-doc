@@ -389,6 +389,8 @@ A stored line and column that no longer hold that text are not fatal either: the
 What it cannot survive is the selected text itself being rewritten, or being repeated in the source once the stored position has drifted.
 Every comment the render cannot place is named on stderr with its source line and the reason, and the render still succeeds, so the count of those lines is what to read after an editing pass.
 
+The apostrophe is matched in either form: a selection written with the straight `'` anchors on prose the render typesets with `’`, and the reverse holds too, so the form the source carries costs nothing.
+
 A selection has to occur exactly once in the rendered document.
 The render places it inside a list, a table cell, a bold run or a link, and beside a citation, a code span or a formula; it refuses to cut one of those in two.
 

@@ -5,8 +5,10 @@ local FILTER = "_extensions/hebstr-doc/filters/collab-comments.lua"
 
 -- The source the store anchors into. A case names the text it selects and the
 -- harness derives the stored range from this table, so no offset is written by
--- hand. Apostrophes and quotes are kept out: pandoc.read applies `smart`, which
--- would leave the AST holding a character the source does not.
+-- hand. Quotes are kept out: pandoc.read applies `smart`, which would leave the
+-- AST holding a character the source does not. The one line carrying a straight
+-- apostrophe is there for exactly that divergence, which is what the three
+-- apostrophe cases are about.
 local LINES = {
   "---",
   "title: Fixture",
@@ -26,10 +28,14 @@ local LINES = {
   "",
   "A paragraph with café then the target here.",
   "",
+  "A paragraph holds l'os and nothing else.",
+  "",
 }
 local SOURCE = table.concat(LINES, "\n")
 
-local PLAIN, BULLET, BOLD, CITED, TWICE, ACCENTED = 5, 7, 9, 11, 13, 17
+local PLAIN, BULLET, BOLD, CITED, TWICE, ACCENTED, APOSTROPHE = 5, 7, 9, 11, 13, 17, 19
+local STRAIGHT = "l'os and nothing"
+local CURLY = STRAIGHT:gsub("'", "\u{2019}")
 
 local function range_of(selection)
   for index, line in ipairs(LINES) do
@@ -50,6 +56,20 @@ end
 -- citing line as Cite, a bullet line as a BulletList.
 local function block_of(number)
   return pandoc.read(LINES[number], "markdown").blocks[1]
+end
+
+-- The same line as the reader would leave it untouched, which is the state a
+-- raw table block arrives in: `smart` never runs on it, so the straight
+-- apostrophe survives into the rendered document beside its typographic twin.
+local function verbatim_block(number)
+  local inlines = {}
+  for word in LINES[number]:gmatch("%S+") do
+    if #inlines > 0 then
+      table.insert(inlines, pandoc.Space())
+    end
+    table.insert(inlines, pandoc.Str(word))
+  end
+  return pandoc.Para(inlines)
 end
 
 local function store_json(entries)
@@ -365,6 +385,38 @@ function TestCollabComments:test_a_stale_range_whose_literal_is_not_unique_in_th
   lu.assertStrContains(out.stderr, "stored range is stale and the selection is not unique in the source")
   lu.assertNotStrContains(out.stderr, "drifted Word comment")
   lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
+end
+
+-- The three cases below hold the apostrophe normalisation: the comparator reads
+-- the two forms as one character, so the form the source carries and the form
+-- the store carries each cost the comment nothing.
+function TestCollabComments:test_a_stored_curly_literal_resolves_against_a_straight_source()
+  local out = run({
+    blocks = { block_of(APOSTROPHE) },
+    comments = { { selection = STRAIGHT, selected_text = CURLY } },
+  })
+  lu.assertEquals(out.stderr, "")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), { "comment-start", "comment-end" })
+  lu.assertEquals(text_without_markers(out.doc.blocks[1]), LINES[APOSTROPHE]:gsub("'", "\u{2019}"))
+end
+
+function TestCollabComments:test_a_straight_literal_resolves_against_the_curly_rendered_prose()
+  local out = run({
+    blocks = { block_of(APOSTROPHE) },
+    comments = { { selection = STRAIGHT } },
+  })
+  lu.assertEquals(out.stderr, "")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), { "comment-start", "comment-end" })
+end
+
+function TestCollabComments:test_both_forms_occurring_once_is_named_ambiguous()
+  local out = run({
+    blocks = { block_of(APOSTROPHE), verbatim_block(APOSTROPHE) },
+    comments = { { selection = STRAIGHT } },
+  })
+  lu.assertStrContains(out.stderr, "selection is ambiguous in rendered document")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
+  lu.assertEquals(classes_at(out.doc.blocks[2].content), {})
 end
 
 function TestCollabComments:test_a_resolved_comment_is_dropped_by_default()

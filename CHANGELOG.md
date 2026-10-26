@@ -5,6 +5,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Fixed
+
+- A Word comment no longer depends on which apostrophe its source happens to carry: the straight form and the typographic one are read as one character wherever a selection is matched.
+  Typing a straight apostrophe in a sentence a comment anchors on used to cost that comment in silence, and a comment imported from Word, which carries the typographic form, used to miss a selection written with the straight one.
+  A selection the rendered document carries in both forms at once is refused and named, as an ambiguous selection already was.
+
 ## [1.7.2] - 2026-10-26
 
 ### Fixed
