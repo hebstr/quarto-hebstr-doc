@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.7.3] - 2026-10-26
+
 ### Fixed
 
 - A Word comment no longer depends on which apostrophe its source happens to carry: the straight form and the typographic one are read as one character wherever a selection is matched.
