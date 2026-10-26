@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.7.2] - 2026-10-26
+
 ### Fixed
 
 - A Word comment whose stored position no longer matches the source is no longer lost: it is anchored wherever the source carries its selected text exactly once, and the drift is named on stderr instead of being reported as a skip.
