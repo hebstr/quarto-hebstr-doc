@@ -106,6 +106,10 @@ end
 
 local function config_value(meta, key, default)
   local config = meta["collab-comments"]
+  if config ~= nil and type(config) ~= "table" then
+    io.stderr:write("[collab-comments] ignored the collab-comments metadata: expected a block of keys\n")
+    return default
+  end
   if config and config[key] ~= nil then
     return boolean(config[key], default)
   end
@@ -150,7 +154,12 @@ local function exported_comments(workspace, input, show_resolved)
     return {}
   end
   local ok, store = pcall(pandoc.json.decode, raw)
-  if not ok or type(store) ~= "table" or type(store.comments) ~= "table" then
+  if not ok or store == nil then
+    io.stderr:write("[collab-comments] skipped comment export: comment store is not valid JSON\n")
+    return {}
+  end
+  if type(store) ~= "table" or type(store.comments) ~= "table" then
+    io.stderr:write("[collab-comments] skipped comment export: comment store holds no comment collection\n")
     return {}
   end
   local function valid_position(position)
@@ -168,7 +177,7 @@ local function exported_comments(workspace, input, show_resolved)
     end
     for key, item in pairs(items) do
       if type(key) ~= "number" or key < 1 or key ~= math.floor(key) or not valid_item(item) then
-        return false
+        return false, key
       end
     end
     return true
@@ -227,13 +236,20 @@ local function exported_comments(workspace, input, show_resolved)
   end
   -- Reject a malformed collection as a whole. Do not turn a partial parse of
   -- an untrusted store into an export containing a possibly unrelated entry.
-  if not valid_array(store.comments, valid_comment) then
+  local comments_ok, invalid_key = valid_array(store.comments, valid_comment)
+  if not comments_ok then
+    io.stderr:write(
+      string.format(
+        "[collab-comments] skipped comment export: %s does not match the comment schema\n",
+        invalid_key and ("comment entry " .. tostring(invalid_key)) or "the comment collection"
+      )
+    )
     return {}
   end
   local relative = normalize(input):sub(#root + 2)
   local result = {}
   for _, comment in ipairs(store.comments) do
-    if valid_comment(comment) and comment.filePath == relative and (show_resolved or not comment.resolved) then
+    if comment.filePath == relative and (show_resolved or not comment.resolved) then
       table.insert(result, comment)
     end
   end
@@ -614,7 +630,7 @@ local function rewrite_block(block, candidates, used)
   -- A selection must have one and only one rendered occurrence in the document.
   local accepted = {}
   for _, match in ipairs(matches) do
-    if candidates[match.candidate.index].occurrences == 1 then
+    if match.candidate.occurrences == 1 then
       table.insert(accepted, match)
     end
   end

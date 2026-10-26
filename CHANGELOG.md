@@ -5,6 +5,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Fixed
+
+- A comment store the extension cannot read no longer costs every comment in silence.
+  A store that is not valid JSON, one carrying no comment collection and one carrying an entry that does not match the comment schema are each named on standard error, the last one by the position of the offending entry.
+  The render still succeeds, as it already did for a single comment that cannot be placed, so reading the render's messages remains the way to check a delivery.
+- A `collab-comments` option written as a single value instead of a block of keys is named and ignored, where it used to stop the render.
+
 ## [1.7.3] - 2026-10-26
 
 ### Fixed

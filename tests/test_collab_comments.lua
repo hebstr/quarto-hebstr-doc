@@ -30,10 +30,13 @@ local LINES = {
   "",
   "A paragraph holds l'os and nothing else.",
   "",
+  "## A heading introduces the annexe section.",
+  "",
 }
 local SOURCE = table.concat(LINES, "\n")
 
 local PLAIN, BULLET, BOLD, CITED, TWICE, ACCENTED, APOSTROPHE = 5, 7, 9, 11, 13, 17, 19
+local HEADING = 21
 local STRAIGHT = "l'os and nothing"
 local CURLY = STRAIGHT:gsub("'", "\u{2019}")
 
@@ -80,11 +83,12 @@ local function store_json(entries)
       author = entry.author or "Reviewer One",
       timestamp = entry.timestamp or "2026-10-01T09:00:00Z",
       text = entry.text or "An opening comment.",
-      filePath = "doc.qmd",
+      filePath = entry.file_path or "doc.qmd",
       range = entry.range or range_of(entry.selection),
       selectedText = entry.selected_text or entry.selection,
       resolved = entry.resolved,
       replies = entry.replies,
+      trackedChanges = entry.tracked_changes,
     }
   end
   return pandoc.json.encode({ comments = comments })
@@ -103,15 +107,20 @@ end
 -- by their store alone, and an isolated one cannot make another ambiguous.
 local function run(opts)
   return pandoc.system.with_temporary_directory("collab-comments", function(dir)
-    write_file(dir .. "/doc.qmd", SOURCE)
+    local folder = dir
+    if opts.subdir then
+      folder = dir .. "/" .. opts.subdir
+      pandoc.system.make_directory(folder, true)
+    end
+    write_file(folder .. "/doc.qmd", SOURCE)
     if opts.comments then
       pandoc.system.make_directory(dir .. "/.comments")
-      write_file(dir .. "/.comments/collab-comments.json", store_json(opts.comments))
+      write_file(dir .. "/.comments/collab-comments.json", opts.store_text or store_json(opts.comments))
     end
     local filter = support.load_filter(FILTER, {
       formats = opts.formats or { docx = true },
       project_dir = dir,
-      input_file = dir .. "/doc.qmd",
+      input_file = folder .. "/doc.qmd",
     })
     local captured = {}
     local real = io.stderr
@@ -151,6 +160,18 @@ local function text_without_markers(block)
   return pandoc.utils.stringify(stripped)
 end
 
+-- The two markers of one range carry the same id, which is what pairs the
+-- `w:commentRangeStart` and `w:commentRangeEnd` Word reads.
+local function marker_ids(inlines)
+  local ids = {}
+  for _, inline in ipairs(inlines) do
+    if inline.t == "Span" and (inline.classes:includes("comment-start") or inline.classes:includes("comment-end")) then
+      ids[#ids + 1] = inline.attributes.id
+    end
+  end
+  return ids
+end
+
 local function first_span(inlines)
   local found
   for _, inline in ipairs(inlines) do
@@ -172,6 +193,9 @@ function TestCollabComments:test_a_plain_paragraph_gains_the_comment_markers()
   lu.assertEquals(out.stderr, "")
   lu.assertEquals(classes_at(out.doc.blocks[1].content), { "comment-start", "comment-end" })
   lu.assertEquals(text_without_markers(out.doc.blocks[1]), LINES[PLAIN])
+  local ids = marker_ids(out.doc.blocks[1].content)
+  lu.assertEquals(#ids, 2)
+  lu.assertEquals(ids[1], ids[2])
 end
 
 function TestCollabComments:test_the_start_marker_carries_the_author_and_the_date()
@@ -204,6 +228,41 @@ function TestCollabComments:test_the_marker_body_carries_the_whole_transcript()
   lu.assertStrContains(body, "The answer.")
 end
 
+-- The activity is chronological, a tie puts a Reply before a Tracked change,
+-- and a tracked change prints both of its texts. No store in use carries one.
+function TestCollabComments:test_the_transcript_orders_its_activity_and_prints_a_tracked_change()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = {
+      {
+        selection = "simple anchor",
+        text = "The opening remark.",
+        replies = {
+          { id = "r2", author = "Reviewer Two", timestamp = "2026-10-03T08:00:00Z", text = "The later answer." },
+          { id = "r1", author = "Reviewer Two", timestamp = "2026-10-02T08:00:00Z", text = "The earlier answer." },
+        },
+        tracked_changes = {
+          {
+            id = "t1",
+            author = "The Author",
+            timestamp = "2026-10-03T08:00:00Z",
+            previousText = "a simple anchor",
+            newText = "a moved anchor",
+          },
+        },
+      },
+    },
+  })
+  local body = pandoc.utils.stringify(first_span(out.doc.blocks[1].content))
+  local earlier = assert(body:find("The earlier answer.", 1, true))
+  local later = assert(body:find("The later answer.", 1, true))
+  local tracked = assert(body:find("Tracked change", 1, true))
+  lu.assertTrue(earlier < later)
+  lu.assertTrue(later < tracked)
+  lu.assertStrContains(body, "Previous: a simple anchor")
+  lu.assertStrContains(body, "Current: a moved anchor")
+end
+
 -- Stair 1: the rewrite walks the body instead of iterating its top level.
 function TestCollabComments:test_a_bullet_item_is_reached()
   local out = run({
@@ -225,6 +284,18 @@ function TestCollabComments:test_a_wholly_bold_paragraph_is_reached_inside_its_s
   lu.assertEquals(out.doc.blocks[1].content[1].t, "Strong")
   lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
   lu.assertEquals(classes_at(out.doc.blocks[1].content[1].content), { "comment-start", "comment-end" })
+end
+
+-- Both walks are wired for Header, and a comment on a heading is the one shape
+-- a reviewer's remark on a whole section can take.
+function TestCollabComments:test_a_heading_is_reached()
+  local out = run({
+    blocks = { block_of(HEADING) },
+    comments = { { selection = "introduces the annexe" } },
+  })
+  lu.assertEquals(out.stderr, "")
+  lu.assertEquals(out.doc.blocks[1].t, "Header")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), { "comment-start", "comment-end" })
 end
 
 -- Stair 2b: an atomic inline is an opaque run the selection can sit beside.
@@ -251,6 +322,32 @@ function TestCollabComments:test_a_selection_cutting_an_atomic_inline_is_refused
     comments = { { selection = "citing @ref" } },
   })
   lu.assertStrContains(out.stderr, "selection occurs only in unsupported rendered structure")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
+end
+
+-- Two comments on one paragraph is ordinary reviewer use, and the two cases
+-- below are what hold the multi-candidate half of the rewrite: the sort that
+-- puts the markers in document order, and the overlap that drops both.
+function TestCollabComments:test_two_disjoint_selections_in_one_paragraph_both_land()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = { { selection = "simple anchor" }, { selection = "plain paragraph" } },
+  })
+  lu.assertEquals(out.stderr, "")
+  lu.assertEquals(
+    classes_at(out.doc.blocks[1].content),
+    { "comment-start", "comment-end", "comment-start", "comment-end" }
+  )
+  lu.assertEquals(text_without_markers(out.doc.blocks[1]), LINES[PLAIN])
+end
+
+function TestCollabComments:test_two_overlapping_selections_are_both_dropped_and_named()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = { { selection = "a simple anchor" }, { selection = "simple anchor and" } },
+  })
+  lu.assertStrContains(out.stderr, "skipped Word comment comment-1: overlapping rendered selection")
+  lu.assertStrContains(out.stderr, "skipped Word comment comment-2: overlapping rendered selection")
   lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
 end
 
@@ -457,6 +554,75 @@ function TestCollabComments:test_other_formats_are_left_alone()
     comments = { { selection = "simple anchor" } },
   })
   lu.assertEquals(out.stderr, "")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
+end
+
+-- The shape every real store has: the document sits in a subdirectory and the
+-- store at the project root, so the walk climbs and the key carries the folder.
+function TestCollabComments:test_a_nested_document_finds_the_store_above_it()
+  local out = run({
+    subdir = "docs/csi",
+    blocks = { block_of(PLAIN) },
+    comments = { { selection = "simple anchor", file_path = "docs/csi/doc.qmd" } },
+  })
+  lu.assertEquals(out.stderr, "")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), { "comment-start", "comment-end" })
+end
+
+function TestCollabComments:test_an_entry_naming_another_document_is_not_exported()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = { { selection = "simple anchor", file_path = "other.qmd" } },
+  })
+  lu.assertEquals(out.stderr, "")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
+end
+
+-- A store the schema check refuses is a total loss of the export, so it is
+-- named: the delivery check for this filter is the stderr of the render.
+function TestCollabComments:test_an_unparsable_store_is_named()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = { { selection = "simple anchor" } },
+    store_text = "{ not json",
+  })
+  lu.assertStrContains(out.stderr, "comment store is not valid JSON")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
+end
+
+function TestCollabComments:test_a_store_carrying_no_comment_collection_is_named()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = { { selection = "simple anchor" } },
+    store_text = "{}",
+  })
+  lu.assertStrContains(out.stderr, "comment store holds no comment collection")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
+end
+
+function TestCollabComments:test_a_store_holding_an_invalid_entry_names_that_entry()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = { { selection = "simple anchor" } },
+    store_text = pandoc.json.encode({
+      comments = {
+        { id = "comment-1", author = "Reviewer One" },
+      },
+    }),
+  })
+  lu.assertStrContains(out.stderr, "comment entry 1 does not match the comment schema")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
+end
+
+-- A scalar where the block is expected is named and ignored, rather than
+-- costing the render: every other refusal of this filter exits 0.
+function TestCollabComments:test_a_scalar_metadata_value_is_named_and_ignored()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    meta = { ["collab-comments"] = true },
+    comments = { { selection = "simple anchor" } },
+  })
+  lu.assertStrContains(out.stderr, "ignored the collab-comments metadata")
   lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
 end
 

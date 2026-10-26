@@ -387,7 +387,9 @@ An edit made with the editor closed shifts them the same way, which the render t
 A stored comment is anchored on the literal source text it selected, so it survives an edit elsewhere and follows the editor extension when the selected line moves.
 A stored line and column that no longer hold that text are not fatal either: the comment is anchored wherever the source carries the selected text exactly once, and the drift is named on stderr.
 What it cannot survive is the selected text itself being rewritten, or being repeated in the source once the stored position has drifted.
-Every comment the render cannot place is named on stderr with its source line and the reason, and the render still succeeds, so the count of those lines is what to read after an editing pass.
+Every comment the render cannot place is named on stderr with its source line and the reason, and the render still succeeds.
+A failure the whole store carries is named too, on a line of its own and without a source line: a file that is not valid JSON, one holding no comment collection, one holding an entry that does not match the schema, and a `collab-comments` option written as a single value instead of a block.
+Read every `[collab-comments]` line of the render after an editing pass, since a store refused as a whole costs every comment at once.
 
 The apostrophe is matched in either form: a selection written with the straight `'` anchors on prose the render typesets with `’`, and the reverse holds too, so the form the source carries costs nothing.
 
