@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.7.4] - 2026-10-26
+
 ### Fixed
 
 - A comment store the extension cannot read no longer costs every comment in silence.
