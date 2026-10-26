@@ -308,11 +308,63 @@ function TestCollabComments:test_a_selection_spanning_source_lines_is_named()
     comments = {
       {
         selection = "simple anchor",
+        selected_text = "a moved anchor",
         range = { start = { line = 4, character = 0 }, ["end"] = { line = 5, character = 2 } },
       },
     },
   })
   lu.assertStrContains(out.stderr, "selection spans source lines")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
+end
+
+-- The three cases below hold the fallback: the stored range stays the fast path
+-- and a drift in it costs the comment only where the source cannot carry it
+-- alone.
+function TestCollabComments:test_a_range_spanning_source_lines_resolves_on_its_unique_literal()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = {
+      {
+        selection = "simple anchor",
+        range = { start = { line = 4, character = 0 }, ["end"] = { line = 5, character = 2 } },
+      },
+    },
+  })
+  lu.assertStrContains(out.stderr, "drifted Word comment")
+  lu.assertStrContains(out.stderr, "selection spans source lines")
+  lu.assertNotStrContains(out.stderr, "skipped Word comment")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), { "comment-start", "comment-end" })
+end
+
+function TestCollabComments:test_a_stale_range_resolves_on_its_unique_literal()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = {
+      {
+        selection = "simple anchor",
+        range = { start = { line = 6, character = 2 }, ["end"] = { line = 6, character = 15 } },
+      },
+    },
+  })
+  lu.assertStrContains(out.stderr, "drifted Word comment")
+  lu.assertStrContains(out.stderr, "stored selection is stale or not literal source text")
+  lu.assertNotStrContains(out.stderr, "skipped Word comment")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), { "comment-start", "comment-end" })
+end
+
+function TestCollabComments:test_a_stale_range_whose_literal_is_not_unique_in_the_source_is_named()
+  local out = run({
+    blocks = { block_of(TWICE) },
+    comments = {
+      {
+        selection = "twice here",
+        range = { start = { line = 4, character = 0 }, ["end"] = { line = 4, character = 10 } },
+      },
+    },
+  })
+  lu.assertStrContains(out.stderr, "stored range is stale and the selection is not unique in the source")
+  lu.assertNotStrContains(out.stderr, "drifted Word comment")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
 end
 
 function TestCollabComments:test_a_resolved_comment_is_dropped_by_default()

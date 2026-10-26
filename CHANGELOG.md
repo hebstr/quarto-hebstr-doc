@@ -7,6 +7,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ### Fixed
 
+- A Word comment whose stored position no longer matches the source is no longer lost: it is anchored wherever the source carries its selected text exactly once, and the drift is named on stderr instead of being reported as a skip.
+  An edit made with the editor closed shifted every comment of a document by the lines it added or removed, and the whole set was then dropped at the next Word render.
+  A selection spanning two source lines is carried the same way, where it used to be refused outright.
+  A selected text the source no longer carries, or carries twice once the position has drifted, is still refused and named.
+
 - A figure no longer comes out clipped on the right in Word, and a figure laid out in panels (`layout-nrow`, `layout-ncol`) now carries its overall caption styled like any other.
   Quarto sizes an image against the page text column while Pandoc cuts the one-cell table it wraps every float in out of a narrower nominal width, so the image overflowed that cell and Word cut it at the edge.
   Figures now leave that wrapper, as tables already did since 1.5.0, and the caption of a panel float, which Quarto writes outside any wrapper, is styled from the body.

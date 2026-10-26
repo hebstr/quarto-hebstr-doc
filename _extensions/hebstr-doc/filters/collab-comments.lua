@@ -12,6 +12,11 @@
 -- spans Pandoc's DOCX writer turns into a real Word comment part. A selection
 -- that no longer resolves is named on stderr and the render still succeeds.
 --
+-- The stored range is a fast path: when it no longer resolves, the comment is
+-- anchored on its stored selection text wherever the source carries that text
+-- exactly once, and the drift is named on stderr rather than costing the
+-- comment.
+--
 -- Dropped at the fork: the HTML export, the live preview bridge and its
 -- descriptor discovery (`trusted_descriptor_directory`, `live_descriptor`,
 -- `config_script`), with the `collab-comments.js` and `collab-comments.css`
@@ -226,12 +231,28 @@ local function exported_comments(workspace, input, show_resolved)
   return result
 end
 
+local function stored_line(comment)
+  return (comment.range and comment.range.start and comment.range.start.line or 0) + 1
+end
+
 local function warning(input, comment, reason)
   io.stderr:write(
     string.format(
       "[collab-comments] %s:%d: skipped Word comment %s: %s\n",
       input,
-      (comment.range and comment.range.start and comment.range.start.line or 0) + 1,
+      stored_line(comment),
+      comment.id or "?",
+      reason
+    )
+  )
+end
+
+local function drift_warning(input, comment, reason)
+  io.stderr:write(
+    string.format(
+      "[collab-comments] %s:%d: drifted Word comment %s, anchored on its unique source occurrence: %s\n",
+      input,
+      stored_line(comment),
       comment.id or "?",
       reason
     )
@@ -272,10 +293,7 @@ local function utf16_byte_index(text, character)
   return units == character and #text + 1 or nil
 end
 
-local function selected_source_text(lines, comment)
-  if type(comment.selectedText) ~= "string" then
-    return nil, "legacy comment has no stored selection text"
-  end
+local function stored_range_text(lines, comment)
   local start, finish = comment.range.start, comment.range["end"]
   if start.line ~= finish.line then
     return nil, "selection spans source lines"
@@ -293,6 +311,45 @@ local function selected_source_text(lines, comment)
     return nil, "stored selection is stale or not literal source text"
   end
   return selected
+end
+
+local function source_occurrences(lines, literal)
+  local text = table.concat(lines, "\n")
+  local count, from = 0, 1
+  while true do
+    local start = text:find(literal, from, true)
+    if not start then
+      break
+    end
+    count = count + 1
+    from = start + 1
+  end
+  return count
+end
+
+-- The stored range is the fast path and a diagnostic rather than a gate: when
+-- it no longer resolves, a `selectedText` the source carries exactly once
+-- carries the comment and the drift is named instead. What places a balloon is
+-- the occurrence count over the rendered document, which this only feeds.
+local function selected_source_text(lines, comment)
+  if type(comment.selectedText) ~= "string" then
+    return nil, "legacy comment has no stored selection text"
+  end
+  local selected, stale = stored_range_text(lines, comment)
+  if selected then
+    return selected
+  end
+  if comment.selectedText == "" then
+    return nil, stale
+  end
+  local occurrences = source_occurrences(lines, comment.selectedText)
+  if occurrences == 1 then
+    return comment.selectedText, nil, stale
+  end
+  if occurrences > 1 then
+    return nil, "stored range is stale and the selection is not unique in the source"
+  end
+  return nil, stale
 end
 
 local function transcript(comment)
@@ -667,10 +724,13 @@ local function add_docx_comments(doc, input, workspace, show_resolved)
   local selected = exported_comments(workspace, input, show_resolved)
   local raw_candidates = {}
   for _, comment in ipairs(selected) do
-    local literal, reason = selected_source_text(lines, comment)
+    local literal, reason, drift = selected_source_text(lines, comment)
     if not literal then
       warning(input, comment, reason)
     else
+      if drift then
+        drift_warning(input, comment, drift)
+      end
       local body = transcript(comment)
       table.insert(raw_candidates, {
         comment = comment,

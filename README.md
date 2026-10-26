@@ -382,12 +382,14 @@ collab-comments:
 
 Without that block nothing happens, and the document needs no `filters:` line: the extension declares the filter itself.
 Drop an existing one with the editor open on the document, so the extension re-anchors the store as the lines move: a stored range is an absolute line number, and removing two lines of front matter shifts every comment in the body.
+An edit made with the editor closed shifts them the same way, which the render then absorbs on the selected text alone.
 
 A stored comment is anchored on the literal source text it selected, so it survives an edit elsewhere and follows the editor extension when the selected line moves.
-What it cannot survive is the selected text itself being rewritten.
+A stored line and column that no longer hold that text are not fatal either: the comment is anchored wherever the source carries the selected text exactly once, and the drift is named on stderr.
+What it cannot survive is the selected text itself being rewritten, or being repeated in the source once the stored position has drifted.
 Every comment the render cannot place is named on stderr with its source line and the reason, and the render still succeeds, so the count of those lines is what to read after an editing pass.
 
-A selection has to occur exactly once in the rendered document, and sit on a single source line.
+A selection has to occur exactly once in the rendered document.
 The render places it inside a list, a table cell, a bold run or a link, and beside a citation, a code span or a formula; it refuses to cut one of those in two.
 
 The filter is a fork of the Word half of [MikeLydeamore/collab-comments](https://github.com/MikeLydeamore/collab-comments), whose HTML export and live preview are not included.
