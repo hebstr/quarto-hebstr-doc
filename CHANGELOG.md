@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-10-28
+
 ### Added
 
 - A reply to a Word comment comes back as a reply rather than as a line in the comment it answers.
