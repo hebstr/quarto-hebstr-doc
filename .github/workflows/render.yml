@@ -81,6 +81,11 @@ jobs:
       - name: DOCX template assertions
         run: bash tests/docx-template.sh
 
+      # The threading step runs after the zip is closed, so no render reaches it
+      # and the Lua suite cannot: this probe builds its own package instead.
+      - name: DOCX comment threading assertions
+        run: python3 tests/thread-docx.py
+
       - name: Render example.qmd (HTML)
         run: quarto render example.qmd --to hebstr-doc-html
 
