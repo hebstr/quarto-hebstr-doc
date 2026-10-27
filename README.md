@@ -13,7 +13,7 @@ A Quarto theme for HTML and Word output.
 quarto add hebstr/quarto-hebstr-doc
 ```
 
-The HTML format renders figures with the `svglite` R package, which must be installed separately:
+The HTML format renders figures with the `svglite` R package, which you install separately:
 
 ```r
 install.packages("svglite")
@@ -68,7 +68,7 @@ Includes an external file as a foldable code block, with its filename as the hea
   | `lines`    | whole file              | Line range: `10-20`, `10-` or `-20`                                   |
   | `dedent`   | none                    | Number of leading spaces to remove from each line                     |
 
-Invalid arguments raise a render warning and fall back to the default.
+An invalid argument raises a render warning, and the shortcode falls back to the default.
 
 The shortcode renders in HTML only and produces nothing in Word.
 To show a file in both formats, use a regular code block.
@@ -138,7 +138,7 @@ Every key except `paths` can also be set on the shortcode, overriding the sideca
 As attributes, `exclude` and `highlight` take patterns separated by `|`.
 `annotations` sets the path of the sidecar, which must be inside the project.
 Paths resolve from the project root, or from the document's directory when rendering outside a project.
-The document front matter is not read, because Markdown parsing would alter patterns written there.
+The shortcode does not read the document front matter, because Markdown parsing would alter patterns written there.
 
 Descriptions accept inline Markdown.
 Quote every description, since YAML reads unquoted `yes`, `no`, `true` or `false` as booleans.
@@ -146,7 +146,7 @@ A `*` in a key matches any characters within one path segment, so `docs/*_report
 When several wildcard keys match the same entry, the first in byte order applies and a warning names them.
 A key that matches nothing in the rendered tree raises a warning.
 
-In HTML, the tree is shown on a dark background in both colour schemes, with [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme) icons chosen by file name, then extension.
+In HTML, the tree sits on a dark background in both colour schemes, with [Material Icon Theme](https://github.com/material-extensions/vscode-material-icon-theme) icons chosen by file name, then extension.
 To replace an icon, add a rule to your `custom.scss`:
 
 ```scss
@@ -156,7 +156,7 @@ To replace an icon, add a rule to your `custom.scss`:
 ```
 
 In `dynamic` mode, an open folder also needs `.ft-i-<key> details[open] > summary .ft-name::before`.
-The colours are set by `$filetree-bg`, `$filetree-fg`, `$filetree-muted`, `$filetree-highlight` and `$filetree-guide`.
+`$filetree-bg`, `$filetree-fg`, `$filetree-muted`, `$filetree-highlight` and `$filetree-guide` set the colours.
 
 Word renders the tree as a bulleted list.
 
@@ -312,7 +312,7 @@ Override the `!default` declarations of the `scss:defaults` sections in `theme-l
 
 ### Text alignment
 
-Body text is justified and hyphenated.
+The theme justifies and hyphenates body text.
 Hyphenation depends on the document language and on the reader's browser.
 Content in the margin column stays left-aligned, and figures keep their `fig-align`.
 
@@ -349,7 +349,7 @@ To change its title, set `language: toc-title-document:` in `_quarto.yml`.
 
 The `hebstr` R package sizes tables from this text width, so the changelog records any change to it.
 
-Captions are styled by position, as in HTML: `Table Caption` above the content, `Image Caption` below.
+The format styles captions by position, as in HTML: `Table Caption` above the content, `Image Caption` below.
 A caption can carry a second line, written as `<br>` followed by a `quarto-float-subcaption` span, the form `hebstr::str_fig()` produces:
 
 ```r
@@ -358,8 +358,8 @@ A caption can carry a second line, written as `<br>` followed by a `quarto-float
 ```
 
 A two-column block written as `::: {layout-ncol=2}` comes out one part after another in Word, each at full width, where HTML keeps the columns side by side.
-Word lays such a block out as a table whose columns are narrower than a figure placed in them, which cuts the figure off, so the block is flattened instead.
-A row keeps its columns only where Quarto turns the row itself into a float, which a row carrying a float id (`::: {#fig-grid layout-ncol=2}`) and a chunk row with `fig-subcap` both do; every other row is flattened, a plain chunk row (`#| layout-ncol`) included.
+Word lays such a block out as a table whose columns are narrower than a figure placed in them, which cuts the figure off, so the extension flattens the block instead.
+A row keeps its columns only where Quarto turns the row itself into a float, which a row carrying a float id (`::: {#fig-grid layout-ncol=2}`) and a chunk row with `fig-subcap` both do; the extension flattens every other row, a plain chunk row (`#| layout-ncol`) included.
 
 To use your own template, keep the styles the extension relies on: `Table Caption`, `Image Caption`, `Table Caption Title`, `Image Caption Title`, `Table Caption Subtitle`, `Image Caption Subtitle`, `Figure`, `Captioned Figure` and `List Item`.
 
@@ -371,7 +371,7 @@ format:
 
 ### Word comments
 
-A reviewer's comments on a Word export can be carried back into every later Word render.
+The extension can carry a reviewer's comments on a Word export back into every later Word render.
 Import them in the editor with the `collab-comments` extension, which writes a `.comments/collab-comments.json` store at the project root, then ask for them in the document:
 
 ```yaml
@@ -381,11 +381,11 @@ collab-comments:
 ```
 
 Without that block nothing happens, and the document needs no `filters:` line: the extension declares the filter itself.
-Drop an existing one with the editor open on the document, so the extension re-anchors the store as the lines move: a stored range is an absolute line number, and removing two lines of front matter shifts every comment in the body.
+Drop an existing `filters:` line with the editor open on the document, so the editor extension re-anchors the store as the lines move: a stored range is an absolute line number, and removing two lines of front matter shifts every comment in the body.
 An edit made with the editor closed shifts them the same way, which the render then absorbs on the selected text alone.
 
 A stored comment is anchored on the literal source text it selected, so it survives an edit elsewhere and follows the editor extension when the selected line moves.
-A stored line and column that no longer hold that text are not fatal either: the comment is anchored wherever the source carries the selected text exactly once, and the drift is named on stderr.
+A stored line and column that no longer hold that text are not fatal either: the render anchors the comment wherever the source carries the selected text exactly once, and names the drift on stderr.
 What it cannot survive is the selected text itself being rewritten, or being repeated in the source once the stored position has drifted.
 Every comment the render cannot place is named on stderr with its source line and the reason, and the render still succeeds.
 A failure the whole store carries is named too, on a line of its own and without a source line: a file that is not valid JSON, one holding no comment collection, one holding an entry that does not match the schema, and a `collab-comments` option written as a single value instead of a block.
