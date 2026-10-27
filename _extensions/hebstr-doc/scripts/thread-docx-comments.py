@@ -28,14 +28,18 @@ because the filter refuses two distinct comments on one span, under
 `overlapping rendered selection`, so an identical anchor can only come from one
 thread.
 
-The pass is idempotent: an existing `w14:paraId` is reused, and the part, its
-content-type override and its relationship are added only when absent.
+The pass is idempotent: an existing `w14:paraId` is reused, and the content-type
+override and the relationship are added only when absent. The extended part
+itself is rewritten from the document, so a package Word has already saved,
+recognised by `word/commentsIds.xml`, is left untouched rather than stripped of
+the parent relations and the resolved states Word recorded there.
 """
 
 import os
 import re
 import sys
 import zipfile
+import zlib
 from pathlib import Path
 from xml.dom import minidom
 from xml.parsers.expat import ExpatError
@@ -50,6 +54,7 @@ DOCUMENT_PART = "word/document.xml"
 RELS_PART = "word/_rels/document.xml.rels"
 TYPES_PART = "[Content_Types].xml"
 EXTENDED_PART = "word/commentsExtended.xml"
+IDS_PART = "word/commentsIds.xml"
 
 EXTENDED_RELATIONSHIP = "http://schemas.microsoft.com/office/2011/relationships/commentsExtended"
 EXTENDED_CONTENT_TYPE = (
@@ -73,7 +78,10 @@ def targets(argv):
         return [Path(value) for value in argv], None
     listing = os.environ.get("QUARTO_USE_FILE_FOR_PROJECT_OUTPUT_FILES")
     if listing:
-        raw = Path(listing).read_text(encoding="utf-8")
+        try:
+            raw = Path(listing).read_text(encoding="utf-8")
+        except OSError as error:
+            return None, f"{listing}: {error}"
     else:
         raw = os.environ.get("QUARTO_PROJECT_OUTPUT_FILES")
         if raw is None:
@@ -246,18 +254,21 @@ def ensure_relationship(rels, relationship_type, target):
 def rezip(path, parts):
     pending = dict(parts)
     temporary = path.with_name(path.name + ".threading")
-    with (
-        zipfile.ZipFile(path) as source,
-        zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as target,
-    ):
-        for item in source.infolist():
-            replacement = pending.pop(item.filename, None)
-            target.writestr(
-                item, source.read(item.filename) if replacement is None else replacement
-            )
-        for name, data in pending.items():
-            target.writestr(name, data)
-    temporary.replace(path)
+    try:
+        with (
+            zipfile.ZipFile(path) as source,
+            zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as target,
+        ):
+            for item in source.infolist():
+                replacement = pending.pop(item.filename, None)
+                target.writestr(
+                    item, source.read(item.filename) if replacement is None else replacement
+                )
+            for name, data in pending.items():
+                target.writestr(name, data)
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def thread(path):
@@ -265,6 +276,9 @@ def thread(path):
         names = set(package.namelist())
         if COMMENTS_PART not in names:
             say(f"{path}: no comment part, left unchanged")
+            return
+        if IDS_PART in names:
+            complain(f"{path}: Word already threads these comments, left unchanged")
             return
         for required in (DOCUMENT_PART, RELS_PART, TYPES_PART):
             if required not in names:
@@ -295,9 +309,9 @@ def thread(path):
     rezip(
         path,
         {
-            COMMENTS_PART: comments.toxml(encoding="UTF-8"),
-            TYPES_PART: types.toxml(encoding="UTF-8"),
-            RELS_PART: rels.toxml(encoding="UTF-8"),
+            COMMENTS_PART: comments.toxml(encoding="UTF-8", standalone=True),
+            TYPES_PART: types.toxml(encoding="UTF-8", standalone=True),
+            RELS_PART: rels.toxml(encoding="UTF-8", standalone=True),
             EXTENDED_PART: extended,
         },
     )
@@ -316,12 +330,11 @@ def main():
     for path in files:
         if not path.is_file():
             complain(f"{path}: not a file, left unchanged")
-            return 1
+            continue
         try:
             thread(path)
-        except (zipfile.BadZipFile, ExpatError, OSError) as error:
+        except (zipfile.BadZipFile, ExpatError, OSError, zlib.error) as error:
             complain(f"{path}: {error}")
-            return 1
     return 0
 
 
