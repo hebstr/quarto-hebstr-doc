@@ -172,15 +172,30 @@ local function marker_ids(inlines)
   return ids
 end
 
-local function first_span(inlines)
-  local found
+local function start_spans(inlines)
+  local found = {}
   for _, inline in ipairs(inlines) do
     if inline.t == "Span" and inline.classes:includes("comment-start") then
-      found = inline
-      break
+      found[#found + 1] = inline
     end
   end
+  return found
+end
+
+local function first_span(inlines)
+  local found = start_spans(inlines)[1]
   return assert(found, "no comment-start span at this level")
+end
+
+local function distinct(values)
+  local seen, count = {}, 0
+  for _, value in ipairs(values) do
+    if not seen[value] then
+      seen[value] = true
+      count = count + 1
+    end
+  end
+  return count
 end
 
 TestCollabComments = {}
@@ -209,7 +224,10 @@ function TestCollabComments:test_the_start_marker_carries_the_author_and_the_dat
   lu.assertStrMatches(span.attributes.id, "%d+")
 end
 
-function TestCollabComments:test_the_marker_body_carries_the_whole_transcript()
+-- The fan-out: every entry of a thread is a Word comment of its own, anchored
+-- on the span the opening comment selected and carrying its own author and
+-- timestamp, the replies following the opening in chronological order.
+function TestCollabComments:test_each_reply_becomes_a_comment_of_its_own()
   local out = run({
     blocks = { block_of(PLAIN) },
     comments = {
@@ -217,35 +235,98 @@ function TestCollabComments:test_the_marker_body_carries_the_whole_transcript()
         selection = "simple anchor",
         text = "The opening remark.",
         replies = {
-          { id = "r1", author = "Reviewer Two", timestamp = "2026-10-03T08:00:00Z", text = "The answer." },
+          { id = "r2", author = "Reviewer Three", timestamp = "2026-10-03T08:00:00Z", text = "The later answer." },
+          { id = "r1", author = "Reviewer Two", timestamp = "2026-10-02T08:00:00Z", text = "The earlier answer." },
         },
       },
     },
   })
-  local body = pandoc.utils.stringify(first_span(out.doc.blocks[1].content))
-  lu.assertStrContains(body, "The opening remark.")
-  lu.assertStrContains(body, "Reply")
-  lu.assertStrContains(body, "The answer.")
+  lu.assertEquals(out.stderr, "")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {
+    "comment-start",
+    "comment-start",
+    "comment-start",
+    "comment-end",
+    "comment-end",
+    "comment-end",
+  })
+  local spans = start_spans(out.doc.blocks[1].content)
+  lu.assertEquals(pandoc.utils.stringify(spans[1]), "The opening remark.")
+  lu.assertEquals(spans[1].attributes.author, "Reviewer One")
+  lu.assertEquals(spans[1].attributes.date, "2026-10-01T09:00:00Z")
+  lu.assertEquals(pandoc.utils.stringify(spans[2]), "The earlier answer.")
+  lu.assertEquals(spans[2].attributes.author, "Reviewer Two")
+  lu.assertEquals(spans[2].attributes.date, "2026-10-02T08:00:00Z")
+  lu.assertEquals(pandoc.utils.stringify(spans[3]), "The later answer.")
+  lu.assertEquals(spans[3].attributes.author, "Reviewer Three")
+  lu.assertEquals(spans[3].attributes.date, "2026-10-03T08:00:00Z")
+  lu.assertEquals(text_without_markers(out.doc.blocks[1]), LINES[PLAIN])
 end
 
--- The activity is chronological, a tie puts a Reply before a Tracked change,
--- and a tracked change prints both of its texts. No store in use carries one.
-function TestCollabComments:test_the_transcript_orders_its_activity_and_prints_a_tracked_change()
+-- The order of the closing markers is a condition of the feature rather than a
+-- detail: Word threads the staggered order it writes itself and refuses the
+-- reverse-nested one that adjacent spans produce by default.
+function TestCollabComments:test_the_closing_markers_repeat_the_opening_order()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = {
+      {
+        selection = "simple anchor",
+        replies = {
+          { id = "r1", author = "Reviewer Two", timestamp = "2026-10-02T08:00:00Z", text = "The earlier answer." },
+          { id = "r2", author = "Reviewer Three", timestamp = "2026-10-03T08:00:00Z", text = "The later answer." },
+        },
+      },
+    },
+  })
+  local ids = marker_ids(out.doc.blocks[1].content)
+  lu.assertEquals(#ids, 6)
+  lu.assertEquals(distinct(ids), 3)
+  lu.assertEquals({ ids[4], ids[5], ids[6] }, { ids[1], ids[2], ids[3] })
+end
+
+-- `word_id` hashes the entry's own local id against that entry's own body, so
+-- two replies repeating one sentence under two ids stay two comments. Hashing
+-- the store entry's id against the whole thread would collide all three.
+function TestCollabComments:test_the_word_id_is_hashed_per_entry()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = {
+      {
+        selection = "simple anchor",
+        text = "Agreed.",
+        replies = {
+          { id = "r1", author = "Reviewer Two", timestamp = "2026-10-02T08:00:00Z", text = "Agreed." },
+          { id = "r2", author = "Reviewer Three", timestamp = "2026-10-03T08:00:00Z", text = "Agreed." },
+        },
+      },
+    },
+  })
+  lu.assertEquals(out.stderr, "")
+  lu.assertEquals(distinct(marker_ids(out.doc.blocks[1].content)), 3)
+end
+
+-- A tracked change stays in the opening comment's body, chronological and
+-- printing both of its texts. No store in use carries one.
+function TestCollabComments:test_the_opening_body_keeps_its_tracked_changes_in_order()
   local out = run({
     blocks = { block_of(PLAIN) },
     comments = {
       {
         selection = "simple anchor",
         text = "The opening remark.",
-        replies = {
-          { id = "r2", author = "Reviewer Two", timestamp = "2026-10-03T08:00:00Z", text = "The later answer." },
-          { id = "r1", author = "Reviewer Two", timestamp = "2026-10-02T08:00:00Z", text = "The earlier answer." },
-        },
         tracked_changes = {
+          {
+            id = "t2",
+            author = "The Author",
+            timestamp = "2026-10-03T08:00:00Z",
+            previousText = "a moved anchor",
+            newText = "a simple anchor",
+          },
           {
             id = "t1",
             author = "The Author",
-            timestamp = "2026-10-03T08:00:00Z",
+            timestamp = "2026-10-02T08:00:00Z",
             previousText = "a simple anchor",
             newText = "a moved anchor",
           },
@@ -253,14 +334,15 @@ function TestCollabComments:test_the_transcript_orders_its_activity_and_prints_a
       },
     },
   })
+  lu.assertEquals(out.stderr, "")
+  lu.assertEquals(#start_spans(out.doc.blocks[1].content), 1)
   local body = pandoc.utils.stringify(first_span(out.doc.blocks[1].content))
-  local earlier = assert(body:find("The earlier answer.", 1, true))
-  local later = assert(body:find("The later answer.", 1, true))
-  local tracked = assert(body:find("Tracked change", 1, true))
+  lu.assertStrContains(body, "The opening remark.")
+  local earlier = assert(body:find("Previous: a simple anchor", 1, true))
+  local later = assert(body:find("Previous: a moved anchor", 1, true))
   lu.assertTrue(earlier < later)
-  lu.assertTrue(later < tracked)
-  lu.assertStrContains(body, "Previous: a simple anchor")
   lu.assertStrContains(body, "Current: a moved anchor")
+  lu.assertStrContains(body, "Tracked change")
 end
 
 -- Stair 1: the rewrite walks the body instead of iterating its top level.
@@ -345,6 +427,19 @@ function TestCollabComments:test_two_overlapping_selections_are_both_dropped_and
   local out = run({
     blocks = { block_of(PLAIN) },
     comments = { { selection = "a simple anchor" }, { selection = "simple anchor and" } },
+  })
+  lu.assertStrContains(out.stderr, "skipped Word comment comment-1: overlapping rendered selection")
+  lu.assertStrContains(out.stderr, "skipped Word comment comment-2: overlapping rendered selection")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), {})
+end
+
+-- The identical anchor is what hands the parent relation to the post-zip step,
+-- so it may only ever come from one thread: two distinct comments reaching it
+-- stay refused, which is what makes the derivation sound.
+function TestCollabComments:test_two_distinct_comments_on_one_span_are_both_dropped_and_named()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = { { selection = "simple anchor" }, { selection = "simple anchor" } },
   })
   lu.assertStrContains(out.stderr, "skipped Word comment comment-1: overlapping rendered selection")
   lu.assertStrContains(out.stderr, "skipped Word comment comment-2: overlapping rendered selection")

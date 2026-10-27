@@ -396,6 +396,22 @@ The apostrophe is matched in either form: a selection written with the straight 
 A selection has to occur exactly once in the rendered document.
 The render places it inside a list, a table cell, a bold run or a link, and beside a citation, a code span or a formula; it refuses to cut one of those in two.
 
+A reply comes back as a Word comment of its own, on the same text as the comment it answers and under its own author and date.
+Nesting it below that comment takes one more step, because Word keeps the nesting in a part no renderer writes.
+The extension ships that step; a project asks for it once:
+
+```yaml
+project:
+  post-render:
+    - _extensions/hebstr/hebstr-doc/scripts/thread-docx-comments.py
+```
+
+The path is where `quarto add hebstr/quarto-hebstr-doc` puts the extension; a local-path install drops the `hebstr/` level.
+The script needs Python 3 and nothing else, reads the Word files the render produced, and reports what it threaded.
+Without it the replies still arrive, as separate comments in chronological order under their own authors.
+
+The author's own tracked changes, which the editor extension records keystroke by keystroke, stay in the body of the comment they belong to rather than becoming comments of their own.
+
 The filter is a fork of the Word half of [MikeLydeamore/collab-comments](https://github.com/MikeLydeamore/collab-comments), whose HTML export and live preview are not included.
 
 ### Code highlighting

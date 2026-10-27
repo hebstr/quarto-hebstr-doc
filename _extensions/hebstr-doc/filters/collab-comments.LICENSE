@@ -5,8 +5,10 @@ the terms of the MIT License reproduced below.
 
 Modifications: the HTML export, the live preview bridge and its descriptor
 discovery are dropped, with the JavaScript and CSS dependencies they loaded; the
-file is reformatted to this project's Lua conventions; and the rewrite pass is
-widened beyond the top-level blocks the upstream version supports.
+file is reformatted to this project's Lua conventions; the rewrite pass is
+widened beyond the top-level blocks the upstream version supports; and a reply
+becomes a Word comment of its own, anchored on the span its parent selected,
+where the upstream version writes it as a section of the parent's body.
 
 Upstream: https://github.com/MikeLydeamore/collab-comments
 

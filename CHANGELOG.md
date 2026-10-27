@@ -5,6 +5,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- A reply to a Word comment comes back as a reply rather than as a line in the comment it answers.
+  Each reply becomes a Word comment of its own, anchored on the same text and carrying its own author and date, and the extension ships `scripts/thread-docx-comments.py` to nest it under the comment it answers.
+  Word keeps that nesting in a part no renderer writes, so the script runs after the document is packaged: a project adds it to `project: post-render:` to get threaded replies, and without it the replies read as separate comments in chronological order.
+  The author's own tracked changes stay in the body of the opening comment, as before.
+
 ## [1.7.4] - 2026-10-26
 
 ### Fixed

@@ -22,6 +22,18 @@
 -- and the rendered side picks between the stored literal and its twin whichever
 -- occurs exactly once. The form a source carries is therefore free.
 --
+-- A reply is a Word comment of its own rather than a section of the opening
+-- comment's body: every entry of a store comment is anchored on the same span
+-- and carries its own author and timestamp, the author's own tracked changes
+-- staying in the opening body. At one offset the opening entry's
+-- `comment-start` is emitted first and its replies after in chronological
+-- order, and the closing markers are emitted in that same order rather than
+-- nested, which is the order Word reads as a thread. The parent relation
+-- itself is written after the zip is closed, by
+-- `scripts/thread-docx-comments.py`, which a consuming project wires as a
+-- `post-render` entry; without it the entries read as separate comments in
+-- chronological order.
+--
 -- Dropped at the fork: the HTML export, the live preview bridge and its
 -- descriptor discovery (`trusted_descriptor_directory`, `live_descriptor`,
 -- `config_script`), with the `collab-comments.js` and `collab-comments.css`
@@ -260,13 +272,13 @@ local function stored_line(comment)
   return (comment.range and comment.range.start and comment.range.start.line or 0) + 1
 end
 
-local function warning(input, comment, reason)
+local function warning(input, comment, reason, entry_id)
   io.stderr:write(
     string.format(
       "[collab-comments] %s:%d: skipped Word comment %s: %s\n",
       input,
       stored_line(comment),
-      comment.id or "?",
+      entry_id or comment.id or "?",
       reason
     )
   )
@@ -378,63 +390,71 @@ local function selected_source_text(lines, comment)
   return nil, stale
 end
 
+-- Timestamps compare by direct UTF-8 byte ordinal (the TS side compares UTF-8
+-- buffers), never by locale-sensitive collation, and a tie keeps the store's
+-- own insertion order.
+local function chronological(items)
+  table.sort(items, function(left, right)
+    if left.timestamp ~= right.timestamp then
+      return left.timestamp < right.timestamp
+    end
+    return left.order < right.order
+  end)
+  return items
+end
+
+-- The opening comment's body carries the author's own tracked changes and
+-- nothing else, a reply being a comment of its own.
 local function transcript(comment)
-  -- The opening is always first. Activity is chronological; timestamps use
-  -- direct UTF-8 byte ordinal comparison (the TS side compares UTF-8 buffers),
-  -- never locale-sensitive collation. Ties are Reply
-  -- then Tracked change, retaining their original insertion order within a kind.
-  local entries =
-    { { timestamp = comment.timestamp, kind = "Opening comment", author = comment.author, text = comment.text } }
-  local activity = {}
-  for order, reply in ipairs(comment.replies or {}) do
-    table.insert(activity, {
-      timestamp = reply.timestamp,
-      kind = "Reply",
-      kind_rank = 1,
-      order = order,
-      author = reply.author,
-      text = reply.text,
-    })
-  end
+  local changes = {}
   for order, change in ipairs(comment.trackedChanges or {}) do
-    table.insert(activity, {
+    table.insert(changes, {
       timestamp = change.timestamp,
-      kind = "Tracked change",
-      kind_rank = 2,
       order = order,
       author = change.author,
       text = "Previous: " .. change.previousText .. "\nCurrent: " .. change.newText,
     })
   end
-  table.sort(activity, function(left, right)
-    if left.timestamp ~= right.timestamp then
-      return left.timestamp < right.timestamp
-    end
-    if left.kind_rank ~= right.kind_rank then
-      return left.kind_rank < right.kind_rank
-    end
-    return left.order < right.order
-  end)
-  for _, entry in ipairs(activity) do
-    table.insert(entries, entry)
-  end
-  local parts = {}
-  for index, entry in ipairs(entries) do
-    if index == 1 then
-      table.insert(parts, entry.text)
-    else
-      table.insert(
-        parts,
-        "—— " .. entry.kind .. " · " .. entry.author .. " · " .. entry.timestamp .. " ——\n" .. entry.text
-      )
-    end
+  local parts = { comment.text }
+  for _, change in ipairs(chronological(changes)) do
+    table.insert(
+      parts,
+      "—— Tracked change · " .. change.author .. " · " .. change.timestamp .. " ——\n" .. change.text
+    )
   end
   local body = table.concat(parts, "\n\n")
   return comment.resolved and ("Resolved\n\n" .. body) or body
 end
 
--- 31-bit FNV-1a over the UTF-8 bytes of the local ID, a NUL separator, and
--- the exact flattened transcript sent to Word. This provenance snapshot keeps
+-- One entry per Word comment the thread delivers: the opening first, then its
+-- replies in chronological order, which is the order the markers are emitted
+-- in and the order the post-zip step reads as the thread.
+local function thread_entries(comment)
+  local entries = {
+    {
+      local_id = comment.id,
+      author = comment.author,
+      timestamp = comment.timestamp,
+      body = transcript(comment),
+    },
+  }
+  local replies = {}
+  for order, reply in ipairs(comment.replies or {}) do
+    table.insert(replies, { timestamp = reply.timestamp, order = order, reply = reply })
+  end
+  for _, item in ipairs(chronological(replies)) do
+    table.insert(entries, {
+      local_id = item.reply.id,
+      author = item.reply.author,
+      timestamp = item.reply.timestamp,
+      body = item.reply.text,
+    })
+  end
+  return entries
+end
+
+-- 31-bit FNV-1a over the UTF-8 bytes of the entry's own local ID, a NUL
+-- separator, and the exact body sent to Word. This provenance snapshot keeps
 -- a later local edit from being mistaken for the exported Word comment.
 local function word_id(local_id, exported_body)
   local hash = 0x811c9dc5
@@ -607,18 +627,18 @@ local function rendered_needle(rendered_blocks, literal)
   return literal, stored
 end
 
-local function rewrite_block(block, candidates, used)
+local function rewrite_block(block, threads, used)
   local inlines = block.content
   local text = inline_text(inlines)
   local matches = {}
-  for _, candidate in ipairs(candidates) do
+  for _, thread in ipairs(threads) do
     local from = 1
     while true do
-      local start = text:find(candidate.selection, from, true)
+      local start = text:find(thread.selection, from, true)
       if not start then
         break
       end
-      table.insert(matches, { start = start, finish = start + #candidate.selection - 1, candidate = candidate })
+      table.insert(matches, { start = start, finish = start + #thread.selection - 1, thread = thread })
       -- Advance one byte so overlapping literal occurrences (for example
       -- `aaa` in `aaaa`) make the source ambiguous instead of exportable.
       from = start + 1
@@ -630,45 +650,54 @@ local function rewrite_block(block, candidates, used)
   -- A selection must have one and only one rendered occurrence in the document.
   local accepted = {}
   for _, match in ipairs(matches) do
-    if match.candidate.occurrences == 1 then
+    if match.thread.occurrences == 1 then
       table.insert(accepted, match)
     end
   end
+  -- The order has to be total, `table.sort` being unstable: two threads sharing
+  -- an offset are refused below, so the tie-break only ever settles which of
+  -- them is named first, but a partial order would leave that to the sort.
   table.sort(accepted, function(left, right)
-    return left.start < right.start
+    if left.start ~= right.start then
+      return left.start < right.start
+    end
+    return left.thread.index < right.thread.index
   end)
+  -- Two distinct comments on one span are both refused, which is what makes the
+  -- marker order at an identical anchor readable as a thread: the entries of one
+  -- thread are one match here, so they never meet this guard.
   for index = 2, #accepted do
     if accepted[index].start <= accepted[index - 1].finish then
-      accepted[index].candidate.overlap = true
-      accepted[index - 1].candidate.overlap = true
+      accepted[index].thread.overlap = true
+      accepted[index - 1].thread.overlap = true
     end
   end
   if #accepted == 0 then
     return block
   end
-  -- A candidate is claimed only once the rewrite below has run to the end. The
+  -- A thread is claimed only once the rewrite below has run to the end. The
   -- walk still refuses a block it cannot map, and marking the claim before that
   -- refusal would drop the comment with no warning at all, every diagnosis
   -- downstream reading the claim as a delivered marker.
   local claimed = {}
   local starts, ends = {}, {}
   for _, match in ipairs(accepted) do
-    if not match.candidate.overlap then
-      starts[match.start] = match.candidate
-      ends[match.finish + 1] = match.candidate
-      table.insert(claimed, match.candidate)
+    if not match.thread.overlap then
+      starts[match.start] = match.thread
+      ends[match.finish + 1] = match.thread
+      table.insert(claimed, match.thread)
     end
   end
-  local function start_marker(candidate)
+  local function start_marker(entry)
     local attr = pandoc.Attr("", { "comment-start" }, {
-      id = candidate.word_id,
-      author = candidate.comment.author,
-      date = candidate.comment.timestamp,
+      id = entry.word_id,
+      author = entry.author,
+      date = entry.timestamp,
     })
-    return pandoc.Span(literal_inlines(candidate.body), attr)
+    return pandoc.Span(literal_inlines(entry.body), attr)
   end
-  local function end_marker(candidate)
-    return pandoc.Span({}, pandoc.Attr("", { "comment-end" }, { id = candidate.word_id }))
+  local function end_marker(entry)
+    return pandoc.Span({}, pandoc.Attr("", { "comment-end" }, { id = entry.word_id }))
   end
   -- The offsets the markers sit at are byte offsets into the one text view
   -- above, so the walk below has to advance through the inlines by the same
@@ -682,6 +711,11 @@ local function rewrite_block(block, candidates, used)
   -- emits both range markers as run-level siblings whatever inline encloses
   -- them.
   --
+  -- One offset carries one thread and as many marker pairs as the thread has
+  -- entries. The closing markers come out in the same order as the opening
+  -- ones, which is what Word reads as a thread: nested the other way round it
+  -- refuses to thread the document at all.
+  --
   -- A refused block is returned untouched, which is why a container is rebuilt
   -- as a clone rather than mutated: a refusal deeper in the same paragraph
   -- would otherwise leave a half-rewritten node behind.
@@ -692,10 +726,14 @@ local function rewrite_block(block, candidates, used)
       return
     end
     if ends[offset] then
-      table.insert(output, end_marker(ends[offset]))
+      for _, entry in ipairs(ends[offset].entries) do
+        table.insert(output, end_marker(entry))
+      end
     end
     if starts[offset] then
-      table.insert(output, start_marker(starts[offset]))
+      for _, entry in ipairs(starts[offset].entries) do
+        table.insert(output, start_marker(entry))
+      end
     end
     emitted[offset] = true
   end
@@ -773,8 +811,8 @@ local function rewrite_block(block, candidates, used)
   if not output then
     return block
   end
-  for _, candidate in ipairs(claimed) do
-    used[candidate.index] = true
+  for _, thread in ipairs(claimed) do
+    used[thread.index] = true
   end
   block.content = output
   return block
@@ -787,12 +825,12 @@ local function add_docx_comments(doc, input, workspace, show_resolved)
     return doc
   end
   local selected = exported_comments(workspace, input, show_resolved)
-  -- Count every rendered Para/Plain/Header before building a candidate,
+  -- Count every rendered Para/Plain/Header before building a thread,
   -- including content in nested containers and tables. A match in an unsupported
   -- rewrite structure still makes another match ambiguous, and the count is what
   -- settles which spelling of the selection the rewrite then looks for.
   local rendered_blocks = rendered_block_texts(doc)
-  local raw_candidates = {}
+  local raw_threads = {}
   for _, comment in ipairs(selected) do
     local literal, reason, drift = selected_source_text(lines, comment)
     if not literal then
@@ -801,28 +839,42 @@ local function add_docx_comments(doc, input, workspace, show_resolved)
       if drift then
         drift_warning(input, comment, drift)
       end
-      local body = transcript(comment)
       local selection, occurrences = rendered_needle(rendered_blocks, literal)
-      table.insert(raw_candidates, {
+      local entries = thread_entries(comment)
+      for _, entry in ipairs(entries) do
+        entry.word_id = word_id(entry.local_id, entry.body)
+      end
+      table.insert(raw_threads, {
         comment = comment,
         selection = selection,
-        body = body,
-        word_id = word_id(comment.id, body),
         occurrences = occurrences,
+        entries = entries,
       })
     end
   end
+  -- The hash is per entry, so a collision costs one entry of a thread rather
+  -- than the thread: the opening dropped leaves its first reply as the root the
+  -- post-zip step threads the rest under.
   local id_counts = {}
-  for _, candidate in ipairs(raw_candidates) do
-    id_counts[candidate.word_id] = (id_counts[candidate.word_id] or 0) + 1
+  for _, thread in ipairs(raw_threads) do
+    for _, entry in ipairs(thread.entries) do
+      id_counts[entry.word_id] = (id_counts[entry.word_id] or 0) + 1
+    end
   end
-  local candidates = {}
-  for _, candidate in ipairs(raw_candidates) do
-    if id_counts[candidate.word_id] > 1 then
-      warning(input, candidate.comment, "deterministic Word ID collision")
-    else
-      candidate.index = #candidates + 1
-      table.insert(candidates, candidate)
+  local threads = {}
+  for _, thread in ipairs(raw_threads) do
+    local kept = {}
+    for _, entry in ipairs(thread.entries) do
+      if id_counts[entry.word_id] > 1 then
+        warning(input, thread.comment, "deterministic Word ID collision", entry.local_id)
+      else
+        table.insert(kept, entry)
+      end
+    end
+    if #kept > 0 then
+      thread.entries = kept
+      thread.index = #threads + 1
+      table.insert(threads, thread)
     end
   end
   -- The rewrite walks the body rather than iterating its top level, so a
@@ -833,18 +885,20 @@ local function add_docx_comments(doc, input, workspace, show_resolved)
   -- occurrence in the rendered output.
   local used = {}
   local function rewrite(block)
-    return rewrite_block(block, candidates, used)
+    return rewrite_block(block, threads, used)
   end
   doc.blocks = pandoc.Blocks(doc.blocks):walk({ Para = rewrite, Plain = rewrite, Header = rewrite })
-  for _, candidate in ipairs(candidates) do
-    if candidate.overlap then
-      warning(input, candidate.comment, "overlapping rendered selection")
-    elseif candidate.occurrences == 0 then
-      warning(input, candidate.comment, "selection is absent from supported rendered blocks")
-    elseif candidate.occurrences > 1 then
-      warning(input, candidate.comment, "selection is ambiguous in rendered document")
-    elseif not used[candidate.index] then
-      warning(input, candidate.comment, "selection occurs only in unsupported rendered structure")
+  -- Every refusal left is a property of the span, which the whole thread
+  -- shares, so it is named once under the opening comment's id.
+  for _, thread in ipairs(threads) do
+    if thread.overlap then
+      warning(input, thread.comment, "overlapping rendered selection")
+    elseif thread.occurrences == 0 then
+      warning(input, thread.comment, "selection is absent from supported rendered blocks")
+    elseif thread.occurrences > 1 then
+      warning(input, thread.comment, "selection is ambiguous in rendered document")
+    elseif not used[thread.index] then
+      warning(input, thread.comment, "selection occurs only in unsupported rendered structure")
     end
   end
   return doc
