@@ -1,0 +1,17 @@
+target-version = "py313"
+line-length = 100
+include = ["*.py", "*.pyi", "*.pyw", "*.ipynb"]
+extend-exclude = [".venv", "_freeze", "_book", "_site", ".quarto"]
+force-exclude = true
+show-fixes = true
+output-format = "concise"
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "PTH", "RUF"]
+per-file-ignores = { "scripts/*" = ["E402"] }
+
+[lint.isort]
+combine-as-imports = true
+
+[format]
+docstring-code-format = true
