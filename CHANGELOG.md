@@ -5,6 +5,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed
+
+- In the `script` shortcode, `lines` given as a single number now shows that line alone.
+  It used to show that line and everything after it, which `10-` already spells, and the form was documented nowhere.
+
+### Fixed
+
+- The `script` shortcode refuses a `dedent` that is not a whole number of spaces, with a warning, instead of silently truncating every line of the listing on a negative value or failing the render on a fractional one.
+- A path the shortcode can open but not read, a directory being the common case, now produces the same visible marker as a missing file instead of failing the render with an error that names neither the document nor the call.
+- Every diagnostic of the shortcode now goes through the render warning channel, the unreadable-path one included, so a mistake that puts a visible marker in the output is also reported where the others are.
+- A `lines` range that selects no line is reported instead of rendering an empty code block in silence, which is what a file shrinking under a range pinned earlier produces.
+- A `lines` range starting below line 1 no longer numbers the rendered listing from zero.
+
 ## [1.9.0] - 2026-10-29
 
 ### Changed

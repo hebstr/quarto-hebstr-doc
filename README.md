@@ -65,7 +65,7 @@ Includes an external file as a foldable code block, with its filename as the hea
   | `filename` | the path                | Label of the fold summary                                             |
   | `suffix`   | none                    | Text appended to the label                                            |
   | `numbers`  | `true`                  | Line numbers (`true`/`false`, `yes`/`no`, `on`/`off`, `1`/`0`)        |
-  | `lines`    | whole file              | Line range: `10-20`, `10-` or `-20`                                   |
+  | `lines`    | whole file              | Line range: `10-20`, `10-`, `-20`, or `10` for a single line          |
   | `dedent`   | none                    | Number of leading spaces to remove from each line                     |
 
 An invalid argument raises a render warning, and the shortcode falls back to the default.

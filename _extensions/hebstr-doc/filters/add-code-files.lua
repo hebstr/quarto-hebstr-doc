@@ -82,15 +82,26 @@ local function parse_lines(spec)
     e = nil
   end
   if not s and not e then
-    if spec:match("^%d+$") then
-      return spec, nil
+    if not spec:match("^%d+$") then
+      warn("lines is not a range, reading the whole file: " .. spec)
+      return nil, nil
     end
-    warn("lines is not a range, reading the whole file: " .. spec)
-    return nil, nil
+    s, e = spec, spec
   end
   if s and e and tonumber(s) > tonumber(e) then
     warn("lines ends before it starts, reading the whole file: " .. spec)
     return nil, nil
+  end
+  if s then
+    if tonumber(s) < 1 then
+      warn("lines starts before line 1, starting at 1: " .. spec)
+      s = "1"
+    else
+      s = tostring(tonumber(s))
+    end
+  end
+  if e then
+    e = tostring(tonumber(e))
   end
   return s, e
 end
@@ -101,25 +112,31 @@ local function dedent(line, n)
 end
 
 local function read_file(filepath, start_line, end_line, dedent_n)
-  local fh = io.open(filepath)
+  local fh, open_error = io.open(filepath)
   if not fh then
-    io.stderr:write("script shortcode: cannot open " .. filepath .. "\n")
-    return nil
+    warn("cannot open " .. (open_error or filepath))
+    return nil, "file not found"
   end
   local chunks = {}
   local n = 1
   local start = start_line and tonumber(start_line) or 1
   local stop = end_line and tonumber(end_line) or nil
-  for line in fh:lines("L") do
-    if stop and n > stop then
-      break
+  local read_ok, read_error = pcall(function()
+    for line in fh:lines("L") do
+      if stop and n > stop then
+        break
+      end
+      if n >= start then
+        chunks[#chunks + 1] = dedent_n and dedent(line, dedent_n) or line
+      end
+      n = n + 1
     end
-    if n >= start then
-      chunks[#chunks + 1] = dedent_n and dedent(line, dedent_n) or line
-    end
-    n = n + 1
-  end
+  end)
   fh:close()
+  if not read_ok then
+    warn("cannot read " .. filepath .. ": " .. tostring(read_error))
+    return nil, "file not readable"
+  end
   return table.concat(chunks)
 end
 
@@ -174,20 +191,33 @@ return {
     local numbers = to_bool("numbers", kw(kwargs, "numbers", "true"), true)
     local dedent_s = kw(kwargs, "dedent", nil)
     local suffix = kw(kwargs, "suffix", nil)
-    local s, e = parse_lines(kw(kwargs, "lines", nil))
+    local lines_spec = kw(kwargs, "lines", nil)
+    local s, e = parse_lines(lines_spec)
 
-    local dedent_n = dedent_s and tonumber(dedent_s) or nil
-    if dedent_s and not dedent_n then
-      warn("dedent is not a number, ignoring: " .. dedent_s)
+    local dedent_n = nil
+    if dedent_s then
+      local asked = tonumber(dedent_s)
+      dedent_n = asked and math.tointeger(asked) or nil
+      if dedent_n and dedent_n < 0 then
+        dedent_n = nil
+      end
+      if not dedent_n then
+        warn("dedent is not a whole number of spaces, ignoring: " .. dedent_s)
+      end
     end
 
     if suffix then
       filename = filename .. " " .. suffix
     end
 
-    local content = read_file(path, s, e, dedent_n)
+    local content, failure = read_file(path, s, e, dedent_n)
     if content == nil then
-      return pandoc.Div({ pandoc.Para({ pandoc.Str("[script: file not found: " .. path .. "]") }) })
+      local label = failure or "file not found"
+      return pandoc.Div({ pandoc.Para({ pandoc.Str("[script: " .. label .. ": " .. path .. "]") }) })
+    end
+
+    if content == "" and (s or e) then
+      warn("lines selects nothing in " .. path .. ", the block is empty: " .. tostring(lines_spec))
     end
 
     ensure_js()
