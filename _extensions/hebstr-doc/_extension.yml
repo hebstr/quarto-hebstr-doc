@@ -98,6 +98,8 @@ contributes:
           path: filters/crossref-anx.lua
         - at: pre-quarto
           path: filters/docx-layout-flatten.lua
+        - at: pre-quarto
+          path: filters/docx-callout-flatten.lua
         - at: post-quarto
           path: filters/r-syntax.lua
         - at: post-quarto

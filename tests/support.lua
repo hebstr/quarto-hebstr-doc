@@ -27,6 +27,34 @@ local function make_quarto(opts)
       end,
     },
     project = { directory = opts.project_dir },
+    utils = {
+      as_inlines = function(obj)
+        local t = pandoc.utils.type(obj)
+        if t == "Inlines" then
+          return obj
+        elseif t == "Inline" then
+          return pandoc.Inlines({ obj })
+        elseif t == "Block" then
+          return pandoc.utils.blocks_to_inlines({ obj })
+        elseif t == "Blocks" then
+          return pandoc.utils.blocks_to_inlines(obj)
+        end
+        return pandoc.Inlines(obj or {})
+      end,
+      as_blocks = function(obj)
+        local t = pandoc.utils.type(obj)
+        if t == "Blocks" then
+          return obj
+        elseif t == "Block" then
+          return pandoc.Blocks({ obj })
+        elseif t == "Inline" then
+          return pandoc.Blocks({ pandoc.Plain({ obj }) })
+        elseif t == "Inlines" then
+          return pandoc.Blocks({ pandoc.Plain(obj) })
+        end
+        return pandoc.Blocks(obj or {})
+      end,
+    },
   }
 end
 

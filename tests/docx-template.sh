@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 # Asserts, on a real `quarto render` to DOCX, what template.dotx,
-# filters/docx-caption.lua, filters/docx-list-style.lua and
-# filters/docx-layout-flatten.lua owe a Word reader.
+# filters/docx-caption.lua, filters/docx-list-style.lua,
+# filters/docx-layout-flatten.lua and filters/docx-callout-flatten.lua owe a
+# Word reader.
 # The Lua suite proves the filter restyles a caption handed to it; it cannot
 # prove a caption ever reaches it. That rests on two undocumented Quarto
 # behaviours: floats are rendered before the post-render stage, and their
@@ -41,6 +42,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+WP = "{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}"
 CAPTION_STYLES = ("TableCaption", "ImageCaption", "TableCaptionTitle", "ImageCaptionTitle")
 SUBTITLE_STYLES = ("TableCaptionSubtitle", "ImageCaptionSubtitle")
 EXPECTED = [
@@ -55,6 +57,9 @@ EXPECTED = [
     ("Table", "TableCaptionTitle", None, "TableCaptionSubtitle"),
     ("Annexe", "TableCaption", None, None),
 ]
+CALLOUT_BORDER_SZ = "24"
+CALLOUT_ICON_EMU = ("152400", "152400")
+CALLOUT_TITLES = ("A callout titled by a heading", "A callout with no body at all")
 EXPECTED_ANCHORS = {
     "fig-bottom",
     "fig-top",
@@ -182,6 +187,40 @@ if (items["ListItem"], items["Compact"]) != (2, 2):
 if not any(style(p) == "Bibliography" for p in root.iter(W + "p")):
     failures.append("no Bibliography paragraph in the output, so the citation reached no reference list")
 
+# Both branches of Quarto's callout renderer wrap the callout in a table whose
+# left border is 3 pt, and the simple one pulls the 16 pt type icon into
+# word/media; the probe's six figures are the only other drawings.
+borders = [
+    t
+    for t in root.iter(W + "tbl")
+    if any(e.get(W + "sz") == CALLOUT_BORDER_SZ for e in t.iter(W + "left"))
+]
+if borders:
+    failures.append(f"{len(borders)} table(s) carry the callout left border, so a callout reached Quarto's renderer")
+
+
+def extent(drawing):
+    node = next(drawing.iter(WP + "extent"), None)
+    return None if node is None else (node.get("cx"), node.get("cy"))
+
+
+icons = [d for d in root.iter(W + "drawing") if extent(d) == CALLOUT_ICON_EMU]
+if icons:
+    failures.append(f"{len(icons)} callout icon(s) reach word/media, which a flattened callout carries none of")
+
+# Without this the two conditions above pass on a probe that lost its callouts.
+for title in CALLOUT_TITLES:
+    para = next(
+        (p for p in root.iter(W + "p") if "".join(t.text or "" for t in p.iter(W + "t")) == title),
+        None,
+    )
+    if para is None:
+        failures.append(f"{title!r}: no paragraph carries that callout title, so the probe exercises no callout")
+    elif parents[para].tag != W + "body":
+        failures.append(f"{title!r}: callout title in {parents[para].tag.removeprefix(W)}, not at body level")
+    elif next(para.iter(W + "b"), None) is None:
+        failures.append(f"{title!r}: callout title carries no bold run, the weight the flatten keeps")
+
 bookmarks = {b.get(W + "name") for b in root.iter(W + "bookmarkStart")}
 anchors = {h.get(W + "anchor") for h in root.iter(W + "hyperlink") if h.get(W + "anchor")}
 for anchor in sorted(anchors - bookmarks):
@@ -268,8 +307,9 @@ if failures:
     print("FAIL  " + "\nFAIL  ".join(failures), file=sys.stderr)
     print(
         "      What Quarto and Pandoc render no longer reaches\n"
-        "      filters/docx-caption.lua, filters/docx-list-style.lua or\n"
-        "      filters/docx-layout-flatten.lua, or no longer matches what\n"
+        "      filters/docx-caption.lua, filters/docx-list-style.lua,\n"
+        "      filters/docx-layout-flatten.lua or\n"
+        "      filters/docx-callout-flatten.lua, or no longer matches what\n"
         "      they read.",
         file=sys.stderr,
     )
@@ -278,6 +318,7 @@ if failures:
 print(
     f"ok    {len(found)} float captions styled by position, subtitle on its own line,"
     f" floats at body level, {len(anchors)} cross-references resolved,"
-    f" {items['ListItem'] + items['Compact']} list items sized by a named style"
+    f" {items['ListItem'] + items['Compact']} list items sized by a named style,"
+    f" {len(CALLOUT_TITLES)} callout titles in the flow with no callout table"
 )
 PY

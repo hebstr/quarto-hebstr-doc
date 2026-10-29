@@ -19,6 +19,22 @@ An opening paragraph, long enough to wrap, so the body style and its justificati
 - A tight item, which Pandoc writes as a `Compact` paragraph.
 - A second tight item.
 
+## Callouts
+
+::: {.callout-note}
+### A callout titled by a heading
+
+Its body paragraph, which comes out as ordinary prose once the callout is flattened.
+:::
+
+::: {.callout-warning}
+### A callout with no body at all
+:::
+
+::: {.callout-tip}
+An untitled callout, whose content opens the flattened block with no bold paragraph above it.
+:::
+
 ## Figures
 
 ```{r}

@@ -5,6 +5,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed
+
+- In Word, a callout comes out as body text instead of a bordered table: its title becomes a bold paragraph and its content follows as ordinary prose, hyphenated and justified like the paragraphs around it.
+  The type icon is gone with the table, and a title authored as a heading stays out of the outline, the section numbering and the table of contents, as it already was inside the table.
+  A callout carrying an identifier keeps its table, so a cross-reference to it still resolves.
+  HTML is unaffected and keeps its callouts.
+
 ## [1.8.0] - 2026-10-28
 
 ### Added
