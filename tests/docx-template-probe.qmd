@@ -35,6 +35,10 @@ Its body paragraph, which comes out as ordinary prose once the callout is flatte
 An untitled callout, whose content opens the flattened block with no bold paragraph above it.
 :::
 
+::: {#nte-x .callout-note}
+A callout carrying an identifier, which keeps the table Quarto builds.
+:::
+
 ## Figures
 
 ```{r}

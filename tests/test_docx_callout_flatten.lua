@@ -35,6 +35,14 @@ function TestDocxCalloutFlatten:test_a_title_comes_back_as_a_bold_paragraph()
   lu.assertEquals(pandoc.utils.stringify(out[1]), "Note title")
 end
 
+function TestDocxCalloutFlatten:test_an_inline_title_comes_back_as_a_bold_paragraph()
+  local out = docx().Callout(callout(pandoc.Str("Note")))
+  lu.assertEquals(out[1].t, "Para")
+  lu.assertEquals(#out[1].content, 1)
+  lu.assertEquals(out[1].content[1].t, "Strong")
+  lu.assertEquals(pandoc.utils.stringify(out[1]), "Note")
+end
+
 function TestDocxCalloutFlatten:test_an_untitled_callout_opens_on_its_own_content()
   local out = docx().Callout(callout(nil))
   lu.assertEquals(#out, 1)
