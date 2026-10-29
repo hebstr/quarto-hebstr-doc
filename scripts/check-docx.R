@@ -30,7 +30,7 @@ report <- \(ok, label, detail = character()) {
 content_parts <- \(dir) {
   list.files(
     file.path(dir, "word"),
-    pattern = "^(document|footnotes|endnotes|comments|header[0-9]*|footer[0-9]*)\\.xml$",
+    pattern = "^(document|footnotes|endnotes|comments|numbering|header[0-9]*|footer[0-9]*)\\.xml$",
     full.names = TRUE
   )
 }
@@ -64,8 +64,8 @@ check_cells <- \(dir) {
   open <- vapply(
     cells,
     \(tc) {
-      blocks <- xml_find_all(tc, "./w:p | ./w:tbl", ns)
-      length(blocks) > 0 && xml_name(blocks[[length(blocks)]]) == "tbl"
+      blocks <- xml_find_all(tc, "./w:p | ./w:tbl | ./w:sdt", ns)
+      length(blocks) > 0 && xml_name(blocks[[length(blocks)]]) != "p"
     },
     logical(1)
   )
@@ -77,7 +77,7 @@ check_cells <- \(dir) {
       sum(open),
       "of",
       length(cells),
-      "cells end on a table, which Word refuses to open"
+      "cells end on a w:tbl or a w:sdt rather than a w:p, which Word refuses to open"
     )
   )
 }
@@ -100,8 +100,8 @@ check_media <- \(dir) {
       sprintf("//@*[namespace-uri() = '%s']", ns_r)
     ))
     rels <- xml_find_all(read_xml(rels_file), "//rel:Relationship", ns)
-    targets <- xml_attr(rels, "Target")[xml_attr(rels, "Id") %in% used]
-    normalizePath(file.path(word, targets), mustWork = FALSE)
+    internal <- rels[xml_attr(rels, "Id") %in% used & is.na(xml_attr(rels, "TargetMode"))]
+    normalizePath(file.path(word, xml_attr(internal, "Target")), mustWork = FALSE)
   }))
 
   embedded <- normalizePath(
@@ -109,16 +109,28 @@ check_media <- \(dir) {
     mustWork = FALSE
   )
   dead <- setdiff(embedded, referenced)
+  absent <- referenced[!file.exists(referenced)]
 
   report(
-    !length(dead),
-    "every file under word/media and word/embeddings is referenced by its part",
-    paste(
-      length(dead),
-      "unreferenced, totalling",
-      format(sum(file.size(dead)), big.mark = " "),
-      "bytes:",
-      paste(basename(dead), collapse = ", ")
+    !length(dead) && !length(absent),
+    "every file under word/media and word/embeddings is referenced, and every reference resolves",
+    c(
+      if (length(dead)) {
+        paste(
+          length(dead),
+          "unreferenced, totalling",
+          format(sum(file.size(dead)), big.mark = " "),
+          "bytes:",
+          paste(basename(dead), collapse = ", ")
+        )
+      },
+      if (length(absent)) {
+        paste(
+          length(absent),
+          "referenced and absent from the package, so Word draws a placeholder:",
+          paste(basename(absent), collapse = ", ")
+        )
+      }
     )
   )
 }
@@ -160,19 +172,22 @@ check_hyphenation <- \(dir) {
 
 check_fonts <- \(dir) {
   fonts <- read_xml(file.path(dir, "word", "fontTable.xml"))
-  alt <- xml_attr(
-    xml_find_all(fonts, "//w:font[@w:name = 'Aptos']/w:altName", ns),
-    "w:val",
-    ns
+  faces <- xml_find_all(fonts, "//w:font[starts-with(@w:name, 'Aptos')]", ns)
+  named <- xml_attr(faces, "w:name", ns)
+  alt <- vapply(
+    faces,
+    \(face) xml_attr(xml_find_first(face, "./w:altName", ns), "w:val", ns),
+    character(1)
   )
+  bad <- named[is.na(alt) | alt != "Calibri"]
 
   report(
-    identical(alt, "Calibri"),
-    "Aptos declares Calibri as its w:altName, for Word before 2024",
-    if (length(alt)) {
-      paste("altName is", alt)
+    length(faces) > 0L && !length(bad),
+    "every Aptos face declares Calibri as its w:altName, for Word before 2024",
+    if (!length(faces)) {
+      "no Aptos entry in word/fontTable.xml"
     } else {
-      "no Aptos entry, or no altName on it"
+      paste("no Calibri fallback on", paste(bad, collapse = ", "))
     }
   )
 }
