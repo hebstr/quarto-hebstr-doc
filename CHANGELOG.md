@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-10-29
+
 ### Changed
 
 - In Word, a callout comes out as body text instead of a bordered table: its title becomes a bold paragraph and its content follows as ordinary prose, hyphenated and justified like the paragraphs around it.
