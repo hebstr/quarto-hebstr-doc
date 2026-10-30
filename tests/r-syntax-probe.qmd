@@ -10,4 +10,5 @@ library(dplyr)
 out <- dplyr::filter(data, n > 1L)
 head(out, n = 3L)
 DT[, val := 2L]
+f(x == 1, y = 2)
 ```
