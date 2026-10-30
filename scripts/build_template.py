@@ -7,8 +7,9 @@
 
 The extension ships template.dotx as a binary, and this script is the recipe
 that produces it. It reads the reference.docx bundled with Quarto's Pandoc and
-applies counted substitutions only: a pattern that matches zero or several
-times aborts the build instead of producing a silently different file.
+applies counted substitutions only: a pattern that does not match the number
+of times it is expected to aborts the build instead of producing a silently
+different file.
 
 Usage, from the repository root:
 
@@ -18,6 +19,7 @@ Usage, from the repository root:
 The output defaults to the extension's template.dotx.
 """
 
+import argparse
 import io
 import re
 import subprocess
@@ -37,6 +39,13 @@ def sub1(pattern, repl, text, label, flags=re.S):
     new, n = re.subn(pattern, lambda _: repl, text, flags=flags)
     if n != 1:
         sys.exit(f"{label}: expected 1 match, got {n}")
+    return new
+
+
+def sub_some(pattern, repl, text, label, flags=re.S):
+    new, n = re.subn(pattern, lambda _: repl, text, flags=flags)
+    if n == 0:
+        sys.exit(f"{label}: expected at least 1 match, got 0")
     return new
 
 
@@ -111,7 +120,7 @@ HEADINGS = {
     4: {
         "spacing": 'w:before="160" w:after="160"',
         "ind": 1009,
-        "rpr": "<w:b/><w:bCs/><w:iCs/>" + color(BLUE),
+        "rpr": "<w:b/><w:bCs/><w:i/><w:iCs/>" + color(BLUE),
     },
     5: {"spacing": SPACED, "ind": None, "rpr": color(BLUE)},
     6: {"spacing": SPACED, "ind": None, "rpr": "<w:i/><w:iCs/>" + color(BLUE)},
@@ -139,7 +148,9 @@ COMPAT = (
 
 
 def build_styles(styles):
-    styles = re.sub(r'\s+w:theme(Color|Shade|Tint)="[^"]*"', "", styles)
+    styles = sub_some(
+        r'\s+w:theme(?:Color|Shade|Tint)="[^"]*"', "", styles, "theme colour attributes"
+    )
 
     styles = replace_style(
         styles,
@@ -193,9 +204,7 @@ def build_styles(styles):
     )
 
     title_rpr = (
-        "<w:b/><w:bCs/>"
-        + color(BLUE)
-        + '<w:spacing w:val="5"/><w:kern w:val="28"/><w:sz w:val="56"/><w:szCs w:val="48"/>'
+        "<w:b/><w:bCs/>" + color(BLUE) + '<w:spacing w:val="5"/><w:kern w:val="28"/>' + sz(56)
     )
     styles = replace_style(
         styles,
@@ -238,7 +247,7 @@ def build_styles(styles):
             next_="BodyText",
             link="SubtitleChar",
             rpr='<w:b w:val="0"/><w:bCs w:val="0"/><w:spacing w:val="0"/><w:kern w:val="0"/>'
-            '<w:sz w:val="48"/><w:szCs w:val="28"/>',
+            + sz(48),
         ),
     )
     styles = replace_style(
@@ -251,7 +260,7 @@ def build_styles(styles):
             based_on="DefaultParagraphFont",
             link="Subtitle",
             custom=True,
-            rpr=color(BLUE) + '<w:sz w:val="48"/><w:szCs w:val="28"/>',
+            rpr=color(BLUE) + sz(48),
         ),
     )
     for sid, bold in (("Author", "<w:b/><w:bCs/>"), ("Date", "<w:bCs/>")):
@@ -503,7 +512,14 @@ def build_styles(styles):
     return sub1(r"</w:styles>", added + "</w:styles>", styles, "styles tail")
 
 
+def reject_taken(text, pattern, label):
+    if re.search(pattern, text):
+        sys.exit(f"{label}: already taken in the reference")
+
+
 def build_numbering(numbering):
+    reject_taken(numbering, r'w:abstractNumId="1"', "numbering abstractNumId 1")
+    reject_taken(numbering, r'w:num w:numId="1"', "numbering numId 1")
     levels = [
         '<w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="none"/><w:suff w:val="nothing"/>'
         '<w:lvlText w:val=""/><w:lvlJc w:val="left"/>'
@@ -548,8 +564,10 @@ FOOTER = (
     "</w:p></w:ftr>"
 )
 
+FOOTER_REL_ID = "rId9"
+
 SECT_PR = (
-    '<w:sectPr><w:footerReference w:type="default" r:id="rId9"/>'
+    f'<w:sectPr><w:footerReference w:type="default" r:id="{FOOTER_REL_ID}"/>'
     '<w:footnotePr><w:numRestart w:val="eachSect"/></w:footnotePr>'
     '<w:pgSz w:w="11900" w:h="16840"/>'
     '<w:pgMar w:top="1417" w:right="1417" w:bottom="1417" w:left="1417"'
@@ -558,88 +576,141 @@ SECT_PR = (
 )
 
 
+def build_content_types(text):
+    text = sub1(
+        r"wordprocessingml\.document\.main\+xml",
+        "wordprocessingml.template.main+xml",
+        text,
+        "content type",
+    )
+    return sub1(
+        r"</Types>",
+        '<Override PartName="/word/footer1.xml" ContentType='
+        '"application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/></Types>',
+        text,
+        "footer content type",
+    )
+
+
+def build_document_rels(text):
+    reject_taken(text, f'Id="{FOOTER_REL_ID}"', f"footer rel {FOOTER_REL_ID}")
+    return sub1(
+        r"</Relationships>",
+        '<Relationship Type="http://schemas.openxmlformats.org/officeDocument/'
+        f'2006/relationships/footer" Id="{FOOTER_REL_ID}" Target="footer1.xml"/>'
+        "</Relationships>",
+        text,
+        "footer rel",
+    )
+
+
+def build_document(text):
+    return sub1(r"<w:sectPr>.*?</w:sectPr>", SECT_PR, text, "sectPr")
+
+
+def build_settings(text):
+    text = sub1(
+        r'<w:defaultTabStop w:val="720" />',
+        '<w:defaultTabStop w:val="720" />'
+        '<w:autoHyphenation w:val="true"/><w:hyphenationZone w:val="425"/>',
+        text,
+        "autoHyphenation",
+    )
+    # Word offers to update the table of contents on open, a field no render can fill
+    text = sub1(
+        r"<w:footnotePr>",
+        '<w:updateFields w:val="true"/><w:footnotePr>',
+        text,
+        "updateFields",
+    )
+    return sub1(r"<w:rsids>", COMPAT + "<w:rsids>", text, "compat")
+
+
+def build_font_table(text):
+    for font in ("Aptos", "Aptos Display"):
+        text = sub1(
+            f'<w:font w:name="{font}">',
+            f'<w:font w:name="{font}"><w:altName w:val="Calibri"/>',
+            text,
+            f"altName {font}",
+        )
+    return text
+
+
+def build_theme(text):
+    return sub1(
+        r'<a:latin typeface="Aptos Display"',
+        '<a:latin typeface="Aptos"',
+        text,
+        "theme major font",
+    )
+
+
+HANDLERS = {
+    "[Content_Types].xml": build_content_types,
+    "word/_rels/document.xml.rels": build_document_rels,
+    "word/document.xml": build_document,
+    "word/styles.xml": build_styles,
+    "word/numbering.xml": build_numbering,
+    "word/settings.xml": build_settings,
+    "word/fontTable.xml": build_font_table,
+    "word/theme/theme1.xml": build_theme,
+}
+
+
+def entry(name):
+    info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+    info.compress_type = zipfile.ZIP_DEFLATED
+    return info
+
+
 def transform(name, data):
-    text = data.decode("utf-8")
-    if name == "[Content_Types].xml":
-        text = sub1(
-            r"wordprocessingml\.document\.main\+xml",
-            "wordprocessingml.template.main+xml",
-            text,
-            "content type",
-        )
-        text = sub1(
-            r"</Types>",
-            '<Override PartName="/word/footer1.xml" ContentType='
-            '"application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/></Types>',
-            text,
-            "footer content type",
-        )
-    elif name == "word/_rels/document.xml.rels":
-        text = sub1(
-            r"</Relationships>",
-            '<Relationship Type="http://schemas.openxmlformats.org/officeDocument/'
-            '2006/relationships/footer" Id="rId9" Target="footer1.xml"/></Relationships>',
-            text,
-            "footer rel",
-        )
-    elif name == "word/document.xml":
-        text = sub1(r"<w:sectPr>.*?</w:sectPr>", SECT_PR, text, "sectPr")
-    elif name == "word/styles.xml":
-        text = build_styles(text)
-    elif name == "word/numbering.xml":
-        text = build_numbering(text)
-    elif name == "word/settings.xml":
-        text = sub1(
-            r'(<w:defaultTabStop w:val="720" />)',
-            '<w:defaultTabStop w:val="720" />'
-            '<w:autoHyphenation w:val="true"/><w:hyphenationZone w:val="425"/>',
-            text,
-            "autoHyphenation",
-        )
-        # Word offers to update the table of contents on open, a field no render can fill
-        text = sub1(
-            r"<w:footnotePr>",
-            '<w:updateFields w:val="true"/><w:footnotePr>',
-            text,
-            "updateFields",
-        )
-        text = sub1(r"<w:rsids>", COMPAT + "<w:rsids>", text, "compat")
-    elif name == "word/fontTable.xml":
-        for font in ("Aptos", "Aptos Display"):
-            text = sub1(
-                f'<w:font w:name="{font}">',
-                f'<w:font w:name="{font}"><w:altName w:val="Calibri"/>',
-                text,
-                f"altName {font}",
-            )
-    elif name == "word/theme/theme1.xml":
-        text = sub1(
-            r'<a:latin typeface="Aptos Display"',
-            '<a:latin typeface="Aptos"',
-            text,
-            "theme major font",
-        )
-    return text.encode("utf-8")
+    handler = HANDLERS.get(name)
+    if handler is None:
+        return data
+    return handler(data.decode("utf-8")).encode("utf-8")
 
 
 def main():
-    out = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_OUT
-    reference = subprocess.run(
-        ["quarto", "pandoc", "--print-default-data-file", "reference.docx"],
-        check=True,
-        capture_output=True,
-    ).stdout
+    parser = argparse.ArgumentParser(description="Rebuild the DOCX reference document.")
+    parser.add_argument(
+        "output",
+        nargs="?",
+        type=Path,
+        default=DEFAULT_OUT,
+        help=f"where to write it, overwriting the file; defaults to {DEFAULT_OUT}, "
+        "the template the extension ships",
+    )
+    out = parser.parse_args().output
+    try:
+        reference = subprocess.run(
+            ["quarto", "pandoc", "--print-default-data-file", "reference.docx"],
+            check=True,
+            capture_output=True,
+            timeout=60,
+        ).stdout
+    except FileNotFoundError:
+        sys.exit("quarto pandoc: quarto is not on the PATH")
+    except subprocess.TimeoutExpired:
+        sys.exit("quarto pandoc: timed out after 60s")
+    except subprocess.CalledProcessError as failure:
+        sys.exit(f"quarto pandoc failed: {failure.stderr.decode(errors='replace').strip()}")
 
+    built = io.BytesIO()
     with (
         zipfile.ZipFile(io.BytesIO(reference)) as zin,
-        zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zout,
+        zipfile.ZipFile(built, "w", zipfile.ZIP_DEFLATED) as zout,
     ):
         names = zin.namelist()
+        missing = sorted(set(HANDLERS) - set(names))
+        if missing:
+            sys.exit(f"reference.docx carries no {', '.join(missing)}")
         ordered = ["[Content_Types].xml"] + [n for n in names if n != "[Content_Types].xml"]
         for name in ordered:
-            zout.writestr(name, transform(name, zin.read(name)))
-        zout.writestr("word/footer1.xml", FOOTER.encode("utf-8"))
+            zout.writestr(entry(name), transform(name, zin.read(name)))
+        zout.writestr(entry("word/footer1.xml"), FOOTER.encode("utf-8"))
 
+    out.write_bytes(built.getvalue())
     print(f"wrote {out} ({out.stat().st_size} bytes)")
 
 
