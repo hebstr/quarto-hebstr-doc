@@ -32,11 +32,14 @@ local LINES = {
   "",
   "## A heading introduces the annexe section.",
   "",
+  "A soft wrapped selection opens here",
+  "and closes on the next line.",
+  "",
 }
 local SOURCE = table.concat(LINES, "\n")
 
 local PLAIN, BULLET, BOLD, CITED, TWICE, ACCENTED, APOSTROPHE = 5, 7, 9, 11, 13, 17, 19
-local HEADING = 21
+local HEADING, WRAPPED = 21, 23
 local STRAIGHT = "l'os and nothing"
 local CURLY = STRAIGHT:gsub("'", "\u{2019}")
 
@@ -56,9 +59,11 @@ end
 
 -- The AST comes from reading the fixture line itself, so the rendered inlines
 -- and the stored literal cannot drift apart: a bold line arrives as Strong, a
--- citing line as Cite, a bullet line as a BulletList.
-local function block_of(number)
-  return pandoc.read(LINES[number], "markdown").blocks[1]
+-- citing line as Cite, a bullet line as a BulletList. A range of lines arrives
+-- as one block holding a SoftBreak at each join, which is the shape a selection
+-- across a soft-wrapped sentence has to resolve against.
+local function block_of(number, last)
+  return pandoc.read(table.concat(LINES, "\n", number, last or number), "markdown").blocks[1]
 end
 
 -- The same line as the reader would leave it untouched, which is the state a
@@ -170,6 +175,33 @@ local function marker_ids(inlines)
     end
   end
   return ids
+end
+
+-- The ordered shape of a comment body, one entry per inline: a field that moved
+-- out of its token's place, a prefix or a suffix lost to the promotion, and a
+-- token wrongly promoted each show up here, where two lists split by type do not.
+local function body_shape(inlines)
+  local shape = {}
+  for _, inline in ipairs(inlines) do
+    if inline.t == "Str" then
+      shape[#shape + 1] = "Str:" .. inline.text
+    elseif inline.t == "RawInline" then
+      shape[#shape + 1] = "Raw:" .. inline.format
+    else
+      shape[#shape + 1] = inline.t
+    end
+  end
+  return shape
+end
+
+local function raw_inlines(inlines)
+  local found = {}
+  for _, inline in ipairs(inlines) do
+    if inline.t == "RawInline" then
+      found[#found + 1] = inline
+    end
+  end
+  return found
 end
 
 local function start_spans(inlines)
@@ -348,32 +380,91 @@ end
 -- A token pandoc reads as a bare URI becomes a `w:fldSimple` HYPERLINK field,
 -- which carries its URL inside the part that cites it. Every other token stays
 -- the Str the literal filter writes: a token with no scheme is never read, and
--- one the shape check refuses is handed back untouched.
+-- one the shape check refuses is handed back untouched. The two promoted tokens
+-- carry the punctuation pandoc splits off a URL, a surrounding pair and a
+-- sentence-final period, so the prefix and suffix branches are both exercised
+-- and the field is asserted where its token sat rather than merely counted.
 function TestCollabComments:test_a_url_in_the_body_becomes_a_hyperlink_field()
   local out = run({
     blocks = { block_of(PLAIN) },
     comments = {
       {
         selection = "simple anchor",
-        text = "See https://x.test/a?b=1&c=2 then CR_OK and `tbl_one` and www.x.test/a.",
+        text = "See (https://x.test/a) then https://x.test/b?c=1&d=2. Not CR_OK and `tbl_one` and www.x.test/a.",
       },
     },
   })
   lu.assertEquals(out.stderr, "")
-  local raws, strs = {}, {}
-  for _, inline in ipairs(first_span(out.doc.blocks[1].content).content) do
-    if inline.t == "RawInline" then
-      raws[#raws + 1] = inline
-    elseif inline.t == "Str" then
-      strs[#strs + 1] = inline.text
-    end
-  end
-  lu.assertEquals(#raws, 1)
-  lu.assertEquals(raws[1].format, "openxml")
-  lu.assertStrContains(raws[1].text, 'w:instr="HYPERLINK &quot;https://x.test/a?b=1&amp;c=2&quot;"')
-  lu.assertStrContains(raws[1].text, '<w:rStyle w:val="Hyperlink"/>')
-  lu.assertStrContains(raws[1].text, ">https://x.test/a?b=1&amp;c=2</w:t>")
-  lu.assertEquals(strs, { "See", "then", "CR_OK", "and", "`tbl_one`", "and", "www.x.test/a." })
+  local content = first_span(out.doc.blocks[1].content).content
+  lu.assertEquals(body_shape(content), {
+    "Str:See",
+    "Space",
+    "Str:(",
+    "Raw:openxml",
+    "Str:)",
+    "Space",
+    "Str:then",
+    "Space",
+    "Raw:openxml",
+    "Str:.",
+    "Space",
+    "Str:Not",
+    "Space",
+    "Str:CR_OK",
+    "Space",
+    "Str:and",
+    "Space",
+    "Str:`tbl_one`",
+    "Space",
+    "Str:and",
+    "Space",
+    "Str:www.x.test/a.",
+  })
+  local fields = raw_inlines(content)
+  lu.assertStrContains(fields[1].text, 'w:instr="HYPERLINK &quot;https://x.test/a&quot;"')
+  lu.assertStrContains(fields[1].text, '<w:rStyle w:val="Hyperlink"/>')
+  lu.assertStrContains(fields[2].text, 'w:instr="HYPERLINK &quot;https://x.test/b?c=1&amp;d=2&quot;"')
+  lu.assertStrContains(fields[2].text, ">https://x.test/b?c=1&amp;d=2</w:t>")
+end
+
+-- Both tokens below parse to a Link the content/target check lets through or
+-- refuses on its own, and the byte-equality check against the token is what
+-- settles each: an angle-bracketed autolink loses its delimiters to the parser,
+-- so promoting it would drop them from the body, and a quote in the path comes
+-- back percent-encoded in the target alone, so promoting it would show the
+-- reader a URL the reviewer did not write.
+function TestCollabComments:test_an_angle_bracketed_url_stays_text()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = { { selection = "simple anchor", text = "See <https://x.test/a> here." } },
+  })
+  lu.assertEquals(out.stderr, "")
+  local content = first_span(out.doc.blocks[1].content).content
+  lu.assertEquals(raw_inlines(content), {})
+  lu.assertEquals(body_shape(content), {
+    "Str:See",
+    "Space",
+    "Str:<https://x.test/a>",
+    "Space",
+    "Str:here.",
+  })
+end
+
+function TestCollabComments:test_a_url_whose_target_is_percent_encoded_stays_text()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = { { selection = "simple anchor", text = 'See https://x.test/a"b here.' } },
+  })
+  lu.assertEquals(out.stderr, "")
+  local content = first_span(out.doc.blocks[1].content).content
+  lu.assertEquals(raw_inlines(content), {})
+  lu.assertEquals(body_shape(content), {
+    "Str:See",
+    "Space",
+    'Str:https://x.test/a"b',
+    "Space",
+    "Str:here.",
+  })
 end
 
 -- Stair 1: the rewrite walks the body instead of iterating its top level.
@@ -570,6 +661,32 @@ function TestCollabComments:test_a_range_spanning_source_lines_resolves_on_its_u
       {
         selection = "simple anchor",
         range = { start = { line = 4, character = 0 }, ["end"] = { line = 5, character = 2 } },
+      },
+    },
+  })
+  lu.assertStrContains(out.stderr, "drifted Word comment")
+  lu.assertStrContains(out.stderr, "selection spans source lines")
+  lu.assertNotStrContains(out.stderr, "skipped Word comment")
+  lu.assertEquals(classes_at(out.doc.blocks[1].content), { "comment-start", "comment-end" })
+end
+
+-- The case above fabricates a two-line range over a single-line literal, so it
+-- holds the fallback and not the recovery it enables. Here the stored selection
+-- itself spans the two fixture lines, which is what a reviewer selecting across
+-- a soft-wrapped sentence files: the fast path refuses every multi-line range by
+-- construction, so the literal is the only route, and it has to be found with
+-- its newline on both sides, the source joined by lines and the rendered block
+-- reading its SoftBreak as one.
+function TestCollabComments:test_a_selection_spanning_two_source_lines_resolves_on_its_literal()
+  local out = run({
+    blocks = { block_of(WRAPPED, WRAPPED + 1) },
+    comments = {
+      {
+        selection = "selection opens here\nand closes",
+        range = {
+          start = { line = WRAPPED - 1, character = 15 },
+          ["end"] = { line = WRAPPED, character = 10 },
+        },
       },
     },
   })
