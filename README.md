@@ -396,6 +396,8 @@ The apostrophe is matched in either form: a selection written with the straight 
 A selection has to occur exactly once in the rendered document.
 The render places it inside a list, a table cell, a bold run or a link, and beside a citation, a code span or a formula; it refuses to cut one of those in two.
 
+A URL in a comment arrives as a link, and it needs no `post-render` step.
+
 A reply comes back as a Word comment of its own, on the same text as the comment it answers and under its own author and date.
 Nesting it below that comment takes one more step, because Word keeps the nesting in a part no renderer writes.
 The extension ships that step; a project asks for it once:

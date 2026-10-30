@@ -5,6 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- A URL written in a Word comment now arrives as a link, clickable from the comment itself.
+  It needs no step in the consuming project: the address travels inside the comment, so nothing has to be wired for it.
+
 ### Changed
 
 - In the `script` shortcode, `lines` given as a single number now shows that line alone.

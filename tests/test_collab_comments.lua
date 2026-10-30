@@ -345,6 +345,37 @@ function TestCollabComments:test_the_opening_body_keeps_its_tracked_changes_in_o
   lu.assertStrContains(body, "Tracked change")
 end
 
+-- A token pandoc reads as a bare URI becomes a `w:fldSimple` HYPERLINK field,
+-- which carries its URL inside the part that cites it. Every other token stays
+-- the Str the literal filter writes: a token with no scheme is never read, and
+-- one the shape check refuses is handed back untouched.
+function TestCollabComments:test_a_url_in_the_body_becomes_a_hyperlink_field()
+  local out = run({
+    blocks = { block_of(PLAIN) },
+    comments = {
+      {
+        selection = "simple anchor",
+        text = "See https://x.test/a?b=1&c=2 then CR_OK and `tbl_one` and www.x.test/a.",
+      },
+    },
+  })
+  lu.assertEquals(out.stderr, "")
+  local raws, strs = {}, {}
+  for _, inline in ipairs(first_span(out.doc.blocks[1].content).content) do
+    if inline.t == "RawInline" then
+      raws[#raws + 1] = inline
+    elseif inline.t == "Str" then
+      strs[#strs + 1] = inline.text
+    end
+  end
+  lu.assertEquals(#raws, 1)
+  lu.assertEquals(raws[1].format, "openxml")
+  lu.assertStrContains(raws[1].text, 'w:instr="HYPERLINK &quot;https://x.test/a?b=1&amp;c=2&quot;"')
+  lu.assertStrContains(raws[1].text, '<w:rStyle w:val="Hyperlink"/>')
+  lu.assertStrContains(raws[1].text, ">https://x.test/a?b=1&amp;c=2</w:t>")
+  lu.assertEquals(strs, { "See", "then", "CR_OK", "and", "`tbl_one`", "and", "www.x.test/a." })
+end
+
 -- Stair 1: the rewrite walks the body instead of iterating its top level.
 function TestCollabComments:test_a_bullet_item_is_reached()
   local out = run({

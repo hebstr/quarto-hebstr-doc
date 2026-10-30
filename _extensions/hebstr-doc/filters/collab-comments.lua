@@ -470,6 +470,59 @@ local function word_id(local_id, exported_body)
   return tostring(hash)
 end
 
+local function xml_escape(value)
+  return (value:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub('"', "&quot;"))
+end
+
+local function hyperlink_field(url)
+  local escaped = xml_escape(url)
+  return pandoc.RawInline(
+    "openxml",
+    '<w:fldSimple w:instr="HYPERLINK &quot;'
+      .. escaped
+      .. '&quot;"><w:r><w:rPr><w:rStyle w:val="Hyperlink"/></w:rPr><w:t xml:space="preserve">'
+      .. escaped
+      .. "</w:t></w:r></w:fldSimple>"
+  )
+end
+
+local function url_field_inlines(token)
+  if not token:find("%a[%w+%.%-]*:") then
+    return nil
+  end
+  local ok, parsed = pcall(pandoc.read, token, "markdown+autolink_bare_uris-smart")
+  if not ok or #parsed.blocks ~= 1 or parsed.blocks[1].t ~= "Para" then
+    return nil
+  end
+  local prefix, suffix, link
+  for _, inline in ipairs(parsed.blocks[1].content) do
+    if inline.t == "Link" and not link and not suffix then
+      link = inline
+    elseif inline.t == "Str" and not link and not prefix then
+      prefix = inline.text
+    elseif inline.t == "Str" and link and not suffix then
+      suffix = inline.text
+    else
+      return nil
+    end
+  end
+  if not link or pandoc.utils.stringify(link.content) ~= link.target then
+    return nil
+  end
+  if (prefix or "") .. link.target .. (suffix or "") ~= token then
+    return nil
+  end
+  local inlines = {}
+  if prefix then
+    table.insert(inlines, pandoc.Str(prefix))
+  end
+  table.insert(inlines, hyperlink_field(link.target))
+  if suffix then
+    table.insert(inlines, pandoc.Str(suffix))
+  end
+  return inlines
+end
+
 local function literal_inlines(text)
   -- Pandoc's native line-break inline represents all source newline styles.
   -- Normalise before splitting so CRLF never becomes Space + LineBreak.
@@ -490,7 +543,10 @@ local function literal_inlines(text)
       else
         local finish = space_start and space_start - 1 or #line
         if finish >= word_start then
-          table.insert(result, pandoc.Str(line:sub(word_start, finish)))
+          local token = line:sub(word_start, finish)
+          for _, inline in ipairs(url_field_inlines(token) or { pandoc.Str(token) }) do
+            table.insert(result, inline)
+          end
         end
         word_start = space_start or (#line + 1)
       end
