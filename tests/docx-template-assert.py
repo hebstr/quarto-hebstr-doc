@@ -32,14 +32,24 @@ EXPECTED = [
     ("Figure\xa03. Panel caption", "ImageCaptionTitle", None, "ImageCaptionSubtitle"),
     ("Figure\xa04. Left of a layout row.", "ImageCaption", "CaptionedFigure", None),
     ("Figure\xa05. Right of a layout row.", "ImageCaption", "CaptionedFigure", None),
+    ("(a) First column.", "ImageCaption", "CaptionedFigure", None),
+    ("(b) Second column.", "ImageCaption", "CaptionedFigure", None),
+    ("Figure\xa06. Column caption.", "ImageCaption", None, None),
     ("Table\xa01. A Markdown table caption.", "TableCaption", None, None),
     ("Table\xa02. A gt table caption.", "TableCaptionTitle", None, "TableCaptionSubtitle"),
     ("Annexe\xa01. An annexe caption.", "TableCaption", None, None),
 ]
 LAYOUT_ROW = "::: {layout-ncol=2}"
+TITLE_BLOCK = (
+    ("Title", "DOCX template probe"),
+    ("Subtitle", "Reference document and float captions"),
+    ("Author", "hebstr"),
+)
+FOOTNOTE = "A footnote."
 CALLOUT_BORDER_SZ = "24"
 CALLOUT_ICON_EMU = ("152400", "152400")
 CALLOUT_EXEMPTED = "A callout carrying an identifier, which keeps the table Quarto builds."
+CALLOUT_IDENTIFIED = "{#nte-x "
 CALLOUT_FLOW = (
     ("A callout titled by a heading", True),
     ("A callout with no body at all", True),
@@ -59,6 +69,7 @@ EXPECTED_ANCHORS = {
     "fig-panels",
     "fig-left",
     "fig-right",
+    "fig-columns",
     "tbl-md",
     "tbl-gt",
     "anx-probe",
@@ -105,21 +116,31 @@ parents = {child: parent for parent in root.iter() for child in parent}
 failures = []
 found = []
 
-# The layout row is the one shape of the probe whose removal nothing below can
-# see: a flattened row and two ordinary body-level figures render alike, which
-# is what docx-layout-flatten.lua is for, and what cost tests/docx-cell.sh its
-# own coverage once.
-if LAYOUT_ROW not in probe.read_text(encoding="utf-8"):
+# Two shapes are read in the source because no output-side condition can read
+# their removal as a probe change. A flattened layout row and two ordinary
+# body-level figures render alike, which is what docx-layout-flatten.lua is for
+# and what cost tests/docx-cell.sh its own coverage once; and an identifier
+# dropped from a callout flattens it, which the conditions below would report as
+# a guard that no longer holds, the opposite diagnosis.
+source = probe.read_text(encoding="utf-8")
+if LAYOUT_ROW not in source:
     failures.append(
         "the staged probe carries no layout row, so docx-layout-flatten.lua is exercised by nothing"
+    )
+identified = CALLOUT_IDENTIFIED in source
+if not identified:
+    failures.append(
+        "the staged probe carries no identified callout, so the identifier guard of"
+        " docx-callout-flatten.lua is exercised by nothing"
     )
 
 for cell in root.iter(W + "tc"):
     inner = blocks(cell)
     if inner and inner[-1].tag == W + "tbl":
         failures.append(
-            "a w:tc ends on a w:tbl, which Word refuses to open;"
-            " a float wrapper docx-caption.lua did not lift is the likely cause"
+            "a w:tc ends on a w:tbl, so a float wrapper docx-caption.lua did not lift and"
+            " Word crushes what that cell holds; the refusal to open is check_cells in"
+            " scripts/check-docx.R, which counts the closing paragraph this one steps over"
         )
 
 # Hyphenation is document-wide in settings.xml and suppressed per style, so it
@@ -128,6 +149,16 @@ styles = {
     s.get(W + "styleId"): s
     for s in ET.fromstring(package.read("word/styles.xml")).iter(W + "style")
 }
+
+
+def inherited_attr(style_id, path, attr):
+    while style_id in styles:
+        node = styles[style_id].find(path)
+        if node is not None and node.get(W + attr) is not None:
+            return node.get(W + attr)
+        based = styles[style_id].find(W + "basedOn")
+        style_id = None if based is None else based.get(W + "val")
+    return None
 
 
 def inherited(style_id, path):
@@ -140,9 +171,15 @@ def inherited(style_id, path):
     return None
 
 
+# A toggle property carrying w:val="0" is off, which is the form Word writes
+# when a style checkbox is cleared and the form this template already uses on
+# Subtitle and BodyText, so presence is never the question.
+def toggled_on(node):
+    return node is not None and node.get(W + "val") not in ("0", "false", "off")
+
+
 def hyphenates(style_id):
-    node = inherited(style_id, f"{W}pPr/{W}suppressAutoHyphens")
-    return True if node is None else node.get(W + "val") in ("0", "false", "off")
+    return not toggled_on(inherited(style_id, f"{W}pPr/{W}suppressAutoHyphens"))
 
 
 for style_id, wanted_hyphens in (
@@ -208,7 +245,7 @@ for style_id, path, wanted, consequence in (
         "a page break can fall between a caption and its subtitle",
     ),
 ):
-    if (inherited(style_id, path) is not None) != wanted:
+    if toggled_on(inherited(style_id, path)) != wanted:
         article = "no" if wanted else "a"
         failures.append(
             f"{style_id} resolves to {article} {path.rsplit('}', 1)[1]}, so {consequence}"
@@ -216,26 +253,45 @@ for style_id, path, wanted, consequence in (
 
 # The size above is all these styles inherit; what each one exists to carry is a
 # spacing of its own, and for a subtitle the bold-off against the bold Caption
-# it descends from.
+# it descends from. Word resolves w:before and w:after one by one, so a style
+# declaring only one of them takes the other from the style it is based on.
 for style_id, attr, wanted_twips in (
     ("ListItem", "before", "120"),
     ("ListItem", "after", "120"),
     ("TableCaptionTitle", "after", "0"),
     ("ImageCaptionTitle", "after", "0"),
 ):
-    node = inherited(style_id, f"{W}pPr/{W}spacing")
-    value = None if node is None else node.get(W + attr)
+    value = inherited_attr(style_id, f"{W}pPr/{W}spacing", attr)
     if value != wanted_twips:
         failures.append(
             f"{style_id} resolves to a spacing {attr} of {value}, not {wanted_twips} twips,"
             " so it renders like the style it is based on"
         )
 
-for style_id in SUBTITLE_STYLES:
-    node = inherited(style_id, f"{W}rPr/{W}b")
-    if node is None or node.get(W + "val") not in ("0", "false", "off"):
+# docx-caption.lua resets a centred wrapper column to AlignDefault and moves
+# the centring onto the image's own style, so what aligns a figure, a caption or
+# the body prose resolves along basedOn or nowhere, and no condition above reads
+# a paragraph's resolved alignment.
+for style_id, wanted_jc in (
+    ("Figure", "center"),
+    ("CaptionedFigure", "center"),
+    ("TableCaption", "center"),
+    ("ImageCaption", None),
+    ("BodyText", "both"),
+):
+    node = inherited(style_id, f"{W}pPr/{W}jc")
+    resolved = None if node is None else node.get(W + "val")
+    if resolved != wanted_jc:
         failures.append(
-            f"{style_id} does not turn off the bold of Caption, so the subtitle renders bold"
+            f"{style_id} resolves to an alignment of {resolved}, not {wanted_jc},"
+            " so Word lays its paragraphs out otherwise"
+        )
+
+for style_id in (*SUBTITLE_STYLES, "Subtitle"):
+    node = inherited(style_id, f"{W}rPr/{W}b")
+    if node is None or toggled_on(node):
+        failures.append(
+            f"{style_id} does not turn off the bold of the style it is based on, so it renders bold"
         )
 
 missing_toc = [f"TOC{level}" for level in range(1, 10) if f"TOC{level}" not in styles]
@@ -253,6 +309,31 @@ if update is None or update.get(W + "val") not in ("true", "1", "on"):
     )
 
 children = root.findall(f"{W}body/*")
+
+# The title block and the footnote are the probe's only call on the Title,
+# Subtitle, Author and FootnoteText styles, and scripts/check-docx.R resolves
+# those through the parts it reads rather than requiring either shape, so
+# dropping one from the probe would cost that coverage with nothing to see.
+opening = [el for el in children if el.tag == W + "p"][: len(TITLE_BLOCK)]
+if tuple((style(p), text(p)) for p in opening) != TITLE_BLOCK:
+    failures.append(
+        f"the body opens on {[(style(p), text(p)) for p in opening]},"
+        f" not on the probe's title block {list(TITLE_BLOCK)}"
+    )
+
+if "word/footnotes.xml" in package.namelist():
+    notes = ET.fromstring(package.read("word/footnotes.xml"))
+    footnoted = any(
+        style(p) == "FootnoteText" and text(p).strip() == FOOTNOTE for p in notes.iter(W + "p")
+    )
+else:
+    footnoted = False
+if not footnoted:
+    failures.append(
+        f"no FootnoteText paragraph reading {FOOTNOTE!r} in word/footnotes.xml, so the probe"
+        " carries no footnote and the style it resolves through that part is unexercised"
+    )
+
 toc = next((i for i, el in enumerate(children) if el.tag == W + "sdt"), None)
 if toc is None:
     failures.append("no table of contents in the output, which the format turns on")
@@ -290,8 +371,10 @@ if not any(style(p) == "Bibliography" for p in root.iter(W + "p")):
 
 
 # Both branches of Quarto's callout renderer wrap the callout in a table whose
-# left border is 3 pt, and the simple one pulls the 16 pt type icon into
-# word/media; the probe's six figures are the only other drawings. One of each
+# left border is 3 pt, and the simple one pulls the 16 px type icon into
+# word/media, 152400 EMU on each side at any dpi, Quarto scaling the pixel size
+# by dpi/96 and Pandoc dividing it back; the probe's figures measure otherwise.
+# One of each
 # is owed, by the callout the identifier guard exempts, and that count is what
 # keeps the two values below from being satisfied by an upstream change to
 # either of them.
@@ -316,7 +399,8 @@ def extent(drawing):
 icons = [d for d in root.iter(W + "drawing") if extent(d) == CALLOUT_ICON_EMU]
 if len(icons) != 1:
     failures.append(
-        f"{len(icons)} callout icon(s) reach word/media, expected the one of the exempted callout"
+        f"{len(icons)} drawing(s) of the callout icon extent in the body,"
+        " expected the one of the exempted callout"
     )
 
 exempted = next((p for p in root.iter(W + "p") if text(p) == CALLOUT_EXEMPTED), None)
@@ -325,7 +409,7 @@ if exempted is None:
         f"{CALLOUT_EXEMPTED!r}: the probe no longer carries"
         " the callout the identifier guard exempts"
     )
-elif parents[exempted].tag == W + "body":
+elif identified and parents[exempted].tag == W + "body":
     failures.append(
         f"{CALLOUT_EXEMPTED!r}: an exempted callout reached body level,"
         " so the guard no longer holds"
@@ -360,6 +444,42 @@ for anchor in sorted(anchors - bookmarks):
 if anchors != EXPECTED_ANCHORS:
     failures.append(
         f"cross-references found {sorted(anchors)}, expected {sorted(EXPECTED_ANCHORS)}"
+    )
+
+
+# Quarto keeps a table for the row of a sub-float, and Pandoc writes that row's
+# column alignment as a direct w:jc on every paragraph of its cells, where it
+# outranks ImageCaption and CaptionedFigure: docx-caption.lua clears it. The
+# one-cell wrapper of a float is lifted out instead, so a caption nested in one
+# of those stays a failure below.
+# Own rows and own cells throughout: a one-cell wrapper holding a nested table
+# answers an iter() over descendants, which would excuse the very nesting the
+# condition below is there to catch.
+def subfloat_cells_of(tbl):
+    wide = [row for row in tbl.findall(f"{W}tr") if len(row.findall(f"{W}tc")) > 1]
+    cells = [cell for row in wide for cell in row.findall(f"{W}tc")]
+    if any(style(p) in CAPTION_STYLES for cell in cells for p in cell.findall(f"{W}p")):
+        return cells
+    return []
+
+
+rows = {t: cells for t in root.iter(W + "tbl") if (cells := subfloat_cells_of(t))}
+subfloat_cells = {cell for cells in rows.values() for cell in cells}
+if len(rows) != 1:
+    failures.append(
+        f"{len(rows)} sub-float row(s) survive as a table, expected the one the probe lays out"
+        " in columns, which is the only shape reaching the filter's column alignment reset"
+    )
+aligned = [
+    p
+    for cell in subfloat_cells
+    for p in cell.findall(f"{W}p")
+    if p.find(f"{W}pPr/{W}jc") is not None
+]
+if aligned:
+    failures.append(
+        f"{len(aligned)} paragraph(s) of a sub-float row carry a direct alignment,"
+        " which outranks their caption and figure styles"
     )
 
 
@@ -415,7 +535,7 @@ for caption in root.iter(W + "p"):
     image = style(content) if content is not None and content.tag == W + "p" else None
     found.append((label, style(caption), image, None if subtitle is None else style(subtitle)))
 
-    if parent.tag != W + "body":
+    if parent.tag != W + "body" and parent not in subfloat_cells:
         failures.append(f"{label}: float nested in {parent.tag.removeprefix(W)}, not at body level")
     titled = wanted + ("Title" if subtitle is not None else "")
     if style(caption) != titled:
