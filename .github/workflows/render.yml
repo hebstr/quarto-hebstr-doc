@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Pre-commit hooks (prek)
-        uses: j178/prek-action@4e14d07f9231acabce116ccfca13b13dd9755ece # v3.0.0
+        uses: j178/prek-action@44924fe9ef4a6f88253c4b6b1bf11c689d3ce53d # v3.1.0
         with:
           # prose-lint and pyrefly are local system hooks, absent on the runner.
           extra-args: --all-files --skip prose-lint --skip pyrefly
