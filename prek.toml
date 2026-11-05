@@ -24,21 +24,21 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/posit-dev/air-pre-commit"
-rev = "0.11.0"
+rev = "0.12.0"
 hooks = [
   { id = "air-format", files = '\.(R|r)$', exclude = '^tests/fixtures/' }
 ]
 
 [[repos]]
 repo = "https://github.com/etiennebacher/jarl-pre-commit"
-rev = "0.6.0"
+rev = "1.0.0"
 hooks = [
   { id = "jarl-check", files = '\.(R|r)$', exclude = '^tests/fixtures/' }
 ]
 
 [[repos]]
 repo = "https://github.com/JohnnyMorganz/StyLua"
-rev = "v2.5.2"
+rev = "v2.6.0"
 hooks = [
   { id = "stylua-github", files = '\.lua$', args = ["--respect-ignores"] }
 ]
@@ -59,7 +59,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.17.2"
+rev = "v0.17.3"
 hooks = [
   { id = "ruff-check", args = ["--fix"] },
   { id = "ruff-format" },
