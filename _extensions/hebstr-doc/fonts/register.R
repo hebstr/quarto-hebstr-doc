@@ -65,7 +65,7 @@ local({
 
   # built on first use, not at source time: encoding the two faces costs ~35 ms
   # that every interactive session would pay through .Rprofile without rendering
-  faces <- NULL
+  cache <- new.env(parent = emptyenv())
 
   # An opts_chunk$set() here would be overwritten by the format's own dev.args
   # when sourced from .Rprofile, and dropped by any chunk that sets dev.args
@@ -78,8 +78,8 @@ local({
         return(options)
       }
 
-      if (is.null(faces)) {
-        faces <<- list(
+      if (is.null(cache$faces)) {
+        cache$faces <- list(
           web_face("Luciole", "Luciole-Regular.woff2", 400),
           web_face("Luciole", "Luciole-Bold.woff2", 700)
         )
@@ -90,7 +90,7 @@ local({
         current <- list()
       }
 
-      options$dev.args <- utils::modifyList(current, list(web_fonts = faces))
+      options$dev.args <- utils::modifyList(current, list(web_fonts = cache$faces))
       options
     }
   )
