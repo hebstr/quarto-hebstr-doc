@@ -1,0 +1,96 @@
+Python syntax definition (https://invent.kde.org/frameworks/syntax-highlighting)
+
+--------------------------------------------------------------------------------
+
+Provenance
+
+`python.xml` is a derivative of the KDE Kate/KWrite highlighting module for
+Python, whose own header credits, in order, Per Wigren (v0.9), Michael Bueker
+(v1.9), Paul Giannaros (v1.97 and v2.01) and Primoz Anzur (v1.99), with later
+revisions up to v2.29 unattributed in the file.
+
+It is vendored from the copy that skylighting embeds, which is what Pandoc uses:
+repository `jgm/skylighting`, path `skylighting-core/xml/python.xml`, commit
+`fcaf8658` (2026-07-26, the last commit to touch that file). That copy is
+byte-identical to KDE `frameworks/syntax-highlighting` at
+`data/syntax/python.xml` on `master`, verified 2026-11-07 at 136,838 bytes on
+both sides.
+
+--------------------------------------------------------------------------------
+
+Licence: not declared upstream
+
+The upstream file declares no licence, and this is a fact about it rather than
+an omission here. Three measurements, all taken on 2026-11-07:
+
+  - the `<language>` element carries `license=""`, the file carries no SPDX
+    header, there is no `python.xml.license` sibling in the KDE repository, and
+    that repository publishes no REUSE metadata covering `data/syntax/`
+  - KDE's `README.md` states that contributions to KSyntaxHighlighting "shall be
+    licensed under MIT", a policy this file's authorship chain predates
+  - skylighting's own `README.md` states only that "some" of the bundled KDE XML
+    files are LGPL- or GPL-licensed, which is why the `skylighting` package ships
+    under the GPL while `skylighting-core`, which carries the XML, is BSD3
+
+hebstr-doc therefore redistributes this file without asserting a licence for it,
+under whichever of the above applies, and claims no licence of its own over it.
+It is aggregated with, not part of, the MIT-licensed remainder of hebstr-doc: no
+other file in this extension derives from it.
+
+Unlike `syntax/r.xml` (GPL v2) and `template.dotx` (GPL v2 or later), this file
+is not a copyleft component of the extension, because no copyleft terms are
+declared for it. Should upstream add an SPDX header, this section is what has to
+be rewritten, and the third-party table of `LICENSE.md` with it.
+
+--------------------------------------------------------------------------------
+
+Changes
+
+Twelve changes were made, each marked `hebstr` in the file on every line it
+touches. Every one of them moves a token onto a default style whose colour in
+`theme-base.scss` is already the value the maintainer's Positron configuration
+resolves for the matching TextMate scope, so none of them introduces a colour:
+
+  - the `funcdefs` list and the `Function Definition` item (`dsImport`): `def`
+    leaves the `defs` list and stops sharing a style with `class`, `del`,
+    `global`, `lambda` and `nonlocal`
+  - the `Import` item moves from `dsImport` to `dsKeyword`, the counterpart of
+    the change above, `import`, `from` and `as` being `keyword.control`
+  - the `langconstants` list and the `Language Constant` item (`dsConstant`):
+    `None`, `True`, `False`, `NotImplemented` and `Ellipsis` leave
+    `specialvars` and stop sharing a style with `self` and the dunders
+  - the `Function Name` item (`dsFunction`) and the two rules that reach it, a
+    `RegExpr` on the identifier in front of `(` and the `DefName` context the
+    `def` keyword enters. Upstream tokenises neither the defined name nor a
+    non-builtin call
+  - the `Caps Constant` item (`dsRegionMarker`) and its `RegExpr`: an ALL_CAPS
+    name, which upstream leaves as unstyled normal text
+  - the `Decorator` item moves from `dsAttribute` to `dsFunction`
+  - the operator `AnyChar` of the `Normal` context gains `,` and `.`, both
+    untokenised upstream
+
+Unlike `r.xml`, the language is **not** renamed and no Lua filter is needed:
+Quarto ships no Python definition of its own, so there is no last-wins collision
+to dodge. The file name still is: skylighting derives the
+`class="sourceCode <name>"` it emits from the basename, so a file named anything
+other than `python.xml` produces markup no stylesheet targets.
+
+--------------------------------------------------------------------------------
+
+Refresh procedure
+
+    gh api "repos/jgm/skylighting/contents/skylighting-core/xml/python.xml?ref=<commit>" \
+      --jq '.content' | base64 -d > python-upstream.xml
+
+Re-apply the twelve changes above, update the commit recorded here, and run
+`bash tests/python-syntax-tokens.sh`, which asserts each of them in a real
+render. Four things the re-application has to preserve, in that order of
+fragility:
+
+  1. the two identifier rules stay **ahead of** `DetectIdentifier` in the
+     `Normal` context: that rule consumes every bare identifier, so a rule
+     appended after it never fires
+  2. the two split lists stay split, upstream adding items to both over time
+  3. the two characters added to the operator `AnyChar` stay **after**
+     `IncludeRules context="Number"`, so a float keeps its own token
+  4. the six `itemData` mappings

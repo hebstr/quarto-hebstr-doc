@@ -427,7 +427,11 @@ code span {
 
   .dv,
   .fl,
-  .dt {
+  .dt,
+  .bn,
+  .ch,
+  .er,
+  .wa {
     color: #ff7869;
   }
 
@@ -437,7 +441,8 @@ code span {
   }
 
   .st,
-  .ss {
+  .ss,
+  .vs {
     color: #c5ff93;
   }
 
@@ -475,12 +480,17 @@ code span {
   }
 
   .co,
-  .do {
+  .do,
+  .al,
+  .an,
+  .cv,
+  .in {
     font-style: normal !important;
     color: var(--code-comment-color);
   }
 
-  .at {
+  .at,
+  .pp {
     color: var(--code-foreground-color);
   }
 }

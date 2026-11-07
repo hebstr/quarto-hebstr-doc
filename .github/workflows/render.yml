@@ -64,6 +64,12 @@ jobs:
       - name: R syntax token assertions
         run: bash tests/r-syntax-tokens.sh
 
+      # Same ordering, read the other way: Quarto ships no python.xml today, so
+      # one of its own would be appended after the document's and win, the fork
+      # falling silent on a green render.
+      - name: Python syntax token assertions
+        run: bash tests/python-syntax-tokens.sh
+
       # Renders its own probe too: a float that stops reaching the custom
       # crossref type loses its number and caption without failing the render.
       - name: Annexe float assertions

@@ -35,8 +35,13 @@ Bundled assets keep the licence they arrived under, each with its own text along
 | code-window (embedded extension) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/LICENSE` | MIT |
 | quarto-lua-modules (vendored by code-window) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/_vendor/quarto-lua-modules/LICENSE` | MIT |
 | quarto-wizard schema validator (vendored by code-window) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/_vendor/quarto-wizard/LICENSE` | MIT |
+| Python syntax definition | `_extensions/hebstr-doc/syntax/PythonSyntax.LICENSE` | not declared upstream |
 | R syntax definition | `_extensions/hebstr-doc/syntax/RSyntax.LICENSE` | **GPL v2** |
 | Word reference document | `_extensions/hebstr-doc/template.LICENSE` | **GPL v2 or later** |
+
+`syntax/python.xml` carries no licence upstream: its `<language>` element declares `license=""`, it has no SPDX header, and the repositories it comes from say two different things about the set it belongs to.
+Its own attribution file records the three measurements behind that row.
+It is aggregated like the rest, and hebstr-doc asserts no licence over it.
 
 `syntax/r.xml` and `template.dotx` are the two copyleft components.
 `syntax/r.xml` derives from the KDE Kate highlighting module for R and stays GPL v2.

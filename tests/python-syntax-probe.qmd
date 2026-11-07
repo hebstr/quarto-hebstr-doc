@@ -1,0 +1,24 @@
+---
+title: Python syntax probe
+format: hebstr-doc-html
+---
+
+The fence below is deliberately not an executable chunk: the markdown engine handles it, so this probe renders without Python.
+
+```python
+import polars as pl
+from pathlib import Path
+
+MAX_ROWS = 0xFF
+
+
+@cache
+class Frame(Path):
+    def width(self, sep=", "):
+        # TODO: widen
+        pattern = r"\d+"
+        label = f"a\n{sep}"
+        if self.empty is True or sep is None:
+            raise ValueError(label)
+        return pl.read_csv(pattern).head(MAX_ROWS)
+```

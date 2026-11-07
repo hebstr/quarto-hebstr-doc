@@ -65,6 +65,7 @@ contributes:
         - icons/code-icons.css
       syntax-definitions:
         - syntax/r.xml
+        - syntax/python.xml
       include-in-header:
         - text: |
             <script>
@@ -95,6 +96,7 @@ contributes:
       link-citations: true
       syntax-definitions:
         - syntax/r.xml
+        - syntax/python.xml
       filters:
         - at: pre-quarto
           path: filters/crossref-anx.lua
