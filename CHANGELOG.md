@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-11-07
+
 ### Added
 
 - In HTML, the title bar of a code window now shows the language's icon beside its name, for the twenty languages the theme ships an icon for.
