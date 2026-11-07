@@ -60,7 +60,9 @@ contributes:
       theme:
         light: [theme-light.scss, theme-base.scss]
         dark: [theme-dark.scss, theme-base.scss]
-      css: fonts/fonts.css
+      css:
+        - fonts/fonts.css
+        - icons/code-icons.css
       syntax-definitions:
         - syntax/r.xml
       include-in-header:

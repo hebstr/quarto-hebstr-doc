@@ -1,0 +1,150 @@
+.code-with-filename.code-window-auto:has(
+    [data-filename="bash"],
+    [data-filename="sh"],
+    [data-filename="shell"],
+    [data-filename="zsh"]
+  )
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("console.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="css"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("css.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="git"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("git.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="html"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("html.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="javascript"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("javascript.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="json"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("json.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="log"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("log.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="lua"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("lua.svg");
+}
+
+.code-with-filename.code-window-auto:has(
+    [data-filename="markdown"],
+    [data-filename="md"]
+  )
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("markdown.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="python"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("python.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="quarto"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("quarto.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="r"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("r.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="rust"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("rust.svg");
+}
+
+.code-with-filename.code-window-auto:has(
+    [data-filename="sass"],
+    [data-filename="scss"]
+  )
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("sass.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="sql"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("database.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="svg"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("svg.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="toml"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("toml.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="typst"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("typst.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="xml"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("xml.svg");
+}
+
+.code-with-filename.code-window-auto:has([data-filename="yaml"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-image: url("yaml.svg");
+}

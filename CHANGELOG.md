@@ -5,6 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- In HTML, the title bar of a code window now shows the language's icon beside its name, for the twenty languages the theme ships an icon for.
+  A language it has no icon for, a block whose title is a file name you set yourself, and the output of an executed cell all keep the bar they have today.
+
 ### Fixed
 
 - Level-4 headings are italic again in Word output, as the theme has always meant them to be.

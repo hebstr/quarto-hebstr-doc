@@ -679,6 +679,66 @@ body div[data-code-filename] {
   }
 }
 
+.code-with-filename.code-window-auto:has(
+    [data-filename="bash"],
+    [data-filename="css"],
+    [data-filename="git"],
+    [data-filename="html"],
+    [data-filename="javascript"],
+    [data-filename="json"],
+    [data-filename="log"],
+    [data-filename="lua"],
+    [data-filename="markdown"],
+    [data-filename="md"],
+    [data-filename="python"],
+    [data-filename="quarto"],
+    [data-filename="r"],
+    [data-filename="rust"],
+    [data-filename="sass"],
+    [data-filename="scss"],
+    [data-filename="sh"],
+    [data-filename="shell"],
+    [data-filename="sql"],
+    [data-filename="svg"],
+    [data-filename="toml"],
+    [data-filename="typst"],
+    [data-filename="xml"],
+    [data-filename="yaml"],
+    [data-filename="zsh"]
+  )
+  .code-with-filename-file
+  pre
+  strong::before {
+  content: "";
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  margin-right: 0.5em;
+  vertical-align: -0.25em;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.code-with-filename.code-window-auto:has(
+    [data-filename="css"],
+    [data-filename="html"],
+    [data-filename="javascript"],
+    [data-filename="sql"]
+  )
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-size: 117%;
+}
+
+.code-with-filename.code-window-auto:has([data-filename="log"])
+  .code-with-filename-file
+  pre
+  strong::before {
+  background-size: 88%;
+}
+
 // CALLOUT ---------------------------------------------------------------------
 
 .callout {
