@@ -19,6 +19,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 - Level-4 headings are italic again in Word output, as the theme has always meant them to be.
   They carried the italic switch for complex scripts only, so Latin text rendered upright.
+- Sourcing `fonts/register.R` no longer replaces a font family you registered yourself under the same name.
+  It skips a family the session's font registry already carries, where it only used to look at the fonts installed on the machine.
+- `fonts/register.R` now says which call it needs when it is reached another way.
+  It has to be `source("…/register.R")`: that is what records the path it reads its own fonts from, and `sys.source()`, a connection and `Rscript` each leave it without one.
 
 ## [1.10.0] - 2026-10-30
 
