@@ -534,16 +534,22 @@ pre {
 body div[data-code-filename] > details,
 body details.code-fold {
   > summary {
+    --code-fold-summary-bg: color-mix(
+      in srgb,
+      var(--neutral),
+      var(--callout-mix-base) 90%
+    );
+
     width: fit-content;
     font-family: $font-family-monospace;
     font-size: 0.8rem;
     letter-spacing: 1px;
     color: var(--neutral);
-    background-color: transparent;
+    background-color: var(--code-fold-summary-bg);
     margin-bottom: 0;
     padding: 0.4rem 1rem;
     border-radius: 10px;
-    border: 2px solid currentcolor;
+    border: 2px solid var(--code-fold-summary-bg);
   }
 
   &[open] > summary {

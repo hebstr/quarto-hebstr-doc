@@ -10,6 +10,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - In HTML, the title bar of a code window now shows the language's icon beside its name, for the twenty languages the theme ships an icon for.
   A language it has no icon for, a block whose title is a file name you set yourself, and the output of an executed cell all keep the bar they have today.
 
+### Changed
+
+- In HTML, the header of a folded code block now sits on a faint tinted surface whose border is that same colour, where it was transparent with a border in the text colour.
+  The tint follows the light and dark schemes, as the callouts do.
+
 ### Fixed
 
 - Level-4 headings are italic again in Word output, as the theme has always meant them to be.
