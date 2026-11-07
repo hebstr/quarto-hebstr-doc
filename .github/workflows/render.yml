@@ -86,6 +86,12 @@ jobs:
       - name: DOCX comment threading assertions
         run: python3 tests/thread-docx.py
 
+      # The one half no other gate reaches: this runner installs neither Luciole
+      # nor Fira Code, so it is where fonts/register.R actually registers them,
+      # and a silent fallback shows only in the figures of a real render.
+      - name: Figure font assertions
+        run: bash tests/fonts-svg.sh
+
       - name: Render example.qmd (HTML)
         run: quarto render example.qmd --to hebstr-doc-html
 
