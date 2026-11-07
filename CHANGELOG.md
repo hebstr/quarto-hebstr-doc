@@ -13,6 +13,8 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   The glyph takes the colour of the name beside it, on a title bar and on a folded header alike, in both schemes.
 - feat: Show the language's icon on the folded header of a `{{< script >}}` block, as the title bar of a code window does, so a folded listing is identifiable before it is opened.
   The path reads smaller beside it, so the icon is what the eye lands on.
+- feat: Lead a code block's name with a larger icon and a smaller name, on a code window's title bar and on a folded header alike, so the icon carries the recognition and the name no longer competes with it.
+  Every code block in a document changes size this way, the title bar's own height excepted.
 
 ## 1.11.0 (2026-11-07)
 
