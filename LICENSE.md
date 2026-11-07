@@ -30,6 +30,7 @@ Bundled assets keep the licence they arrived under, each with its own text along
 | Fira Code | `_extensions/hebstr-doc/fonts/FiraCode.LICENSE` | SIL OFL 1.1 |
 | Font Awesome Free | `_extensions/hebstr-doc/fonts/FontAwesome.LICENSE` | CC-BY 4.0 + SIL OFL 1.1 |
 | Material Icon Theme | `_extensions/hebstr-doc/icons/MaterialIconTheme.LICENSE` | MIT |
+| Bootstrap Icons | `_extensions/hebstr-doc/icons/BootstrapIcons.LICENSE` | MIT |
 | add-code-files (JS) | `_extensions/hebstr-doc/filters/add-code-files.LICENSE` | MIT |
 | collab-comments (Lua filter) | `_extensions/hebstr-doc/filters/collab-comments.LICENSE` | MIT |
 | code-window (embedded extension) | `_extensions/hebstr-doc/_extensions/mcanouil/code-window/LICENSE` | MIT |

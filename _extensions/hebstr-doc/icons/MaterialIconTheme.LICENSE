@@ -5,7 +5,9 @@ Material Icon Theme (https://github.com/material-extensions/vscode-material-icon
 Provenance
 
 The `.svg` files in this directory are a curated subset of the upstream `icons/`
-directory, vendored unmodified at tag v5.37.0.
+directory, vendored unmodified at tag v5.37.0. The one exception is
+`code-slash.svg`, which comes from Bootstrap Icons and is covered by
+`BootstrapIcons.LICENSE`.
 
 Refresh procedure, one icon at a time:
 

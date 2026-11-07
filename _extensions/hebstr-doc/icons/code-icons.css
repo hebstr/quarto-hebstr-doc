@@ -1,67 +1,85 @@
+:is(.code-with-filename.code-window-auto, body div[data-code-filename])
+  :is(.code-with-filename-file pre, details > summary)::before {
+  content: "";
+  background-image: linear-gradient(currentcolor, currentcolor);
+  mask-image: url("code-slash.svg");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="bash"],
     [data-filename="sh"],
     [data-filename="shell"],
     [data-filename="zsh"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("console.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="css"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("css.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="git"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("git.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="html"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("html.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="javascript"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("javascript.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="json"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("json.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="log"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("log.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="lua"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("lua.svg");
 }
 
@@ -69,40 +87,45 @@
     [data-filename="markdown"],
     [data-filename="md"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("markdown.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="python"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("python.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="quarto"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("quarto.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="r"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("r.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="rust"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("rust.svg");
 }
 
@@ -110,55 +133,62 @@
     [data-filename="sass"],
     [data-filename="scss"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("sass.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="sql"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("database.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="svg"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("svg.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="toml"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("toml.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="typst"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("typst.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="xml"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("xml.svg");
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="yaml"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   content: "";
+  mask-image: none;
   background-image: url("yaml.svg");
 }
