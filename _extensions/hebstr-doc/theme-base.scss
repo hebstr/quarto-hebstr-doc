@@ -695,10 +695,8 @@ body div[data-code-filename] {
   }
 }
 
-.code-with-filename.code-window-auto
-  .code-with-filename-file
-  pre
-  strong::before {
+:is(.code-with-filename.code-window-auto, body div[data-code-filename])
+  :is(.code-with-filename-file pre strong, details > summary)::before {
   display: inline-block;
   width: 1.25em;
   height: 1.25em;
@@ -709,22 +707,20 @@ body div[data-code-filename] {
   background-size: contain;
 }
 
-.code-with-filename.code-window-auto:has(
+:is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="css"],
     [data-filename="html"],
     [data-filename="javascript"],
     [data-filename="sql"]
   )
-  .code-with-filename-file
-  pre
-  strong::before {
+  :is(.code-with-filename-file pre strong, details > summary)::before {
   background-size: 117%;
 }
 
-.code-with-filename.code-window-auto:has([data-filename="log"])
-  .code-with-filename-file
-  pre
-  strong::before {
+:is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
+    [data-filename="log"]
+  )
+  :is(.code-with-filename-file pre strong, details > summary)::before {
   background-size: 88%;
 }
 

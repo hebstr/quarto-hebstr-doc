@@ -5,6 +5,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- Python code blocks are now highlighted by a definition the extension ships, in HTML and in Word alike.
+  What changes against the colours Pandoc gave them: `def` reads gold, `import` and `from` read as the keywords they are, `True`, `False` and `None` read as constants, a name a `def` introduces and any name you call read in the function colour, a decorator reads in that same colour, an argument comma and an attribute dot read as separators, and an ALL_CAPS constant reads gold.
+  A class name, an imported module name and `self` are unchanged, by choice rather than by omission.
+- Ten token classes the theme left uncoloured now have a colour, so they no longer fall back to Quarto's own light palette on the dark code surface.
+  Python is where five of them show: a raw string, a hexadecimal, octal or binary literal, a string escape, an exception name, and a `TODO` inside a comment.
+- In HTML, the folded header of a `{{< script >}}` block now carries the language's icon, between the disclosure arrow and the file path.
+  It is the same icon the title bar of a code window shows, and that block has no visible title bar, so the header is the one surface its language could read from.
+  An ordinary folded code block keeps its header as it is, its own title bar being where its icon already sits.
+
 ## [1.11.0] - 2026-11-07
 
 ### Added
