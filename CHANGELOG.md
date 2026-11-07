@@ -1,413 +1,342 @@
 # Changelog
 
 All notable changes to this project are documented in this file.
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## Unreleased
 
-### Added
+### New Features
 
-- Python code blocks are now highlighted by a definition the extension ships, in HTML and in Word alike.
-  What changes against the colours Pandoc gave them: `def` reads gold, `import` and `from` read as the keywords they are, `True`, `False` and `None` read as constants, a name a `def` introduces and any name you call read in the function colour, a decorator reads in that same colour, an argument comma and an attribute dot read as separators, and an ALL_CAPS constant reads gold.
-  A class name, an imported module name and `self` are unchanged, by choice rather than by omission.
-- Ten token classes the theme left uncoloured now have a colour, so they no longer fall back to Quarto's own light palette on the dark code surface.
-  Python is where five of them show: a raw string, a hexadecimal, octal or binary literal, a string escape, an exception name, and a `TODO` inside a comment.
-- In HTML, the folded header of a `{{< script >}}` block now carries the language's icon, between the disclosure arrow and the file path.
-  It is the same icon the title bar of a code window shows, and that block has no visible title bar, so the header is the one surface its language could read from.
-  An ordinary folded code block keeps its header as it is, its own title bar being where its icon already sits.
+- feat: Highlight Python code from the theme's own syntax definition, in HTML and in Word, so keywords, imports, constants, function names and decorators read in the theme's colours instead of Pandoc's defaults.
+- feat: Colour the code tokens the theme left to Quarto's own palette, so a raw string, a hexadecimal or binary literal, a string escape, an exception name and a `TODO` in a comment stay legible on the dark code surface.
+- feat: Mark a code block whose language the theme ships no icon for with a `</>` glyph, the one Quarto gives its own code-tools button, so every block carries a mark rather than only the twenty keyed languages.
+  The glyph takes the colour of the name beside it, on a title bar and on a folded header alike, in both schemes.
+- feat: Show the language's icon on the folded header of a `{{< script >}}` block, as the title bar of a code window does, so a folded listing is identifiable before it is opened.
+  The path reads smaller beside it, so the icon is what the eye lands on.
 
-## [1.11.0] - 2026-11-07
+## 1.11.0 (2026-11-07)
 
-### Added
+### New Features
 
-- In HTML, the title bar of a code window now shows the language's icon beside its name, for the twenty languages the theme ships an icon for.
-  A language it has no icon for, a block whose title is a file name you set yourself, and the output of an executed cell all keep the bar they have today.
+- feat: Show the language's icon beside the name in a code window's title bar, for the twenty languages the theme ships an icon for, so a block is identifiable before it is read.
+  A language with no icon, a block whose title is a file name you set yourself, and the output of an executed cell keep the bar they had.
+- feat: Tint the header of a folded code block to follow the light and dark schemes, so it reads as a surface of its own.
+  It was transparent before.
 
-### Changed
+### Bug Fixes
 
-- In HTML, the header of a folded code block now sits on a faint tinted surface whose border is that same colour, where it was transparent with a border in the text colour.
-  The tint follows the light and dark schemes, as the callouts do.
+- fix: Set a level-4 heading in italic again in Word output, so it is told apart from a level-3 one.
+- fix: Keep a font family you registered yourself when `fonts/register.R` is sourced, so your own faces survive the call.
+  It replaced a family of the same name before.
+- fix: Name the call `fonts/register.R` needs when it is reached another way, so the failure says what to write.
+  It has to be `source("…/register.R")`; `sys.source()`, a connection and `Rscript` do not work.
 
-### Fixed
+## 1.10.0 (2026-10-30)
 
-- Level-4 headings are italic again in Word output, as the theme has always meant them to be.
-  They carried the italic switch for complex scripts only, so Latin text rendered upright.
-- Sourcing `fonts/register.R` no longer replaces a font family you registered yourself under the same name.
-  It skips a family the session's font registry already carries, where it only used to look at the fonts installed on the machine.
-- `fonts/register.R` now says which call it needs when it is reached another way.
-  It has to be `source("…/register.R")`: that is what records the path it reads its own fonts from, and `sys.source()`, a connection and `Rscript` each leave it without one.
+### New Features
 
-## [1.10.0] - 2026-10-30
+- feat: Write a URL in a Word comment as a link, clickable from the comment itself, with nothing to wire in the consuming project.
+- feat: Read the `script` shortcode's `lines` attribute given as a single number as that line alone, so a one-line selection needs no range.
+  It showed that line and everything after it before, which `10-` already spells.
 
-### Added
+### Bug Fixes
 
-- A URL written in a Word comment now arrives as a link, clickable from the comment itself.
-  It needs no step in the consuming project: the address travels inside the comment, so nothing has to be wired for it.
+- fix: Refuse a `dedent` that is not a whole number of spaces, with a warning, so the listing is neither truncated nor the render lost.
+- fix: Mark a path the shortcode can open but not read, a directory being the common case, with the same visible marker as a missing file, so the mistake shows in the output.
+- fix: Send every diagnostic of the shortcode through the render warning channel, so a mistake that marks the output is reported there too.
+- fix: Report a `lines` range that selects no line, so an empty code block no longer renders in silence.
+- fix: Clamp a `lines` range starting below line 1, so the rendered listing is no longer numbered from zero.
 
-### Changed
+## 1.9.0 (2026-10-29)
 
-- In the `script` shortcode, `lines` given as a single number now shows that line alone.
-  It used to show that line and everything after it, which `10-` already spells, and the form was documented nowhere.
+### New Features
 
-### Fixed
+- feat: Render a callout as body text in Word rather than as a bordered table, its title a bold paragraph and its content ordinary prose, so it takes the document's own text width and styles.
+  The type icon goes with the table, a title authored as a heading stays out of the outline and the table of contents, and a callout carrying an identifier keeps its table so a cross-reference to it still resolves; HTML is unaffected.
 
-- The `script` shortcode refuses a `dedent` that is not a whole number of spaces, with a warning, instead of silently truncating every line of the listing on a negative value or failing the render on a fractional one.
-- A path the shortcode can open but not read, a directory being the common case, now produces the same visible marker as a missing file instead of failing the render with an error that names neither the document nor the call.
-- Every diagnostic of the shortcode now goes through the render warning channel, the unreadable-path one included, so a mistake that puts a visible marker in the output is also reported where the others are.
-- A `lines` range that selects no line is reported instead of rendering an empty code block in silence, which is what a file shrinking under a range pinned earlier produces.
-- A `lines` range starting below line 1 no longer numbers the rendered listing from zero.
+## 1.8.0 (2026-10-28)
 
-## [1.9.0] - 2026-10-29
+### New Features
 
-### Changed
+- feat: Carry a reply to a Word comment back as a reply rather than as a line inside the comment it answers, each becoming a Word comment of its own, anchored on the same text and carrying its own author and date.
+  Add `scripts/thread-docx-comments.py` to `project: post-render:` to nest the replies; without it they read as separate comments in chronological order, a document Word has already threaded is left untouched, and one the script cannot read is reported without failing the render.
 
-- In Word, a callout comes out as body text instead of a bordered table: its title becomes a bold paragraph and its content follows as ordinary prose, hyphenated and justified like the paragraphs around it.
-  The type icon is gone with the table, and a title authored as a heading stays out of the outline, the section numbering and the table of contents, as it already was inside the table.
-  A callout carrying an identifier keeps its table, so a cross-reference to it still resolves.
-  HTML is unaffected and keeps its callouts.
+## 1.7.4 (2026-10-26)
 
-## [1.8.0] - 2026-10-28
+### Bug Fixes
 
-### Added
+- fix: Name on standard error a comment store the extension cannot read, so an unreadable export no longer costs every comment in silence and the render still succeeds.
+  Reading the render's messages remains the way to check a delivery.
+- fix: Name and ignore a `collab-comments` option written as a single value instead of a block of keys, where it used to stop the render.
 
-- A reply to a Word comment comes back as a reply rather than as a line in the comment it answers.
-  Each reply becomes a Word comment of its own, anchored on the same text and carrying its own author and date, and the extension ships `scripts/thread-docx-comments.py` to nest it under the comment it answers.
-  Word keeps that nesting in a part no renderer writes, so the script runs after the document is packaged: a project adds it to `project: post-render:` to get threaded replies, and without it the replies read as separate comments in chronological order.
-  The author's own tracked changes stay in the body of the opening comment, as before.
-  A document Word has already threaded is left untouched, and a document the script cannot read is reported without failing the render.
+## 1.7.3 (2026-10-26)
 
-## [1.7.4] - 2026-10-26
+### Bug Fixes
 
-### Fixed
+- fix: Read the straight apostrophe and the typographic one as one character when anchoring a Word comment, so a comment whose source carries either is placed instead of being dropped in silence.
+  A selection the rendered document carries in both forms at once is refused and named.
 
-- A comment store the extension cannot read no longer costs every comment in silence.
-  A store that is not valid JSON, one carrying no comment collection and one carrying an entry that does not match the comment schema are each named on standard error, the last one by the position of the offending entry.
-  The render still succeeds, as it already did for a single comment that cannot be placed, so reading the render's messages remains the way to check a delivery.
-- A `collab-comments` option written as a single value instead of a block of keys is named and ignored, where it used to stop the render.
+## 1.7.2 (2026-10-26)
 
-## [1.7.3] - 2026-10-26
+### Bug Fixes
 
-### Fixed
+- fix: Anchor a Word comment whose stored position no longer matches the source wherever the source carries its selected text exactly once, so an edit made with the editor closed no longer drops every comment of the document at the next render.
+  A selection spanning two source lines is carried the same way, and a selected text the source no longer carries, or carries twice, is still refused and named.
+- fix: Keep a figure inside the text column in Word, and style the overall caption of a figure laid out in panels (`layout-nrow`, `layout-ncol`) like any other, so neither comes out clipped nor unstyled.
+- fix: Place the parts of a two-column layout (`::: {layout-ncol=2}`) one after another at full width in Word, so neither the figures nor the text of the block is cut off or pushed right of the body margin.
+  HTML keeps the columns side by side, and a row Quarto turns into a float still comes out in columns: a row carrying a float id, and a chunk row with `fig-subcap`.
+- fix: Align the sub-captions of one float the same way in Word.
+  A table written by the author keeps the alignment they gave it.
 
-- A Word comment no longer depends on which apostrophe its source happens to carry: the straight form and the typographic one are read as one character wherever a selection is matched.
-  Typing a straight apostrophe in a sentence a comment anchors on used to cost that comment in silence, and a comment imported from Word, which carries the typographic form, used to miss a selection written with the straight one.
-  A selection the rendered document carries in both forms at once is refused and named, as an ambiguous selection already was.
+## 1.7.1 (2026-10-24)
 
-## [1.7.2] - 2026-10-26
+### New Features
 
-### Fixed
+- feat: Open a new page on a level-1 heading in Word, as the table of contents already did, so each section starts on a clean page.
+- feat: Set Word references at 9 pt through the `Bibliography` style, so the reference list reads smaller than the prose instead of taking the document default.
 
-- A Word comment whose stored position no longer matches the source is no longer lost: it is anchored wherever the source carries its selected text exactly once, and the drift is named on stderr instead of being reported as a skip.
-  An edit made with the editor closed shifted every comment of a document by the lines it added or removed, and the whole set was then dropped at the next Word render.
-  A selection spanning two source lines is carried the same way, where it used to be refused outright.
-  A selected text the source no longer carries, or carries twice once the position has drifted, is still refused and named.
+### Bug Fixes
 
-- A figure no longer comes out clipped on the right in Word, and a figure laid out in panels (`layout-nrow`, `layout-ncol`) now carries its overall caption styled like any other.
-  Quarto sizes an image against the page text column while Pandoc cuts the one-cell table it wraps every float in out of a narrower nominal width, so the image overflowed that cell and Word cut it at the edge.
-  Figures now leave that wrapper, as tables already did since 1.5.0, and the caption of a panel float, which Quarto writes outside any wrapper, is styled from the body.
+- fix: Keep a list written with a blank line between its items at the prose size and line spacing in Word, where it rendered one point larger.
+  A custom `reference-doc` has one more style to carry, `List Item`.
 
-- A figure placed in a two-column layout (`::: {layout-ncol=2}`) is no longer cut off in Word, and the text of such a block no longer starts to the right of the body margin.
-  Quarto laid the block out as a table whose columns are narrower than the figure sitting in them, and whose cells inset their own content.
-  Word output now places the parts of the block one after another, each at full width; HTML keeps the columns side by side.
-  A row Quarto turns into a float is unaffected and still comes out in columns, which a row carrying a float id and a chunk row with `fig-subcap` both are; any other chunk row is flattened like a fenced one.
+## 1.7.0 (2026-10-24)
 
-- Two sub-captions of one float no longer come out aligned differently in Word.
-  Quarto lays sub-floats out in a table, and Pandoc wrote that table's column alignment onto every paragraph of its cells, where it outranked the caption and figure styles: a caption left inside the row read left while its lifted sibling read centred.
-  Such a table now carries no alignment of its own, and a table written by the author keeps the alignment they gave it.
+### Breaking Changes
 
-## [1.7.1] - 2026-10-24
-
-### Changed
-
-- A level-1 heading opens a new page in Word, as the table of contents already did.
-- Word references render at 9 pt, the `Bibliography` style carrying its own size instead of the document default.
-
-### Fixed
-
-- A list written with a blank line between its items no longer renders one point larger than the prose in Word, and keeps its line spacing.
-  Pandoc leaves such an item without a paragraph style, which fell through to the document default of 12 pt; the items now take a `List Item` style, sized like the body text and spaced like the loose form they come from.
-  A custom `reference-doc` has one more style to carry.
-
-## [1.7.0] - 2026-10-24
-
-### Added
-
-- Word comments imported from a reviewed `.docx` are carried back into the Word output, so a reviewer's remarks survive every later render.
-  Set `docx-comments: true` under a `collab-comments:` block in the document; without it the filter does nothing.
-  The comment store is written by the `collab-comments` editor extension, which stays installed on its own; the filter forked here is the `docx` half of [MikeLydeamore/collab-comments](https://github.com/MikeLydeamore/collab-comments) at `v1.1.0`, with its HTML export and preview bridge dropped.
-  A document declaring the extension drops its own `filters:` line, with the editor open on it so the store re-anchors: removing those lines shifts every stored comment in the body.
-
-### Removed
-
-- **Breaking:** the `hebstr-doc-typst` format is dropped, with the `template.typ` preamble and the `code.tmTheme` code theme it read.
+- refactor: Remove the `hebstr-doc-typst` format, with the `template.typ` preamble and the `code.tmTheme` code theme it read.
   HTML and Word are the two output formats; for a PDF, export the Word output from Word.
 
-### Fixed
+### New Features
 
-- A comment at the end of a line in `filetree.yml` is no longer read as part of the value.
-  An `exclude` or `highlight` pattern written with a trailing comment used to match nothing, without a warning.
+- feat: Carry Word comments imported from a reviewed `.docx` back into the Word output, so a reviewer's remarks survive every later render.
+  Set `docx-comments: true` under a `collab-comments:` block in the document, keep the `collab-comments` editor extension installed for the store it writes, and drop the document's own `filters:` line with the editor open on it, since removing those lines shifts every stored comment in the body.
 
-- An empty description under `paths` raises a warning naming the key, instead of being ignored in silence or rendering an empty element.
+### Bug Fixes
 
-- Two `paths` keys that differ only by a trailing slash raise a warning, and the one that survives no longer depends on the order the file happens to be read in.
-
-- A named profile whose `filetree.yml` cannot be parsed renders nothing, as it already did when the file was missing, instead of rendering an unconfigured tree.
-
-- A profile written on one line (`default: { depth: 3 }`) or under a quoted name raises a warning instead of losing every key but `paths` in silence.
+- fix: Stop reading a comment at the end of a line in `filetree.yml` as part of the value, so an `exclude` or `highlight` pattern written with a trailing comment matches again.
+  It matched nothing, without a warning, before.
+- fix: Warn on an empty description under `paths`, naming the key, instead of ignoring it in silence or rendering an empty element.
+- fix: Warn on two `paths` keys that differ only by a trailing slash, so which one survives no longer depends on the order the file happens to be read in.
+- fix: Render nothing for a named profile whose `filetree.yml` cannot be parsed, as a missing file already did, instead of rendering an unconfigured tree.
+- fix: Warn on a profile written on one line (`default: { depth: 3 }`) or under a quoted name, where it lost every key but `paths` in silence.
   Write each key on its own line under the unquoted profile name.
 
-## [1.6.0] - 2026-09-26
+## 1.6.0 (2026-09-26)
 
-### Added
+### Breaking Changes
 
-- The `script` shortcode recognises `.log` and `.txt` files, and labels their code header `log` or `txt`.
-- `filetree.yml` holds several named profiles, and `{{< filetree name >}}` renders the profile `name`.
-  See [`filetree`](README.md#filetree).
-
-### Changed
-
-- **Breaking:** `filetree.yml` no longer has a `filetree:` key: its top-level keys are profiles, and `{{< filetree >}}` renders the one named `default`.
+- refactor: Remove the `filetree:` key from `filetree.yml`: its top-level keys are profiles, and `{{< filetree >}}` renders the one named `default`.
   Rename `filetree:` to `default:` in an existing file; until then the shortcode renders nothing and raises a warning.
 
-- The embedded `code-window` extension is updated from 1.1.5 to 1.5.1, and code blocks change in two ways:
-  - a code block with no language gets a header labelled `default`; add `code-window-enabled="false"` to the block to keep it plain;
-  - printed output of a chunk whose code is hidden gets the same `default` header, with line numbers, because `collapse: true` merges it into a block with no language; set `collapse: false` on the chunk to show it as plain output on the dark code surface, without a header or a copy button.
+### New Features
 
-  The update also brings the `collapse` and `lines-label` options and checks the `code-window` settings for errors.
+- feat: Recognise `.log` and `.txt` files in the `script` shortcode, and label their code header `log` or `txt`.
+- feat: Hold several named profiles in `filetree.yml`, `{{< filetree name >}}` rendering the profile `name`, so one sidecar serves every tree of a project.
+  See [`filetree`](README.md#filetree).
+- feat: Label a code block with no language `default` and frame it like a highlighted one, so it carries the same chrome as its neighbours.
+  Add `code-window-enabled="false"` to the block to keep it plain.
+- feat: Frame the printed output of a chunk whose code is hidden under the same `default` header, with line numbers, `collapse: true` merging it into a block with no language.
+  Set `collapse: false` on the chunk to show it as plain output on the dark code surface, without a header or a copy button.
+- build: Update the embedded `code-window` extension from 1.1.5 to 1.5.1, which brings the `collapse` and `lines-label` options and checks the `code-window` settings for errors.
   See the [code-window changelog](https://github.com/mcanouil/quarto-code-window/blob/1.5.1/CHANGELOG.md).
 
-### Fixed
+### Bug Fixes
 
-- Figures follow `fig-align` again in HTML.
-  Since 1.5.0, body justification also applied to the image of a figure built with `renderings` or of an unlabelled figure with a caption, which left it aligned to the left.
-  The body text override in [Text alignment](README.md#text-alignment) now excludes figures; the previous form still works but also moves those figures to the left.
+- fix: Follow `fig-align` again in HTML, so a figure built with `renderings` and an unlabelled figure with a caption stay centred.
+  Body justification had applied to a figure's image since 1.5.0; the body text override in [Text alignment](README.md#text-alignment) now excludes figures, and the previous form still works but also moves those figures to the left.
 
-## [1.5.0] - 2026-09-22
+## 1.5.0 (2026-09-22)
 
-### Added
+### Breaking Changes
 
-- `reactable` tables follow the dark scheme when left unthemed.
-  A widget with its own `reactableTheme()` keeps its colours; pass CSS variables such as `var(--primary-surface)` to follow the toggle from R.
-- Body text is justified and hyphenated in HTML, matching the Typst and Word formats.
-  Margin content stays left-aligned.
-  See [Text alignment](README.md#text-alignment) to opt out.
-- Figures without a cross-reference label get the float caption style, centred.
-- Citations link to their bibliography entry in Word output (`link-citations: true`).
-- `scripts/check-docx.R` checks a rendered `.docx` or the `.dotx` template for the properties Word output depends on: defined styles, well-formed table cells, no unused media, text width, hyphenation and font fallback.
-  Requires the `officer` and `xml2` R packages.
-- `scripts/build_template.py` rebuilds `template.dotx` from Pandoc's reference document.
-- `filetree`: keys under `paths` accept a `*` wildcard, matching within a single path segment (`docs/*_report.html`).
-  Exact keys take precedence over wildcards.
-- `filetree`: icons for spreadsheets and CSV, presentations, PDF, SVG, BibTeX, shell scripts, logs, databases and data files (SQL, SQLite, DuckDB, Parquet, Feather), XML and CSL, and Rust.
-- `example.qmd` demonstrates `gt` and `reactable` tables.
-
-### Changed
-
-- `gt` tables follow the dark scheme instead of keeping the light palette set in R.
-  Colours passed to `gt::tab_options()` are replaced in dark mode; to adjust them, override `$primary-surface`, `$primary-back`, `$neutral` and `$body-color`.
-  Light mode is unchanged.
-
-- The light/dark toggle moved from beside the document title to the top of the table of contents sidebar.
-  On narrow screens it returns to the top-right corner.
-
-- `{{< script >}}` renders in HTML only and produces no output in Typst and Word.
-  Use a plain code block to show a file in every format.
-
-- `filetree`: `.svg` files use the dedicated SVG icon instead of the generic image icon.
-  Rules targeting `.ft-i-image` no longer apply to them; use `.ft-i-svg`.
-
-- `template.dotx` is rebuilt from Pandoc's reference document (12 KB, down from 562 KB), and Word output changes accordingly:
-  - text is set in Aptos, with Calibri as fallback for Word versions before 2024;
-  - body text is 11 pt with 1.5 line spacing, justified and hyphenated; headings, captions, lists, footnotes and single-paragraph table cells are not hyphenated;
-  - the title block has its own page, and the table of contents starts on the second page;
-  - captions are bold, 10 pt, not italic;
-  - every style Pandoc uses is defined (the previous template left 35 of them to fall back to `Normal`), and rendered documents no longer carry about 1 MB of unused media.
-
-  Page geometry is unchanged: A4, 2.5 cm margins, 6.2958 in text width.
-  `quarto update` replaces an installed copy of the template edited by hand.
-  The template is licensed under the GPL, version 2 or later, as a derivative of Pandoc's reference document; see [LICENSE.md](LICENSE.md).
-
-### Removed
-
-- **Breaking:** the SCSS variables `$surface-default` and `$figure-shadow`, and their CSS custom properties `--surface-default` and `--figure-shadow`.
+- refactor: Remove the SCSS variables `$surface-default` and `$figure-shadow`, and their CSS custom properties `--surface-default` and `--figure-shadow`.
   No rule used either, so overriding them had no effect.
-  Shipped as a minor release under the no-consumer clause of `CONTRIBUTING.md`.
 
-### Fixed
+### New Features
 
-- `gt` tables wider than the text column shrink to fit instead of scrolling horizontally.
-- Word no longer refuses to open documents containing cross-referenced `flextable` or `gt` tables ("an ambiguous cell mapping was encountered").
-- Cross-referenced tables are no longer squeezed in Word, whether Markdown, `gt` or `flextable`.
-- Word captions are styled by position: a caption above its content uses `Table Caption` (centred, kept with the next paragraph), one below uses `Image Caption` (left-aligned).
+- feat: Follow the dark scheme in an unthemed `reactable` table, so a widget matches the page with no R-side change.
+  A widget with its own `reactableTheme()` keeps its colours; pass CSS variables such as `var(--primary-surface)` to follow the toggle from R.
+- feat: Follow the dark scheme in a `gt` table instead of keeping the light palette set in R, so a table matches the page.
+  Colours passed to `gt::tab_options()` are replaced in dark mode, light mode is unchanged, and to adjust them override `$primary-surface`, `$primary-back`, `$neutral` and `$body-color`.
+- feat: Justify and hyphenate body text in HTML, matching the Word output, margin content staying left-aligned.
+  See [Text alignment](README.md#text-alignment) to opt out.
+- feat: Give a figure without a cross-reference label the float caption style, centred, so it reads like a labelled one.
+- feat: Link a citation to its bibliography entry in Word output (`link-citations: true`), so a reader can reach the reference from the text.
+- feat: Move the light/dark toggle from beside the document title to the top of the table of contents sidebar, so it sits with the page's own navigation.
+  On a narrow screen it returns to the top-right corner.
+- feat: Accept a `*` wildcard in a `filetree` key under `paths`, matching within a single path segment (`docs/*_report.html`), so one key describes a family of files.
+  Exact keys take precedence over wildcards.
+- feat: Add `filetree` icons for spreadsheets and CSV, presentations, PDF, SVG, BibTeX, shell scripts, logs, databases and data files (SQL, SQLite, DuckDB, Parquet, Feather), XML and CSL, and Rust.
+- feat: Add `scripts/check-docx.R`, which checks a rendered `.docx` or the `.dotx` template for the properties Word output depends on, so a broken deliverable is caught before it is sent: defined styles, well-formed table cells, no unused media, text width, hyphenation and font fallback.
+  It requires the `officer` and `xml2` R packages.
+- feat: Add `scripts/build_template.py`, which rebuilds `template.dotx` from Pandoc's reference document, so a template change is a recipe rather than a hand edit.
+- feat: Demonstrate `gt` and `reactable` tables in `example.qmd`, so both table surfaces can be checked in one render.
+- refactor: Produce no output from `{{< script >}}` outside HTML, so a Word render no longer carries a listing meant for the screen.
+  Use a plain code block to show a file in every format.
+- refactor: Use the dedicated SVG icon for a `.svg` file in `filetree` instead of the generic image icon.
+  A rule targeting `.ft-i-image` no longer reaches them; use `.ft-i-svg`.
+- build: Rebuild `template.dotx` from Pandoc's reference document, 12 KB down from 562 KB, so every style Pandoc uses is defined and a rendered document no longer carries about 1 MB of unused media.
+  Word output changes with it: text is set in Aptos with Calibri as fallback for Word versions before 2024, body text is 11 pt with 1.5 line spacing, justified and hyphenated where headings, captions, lists, footnotes and single-paragraph table cells are not, the title block has its own page, the table of contents starts on the second page, and captions are bold, 10 pt and not italic.
+  Page geometry is unchanged (A4, 2.5 cm margins, 6.2958 in text width), `quarto update` replaces an installed copy of the template edited by hand, and the template is licensed under the GPL, version 2 or later, as a derivative of Pandoc's reference document; see [LICENSE.md](LICENSE.md).
+
+### Bug Fixes
+
+- fix: Shrink a `gt` table wider than the text column to fit, where it scrolled horizontally.
+- fix: Let Word open a document holding a cross-referenced `flextable` or `gt` table, which it refused with "an ambiguous cell mapping was encountered".
+- fix: Keep a cross-referenced table at its own width in Word, whether Markdown, `gt` or `flextable`, where it came out squeezed.
+- fix: Style a Word caption by its position, `Table Caption` above its content and `Image Caption` below, so a caption reads the same way wherever it sits.
   A subtitle written as `<br><span class='quarto-float-subcaption'>…</span>`, as `hebstr::str_fig()` does, becomes a separate paragraph in a lighter style.
-- The Word table of contents takes its title from the document language instead of a hard-coded "Table of Contents", and the body starts on the page after it.
+- fix: Take the Word table of contents title from the document language instead of a hard-coded "Table of Contents", and start the body on the page after it.
   Word offers to update the table of contents when the document is opened.
 
-## [1.4.0] - 2026-08-29
+## 1.4.0 (2026-08-29)
 
-### Added
+### New Features
 
-- Numbered annexes through a custom `anx` cross-reference type.
+- feat: Number annexes through a custom `anx` cross-reference type, so an annexe is captioned and counted apart from the figures and tables.
   Label a chunk `tbl-anx-<name>` or `fig-anx-<name>`, or a fenced div `anx-<name>`, and reference it as `@anx-<name>`; it is captioned *Annexe n.* and numbered separately.
-- R code highlighting marks the package name before `::` and `:::`, and treats `library`, `require` and `requireNamespace` as keywords.
-  Applies to HTML and Word.
-  The R syntax definition is licensed under the GPL v2; see [LICENSE.md](LICENSE.md).
-- Figure SVGs embed the Luciole regular and bold faces when `fonts/register.R` is sourced, so figure text renders in Luciole for readers who do not have it installed.
-  Adds about 114 KB per figure.
-  Italic and monospaced figure text still depends on the reader's fonts.
-- New public SCSS variable `$font-size-root`, defaulting to `1rem`, so the document follows the reader's browser font size and can be rescaled from one variable.
-
-### Changed
-
-- R code highlighting colours argument separators, the `=` of named arguments, and brackets.
+- feat: Mark the package name before `::` and `:::` in R code, and treat `library`, `require` and `requireNamespace` as keywords, so a namespaced call reads apart from an ordinary one.
+  It applies to HTML and Word, and the R syntax definition is licensed under the GPL v2; see [LICENSE.md](LICENSE.md).
+- feat: Colour the argument separator, the `=` of a named argument and the brackets in R code, so an argument list reads apart from its values.
   Brackets reuse the `.re` token class, which now renders in gold in every language.
-- The import/namespace token `.im` has its own colour (`#fad430`), distinct from keywords.
-  This also affects imports in other languages, such as Python.
-- Code blocks are no longer bold throughout; bold is kept for keywords, imports and constants.
-- Code sizes are harmonised: code blocks and inline code at `0.9rem`, the code-fold label at `0.8rem`.
-- `$toc-font-size` changes from `0.825rem` to `0.8rem`.
+- feat: Give the import and namespace token `.im` its own colour (`#fad430`), distinct from a keyword, so an import is not read as one.
+  This also reaches imports in other languages, such as Python.
+- feat: Embed the Luciole regular and bold faces in a figure's SVG when `fonts/register.R` is sourced, so figure text renders in Luciole for a reader who does not have it installed.
+  It adds about 114 KB per figure, and italic and monospaced figure text still depends on the reader's fonts.
+- feat: Add the public SCSS variable `$font-size-root`, defaulting to `1rem`, so the document follows the reader's browser font size and rescales from one variable.
+- refactor: Keep bold for keywords, imports and constants alone instead of setting a whole code block in bold, so a block reads evenly.
+- refactor: Harmonise the type scale, code blocks and inline code at `0.9rem`, the code-fold label at `0.8rem` and `$toc-font-size` from `0.825rem` to `0.8rem`, so fewer sizes are in play.
 
-### Fixed
+### Bug Fixes
 
-- The R `:=` operator (`data.table`, rlang) is no longer highlighted as an error.
-- Code comments and line numbers meet WCAG contrast requirements: `$code-comment-color` changes to `#8d8d8d` and `$code-window-line-number` to `#7b7a76`.
-- `fonts/register.R` works on systems whose FreeType lacks WOFF2 support.
+- fix: Stop highlighting the R `:=` operator (`data.table`, rlang) as an error.
+- fix: Raise code comments and line numbers to the WCAG contrast ratio against the code surface, `$code-comment-color` to `#8d8d8d` and `$code-window-line-number` to `#7b7a76`, so both stay legible.
+- fix: Register the bundled fonts on a system whose FreeType lacks WOFF2 support, so `fonts/register.R` works there too.
 
-## [1.3.0] - 2026-08-01
+## 1.3.0 (2026-08-01)
 
-### Added
+### Breaking Changes
 
-- `fonts/register.R` makes the bundled Luciole and Fira Code fonts available to R graphics devices on machines where they are not installed.
-  Source it from `.Rprofile` or a setup chunk.
+- build: Require the `svglite` R package for the HTML format, figures rendering with `svglite` so their text stays selectable and the files stay small.
+  Any document with an R chunk needs the package, even if it draws no figure; to keep R's built-in device, set `knitr: { opts_chunk: { dev: svg, dev.args: null } }`.
 
-### Changed
+### New Features
 
-- **The HTML format requires the `svglite` R package.**
-  Figures render with `svglite`, which keeps text selectable and produces smaller files.
-  Any document with an R chunk needs the package, even if it draws no figure.
-  To keep R's built-in device, set `knitr: { opts_chunk: { dev: svg, dev.args: null } }`.
-- In HTML figures, the generic `sans` and `mono` font families map to Luciole and Fira Code.
-  A chunk that sets its own `dev.args` loses this mapping.
+- feat: Add `fonts/register.R`, which makes the bundled Luciole and Fira Code fonts available to R graphics devices on a machine where they are not installed, so a figure is not drawn in a substitute face.
+  Source it from a setup chunk.
+- feat: Map the generic `sans` and `mono` font families to Luciole and Fira Code in HTML figures, so figure text matches the body.
+  A chunk that sets its own `dev.args` loses the mapping.
 
-### Fixed
+### Bug Fixes
 
-- The light theme page background is plain white; `$primary-surface` no longer mixes in 2% of `$primary`.
+- fix: Keep the light theme page background plain white, `$primary-surface` no longer mixing in 2% of `$primary`.
 
-## [1.2.1] - 2026-07-26
+## 1.2.1 (2026-07-26)
 
-### Added
+### New Features
 
-- `filetree`: icons for more file types, including `.mjs`, `.cjs`, `.Rmd`, `.htm`, `.jsonc`, `.ttf`, `.otf`, `.gif`, `.webp`, `.avif`, `.doc`, `.odt` and `.rtf`.
-- `{{< script >}}` warns on invalid arguments instead of ignoring them silently.
-- Alternative text for the color-scheme toggle and callout icons.
+- feat: Add `filetree` icons for more file types, among them `.mjs`, `.cjs`, `.Rmd`, `.htm`, `.jsonc`, `.ttf`, `.otf`, `.gif`, `.webp`, `.avif`, `.doc`, `.odt` and `.rtf`.
+- feat: Warn on an invalid argument to `{{< script >}}` instead of ignoring it silently, so a typo is reported rather than absorbed.
+- feat: Give the color-scheme toggle and the callout icons alternative text, so a screen reader names them.
 
-### Changed
+### Bug Fixes
 
-- Stylesheets are checked by stylelint and prettier.
+- fix: Keep filenames showing on the rest of the page when a `{{< script >}}` block carries no `code-fold`.
+- fix: Keep a highlighted folder styled in `filetree`'s `dynamic` mode.
+- fix: Read past a blank line or a comment in the `filetree` sidecar, so the `exclude` and `highlight` lists are no longer truncated.
+
+### Refactoring
+
+- build: Check the stylesheets with stylelint and prettier, so a malformed rule is caught at the commit.
   No visual change.
-- Unused rules removed from `template.typ`.
+- refactor: Remove the rules `template.typ` no longer used.
 
-### Fixed
+## 1.2.0 (2026-07-21)
 
-- `{{< script >}}`: a code block without `code-fold` stopped filenames from appearing on the whole page.
-- `filetree`: highlighted folders lost their styling in `dynamic` mode.
-- `filetree`: a blank line or a comment in the sidecar truncated the `exclude` and `highlight` lists.
+### Breaking Changes
 
-## [1.2.0] - 2026-07-21
-
-### Added
-
-- `{{< filetree >}}` shortcode, which renders a directory tree read from disk.
-  Configure it with a `filetree.yml` sidecar or shortcode attributes; see the [README](README.md#filetree).
-  Includes file-type icons from Material Icon Theme and five SCSS variables for its colours.
-- `mode: dynamic` renders the tree with collapsible folders, without JavaScript.
-
-### Changed
-
-- `$tab-background` is renamed `$tab-surface` and exposed as a CSS custom property.
-- The default layout is narrower: `body-width` 1000px (was 1100px), `margin-width` 450px (was 600px).
-
-### Removed
-
-- **Breaking:** the HTML format no longer sets `fontsize: 1.2rem`.
+- refactor: Stop setting `fontsize: 1.2rem` in the HTML format.
   Set `fontsize` in your document to restore it.
+- refactor: Rename `$tab-background` to `$tab-surface` and expose it as a CSS custom property.
+  Rename the override in a consumer's own stylesheet.
 
-### Fixed
+### New Features
 
-- `{{< script >}}`: `dedent` removed spaces inside lines instead of only leading indentation.
+- feat: Add the `{{< filetree >}}` shortcode, which renders a directory tree read from disk, so a documented layout stays in step with what is on disk.
+  Configure it with a `filetree.yml` sidecar or shortcode attributes, see the [README](README.md#filetree); it carries file-type icons from Material Icon Theme and five SCSS variables for its colours.
+- feat: Add `mode: dynamic`, which renders the tree with collapsible folders and no JavaScript, so a deep tree opens where the reader wants it.
+- refactor: Narrow the default layout, `body-width` to 1000px from 1100px and `margin-width` to 450px from 600px, so the text column holds a shorter measure.
 
-## [1.1.0] - 2026-07-07
+### Bug Fixes
 
-### Added
+- fix: Remove only the leading indentation with `{{< script >}}`'s `dedent`, where it also took spaces from inside a line.
 
-- SVG figures in the lightbox scale to fit the viewport.
+## 1.1.0 (2026-07-07)
 
-### Changed
+### New Features
 
-- HTML figures render as SVG instead of PNG.
+- feat: Render HTML figures as SVG instead of PNG, so figure text stays sharp at any zoom.
   Use `fig-format: png` to restore raster output.
+- feat: Scale an SVG figure in the lightbox to fit the viewport, so a tall figure is read without scrolling.
 
-## [1.0.0] - 2026-04-29
+## 1.0.0 (2026-04-29)
 
 First stable release.
-The public API surface is versioned as described in `CONTRIBUTING.md`.
 
-### Added
+### New Features
 
-- SCSS variables for the navbar, sidebar and footer of websites and books: `$navbar-bg`, `$navbar-fg`, `$navbar-hl`, `$sidebar-bg`, `$sidebar-fg`, `$sidebar-hl`, `$footer-bg`, `$footer-fg`.
-- `CONTRIBUTING.md`, with the public API surface, versioning policy and release procedure.
+- feat: Add SCSS variables for the navbar, sidebar and footer of a website or a book, `$navbar-bg`, `$navbar-fg`, `$navbar-hl`, `$sidebar-bg`, `$sidebar-fg`, `$sidebar-hl`, `$footer-bg` and `$footer-fg`, so a project layout takes the theme's own colours.
+- feat: Use the navbar colour for the title block banner under `title-block-banner: true`, instead of Quarto's default blue.
+- docs: Add `CONTRIBUTING.md`, carrying the public API surface, the versioning policy and the release procedure.
 
-### Changed
+## 0.12.0 (2026-04-28)
 
-- With `title-block-banner: true`, the banner uses the navbar colour instead of Quarto's default blue.
+### Breaking Changes
 
-## [0.12.0] - 2026-04-28
+- refactor: Rename the extension to `hebstr-doc` and the repository to `quarto-hebstr-doc`.
+  Reinstall with `quarto add hebstr/quarto-hebstr-doc` and declare `hebstr-doc-html`, `hebstr-doc-typst` or `hebstr-doc-docx`.
 
-### Changed
+### New Features
 
-- **Breaking:** the extension is renamed `hebstr-doc` and the repository `quarto-hebstr-doc`.
-  Reinstall with `quarto add hebstr/quarto-hebstr-doc` and use `hebstr-doc-html`, `hebstr-doc-typst` or `hebstr-doc-docx`.
+- feat: Read the front matter options `mainfont`, `monofont`, `fontsize` and `linestretch`, so a document sets its own type without touching the theme.
+- feat: Take colours and typography from `_brand.yml`, so a project's brand reaches the output.
+- build: Add GitHub Actions workflows for the render, the demo site and the releases.
 
-### Added
+### Bug Fixes
 
-- Front matter options `mainfont`, `monofont`, `fontsize` and `linestretch`.
-- Support for `_brand.yml` colours and typography.
-- GitHub Actions workflows for rendering, the demo site and releases.
+- fix: Honour `linestretch`.
 
-### Fixed
+## 0.11.0 (2026-04-27)
 
-- `linestretch` is respected.
+### Breaking Changes
 
-## [0.11.0] - 2026-04-27
+- refactor: Split `theme.scss` into `theme-base.scss`, `theme-light.scss` and `theme-dark.scss`.
+  Declare `format: hebstr-html`, or list the files in `theme:`.
 
-### Added
+### New Features
 
-- Light and dark themes, switchable from the page.
-- Font Awesome 7 icons bundled locally.
+- feat: Add a light and a dark theme, switchable from the page.
+- feat: Bundle the Font Awesome 7 icons locally, so a callout icon needs no remote request.
+- feat: Follow the active theme in the callout colours.
+- refactor: Turn section anchors off by default, so a heading carries no hover anchor.
 
-### Changed
+## 0.10.0 (2026-04-26)
 
-- **Breaking:** `theme.scss` is split into `theme-base.scss`, `theme-light.scss` and `theme-dark.scss`.
-  Use `format: hebstr-html`, or list the files in `theme:`.
-- Callout colours follow the active theme.
-- Section anchors are disabled by default.
+### Breaking Changes
 
-## [0.10.0] - 2026-04-26
+- refactor: Rename the extension to `hebstr`.
+- refactor: Stop setting `lang` by default; declare it in `_quarto.yml`.
+- build: Require Quarto 1.9.36 or later.
 
-### Added
+### New Features
 
-- `example.qmd` demonstration document.
-- `{{< script >}}` shortcode, which includes an external file as a foldable code block.
-- Embedded `mcanouil/code-window` extension for code block headers.
+- feat: Add the `{{< script >}}` shortcode, which includes an external file as a foldable code block, so a listing stays in step with the file on disk.
+- feat: Embed the `mcanouil/code-window` extension, which gives a code block its filename header.
+- docs: Add the `example.qmd` demonstration document, so every surface of the theme is rendered from one file.
 
-### Changed
+## 0.9.0 (2026-04-24)
 
-- **Breaking:** the extension is renamed `hebstr`.
-- **Breaking:** `lang` is no longer set by default; declare it in `_quarto.yml`.
-- Requires Quarto 1.9.36 or later.
+### New Features
 
-## [0.9.0] - 2026-04-24
-
-### Added
-
-- Initial release: HTML, Typst and Word formats with bundled Luciole and Fira Code fonts.
+- feat: Add the HTML, Typst and Word formats, with the Luciole and Fira Code fonts bundled, so the three outputs share one theme.

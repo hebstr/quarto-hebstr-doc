@@ -18,8 +18,8 @@ jobs:
         run: |
           version="${GITHUB_REF_NAME#v}"
           awk -v v="$version" '
-            index($0, "## [" v "]") == 1 { f = 1; next }
-            /^## \[/ { f = 0 }
+            index($0, "## " v " (") == 1 { f = 1; next }
+            /^## / { f = 0 }
             f
           ' CHANGELOG.md >release-notes.md
           test -n "$(tr -d '[:space:]' <release-notes.md)"
