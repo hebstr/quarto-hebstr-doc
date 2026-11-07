@@ -16,4 +16,5 @@ default:
     - "^[^/]*%.html$"
     - "_files$"
     - "node_modules"
+    - "__pycache__"
     - "^TODO%.md$"

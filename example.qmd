@@ -241,7 +241,12 @@ summary(palmerpenguins::penguins$body_mass_g)
 # Code window
 
 Code blocks carry a header, provided by the embedded [`code-window`](https://github.com/mcanouil/quarto-code-window) extension.
-Without a `filename` attribute, the header shows the language.
+Without a `filename` attribute, the header shows the language's icon and its name.
+
+```bash
+quarto add hebstr/quarto-hebstr-doc --no-prompt
+quarto render example.qmd
+```
 
 ```python
 def greet(name: str) -> str:
@@ -253,16 +258,21 @@ penguins |>
   dplyr::count(species)
 ```
 
-```bash
-quarto add hebstr/quarto-hebstr-doc --no-prompt
-quarto render example.qmd
+```sql
+SELECT
+    species,
+    island,
+    COUNT(*) AS n
+FROM penguins
+GROUP BY species, island
+ORDER BY n DESC;
 ```
 
 # Injected script
 
 The `script` shortcode includes `scripts/demo_penguins.R` as a folded code block; click the filename to expand it.
 
-{{< script scripts/demo_penguins.R >}}
+{{< script ./scripts/demo_penguins.R >}}
 
 # Tabset {#sec-tabs}
 

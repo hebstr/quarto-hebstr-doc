@@ -552,8 +552,9 @@ body details.code-fold {
 
     width: fit-content;
     font-family: $font-family-monospace;
-    font-size: 0.8rem;
-    letter-spacing: 1px;
+    font-size: 0.75rem;
+
+    // letter-spacing: 1px;
     color: var(--neutral);
     background-color: var(--code-fold-summary-bg);
     margin-bottom: 0;
@@ -624,8 +625,8 @@ body div[data-code-filename] {
       background: transparent;
       pointer-events: none;
       font-family: $font-family-monospace;
-      font-size: 1rem;
-      letter-spacing: 0.1em;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
       color: var(--code-window-muted);
     }
   }
@@ -695,13 +696,18 @@ body div[data-code-filename] {
   }
 }
 
+.code-with-filename.code-window-auto .code-with-filename-file pre {
+  display: flex;
+  align-items: center;
+}
+
 :is(.code-with-filename.code-window-auto, body div[data-code-filename])
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   display: inline-block;
-  width: 1.25em;
-  height: 1.25em;
-  margin-right: 0.5em;
-  vertical-align: -0.25em;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-right: 0.4rem;
+  vertical-align: -0.4rem;
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -710,17 +716,16 @@ body div[data-code-filename] {
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="css"],
     [data-filename="html"],
-    [data-filename="javascript"],
-    [data-filename="sql"]
+    [data-filename="javascript"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   background-size: 117%;
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(
     [data-filename="log"]
   )
-  :is(.code-with-filename-file pre strong, details > summary)::before {
+  :is(.code-with-filename-file pre, details > summary)::before {
   background-size: 88%;
 }
 
