@@ -81,8 +81,16 @@ body {
   hyphens: auto;
 }
 
-#quarto-document-content .column-margin p {
-  text-align: left;
+#quarto-document-content .column-margin {
+  p {
+    text-align: left;
+  }
+
+  :is(h1, h2, h3, h4, h5, h6) {
+    margin-left: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
 }
 
 .cb1,
@@ -150,15 +158,17 @@ mjx-container {
       var(--primary-back) var(--tab-surface);
   }
 
+  .nav-link {
+    border-radius: 10px 10px 0 0;
+  }
+
   .nav-link.active {
     border-bottom-color: var(--primary);
-    border-radius: 10px 10px 0 0;
   }
 
   .nav-link:not(.active) {
     background-color: var(--primary-back);
     border-bottom-color: var(--tab-surface);
-    border-radius: 10px 10px 0 0;
   }
 
   .tab-content {
@@ -182,7 +192,7 @@ mjx-container {
   }
 
   .subtitle {
-    font-size: 24px;
+    font-size: 1.5rem;
     color: var(--primary-dark);
   }
 
@@ -265,7 +275,7 @@ mjx-container {
       padding-bottom: 0.3rem;
     }
 
-    :is(ul > li, ul > li > ul > li) > a.active {
+    li > a.active {
       border-left: 2px solid var(--primary);
     }
   }
@@ -316,7 +326,6 @@ h4 {
 }
 
 h5 {
-  margin-top: 1.5em;
   margin-left: 2.5rem;
   font-size: 1rem;
 }
@@ -350,12 +359,17 @@ figure.figure > figcaption:not(.quarto-float-caption) {
   padding-bottom: 1em;
 }
 
-// The `anx` custom float carries no built-in styling. Keyed on the float
-// type, this rule is the one that survives a document moving the caption,
-// where the position-keyed rule below stops applying.
 .quarto-float-tbl,
 .quarto-float-anx {
   margin-top: 2rem;
+}
+
+// The `anx` custom float carries no built-in styling. Keyed on the float type
+// and borne by the caption itself, this rule survives a document moving the
+// caption, where the position-keyed rule below stops applying ; on the float it
+// would centre the float's own content instead.
+figcaption.quarto-float-tbl,
+figcaption.quarto-float-anx {
   text-align: center;
 }
 
@@ -705,6 +719,10 @@ body div[data-code-filename] {
         color: var(--code-window-line-number);
         border-right: 1px solid var(--code-window-line-divider);
         user-select: none;
+
+        @supports (content: "a" / "b") {
+          content: counter(line) / "";
+        }
       }
 
       > a:first-child {
@@ -788,7 +806,9 @@ body div[data-code-filename] {
 
   .callout-icon::before {
     background-image: none !important;
+    width: auto;
     height: auto;
+    line-height: 1;
     font-family: "Font Awesome 7 Free", sans-serif;
     font-style: normal;
     font-weight: 900;
@@ -926,7 +946,6 @@ $callout-types: (
   // A descendant selector would reach its children too and highlight the subtree.
   .ft-hl > .ft-name,
   .ft-hl > details > summary > .ft-name {
-    font-weight: 700;
     color: var(--filetree-highlight);
   }
 
