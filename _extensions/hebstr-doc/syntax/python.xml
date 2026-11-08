@@ -85,9 +85,13 @@
 	Upstream: jgm/skylighting, skylighting-core/xml/python.xml at commit
 	fcaf8658 (byte-identical to KDE frameworks/syntax-highlighting master at
 	data/syntax/python.xml, verified 2026-11-07).
-	Twelve changes, all marked "hebstr" below, each one moving a token onto a
+	Sixteen changes, all marked "hebstr" below, each one moving a token onto a
 	default style whose colour in theme-base.scss is already the value the
-	user's Positron configuration resolves for the matching TextMate scope:
+	user's Positron configuration resolves for the matching TextMate scope.
+	That value is read through the whole resolution rather than through the
+	user's own rules alone: a TextMate rule matches the token's deepest scope,
+	and whatever none of them reaches falls back to the base theme, so a scope
+	no user rule names is NOT white:
 	  - list "funcdefs" + itemData "Function Definition" (dsImport): def leaves
 	    the "defs" list, so it no longer shares a style with class, del, global,
 	    lambda and nonlocal. Positron holds entity.name.namespace.r and
@@ -115,6 +119,24 @@
 	    tests/r-syntax-tokens.sh asserts
 	  - the operator AnyChar of the "Normal" context gains "," and ".", both
 	    punctuation.separator in Positron and both untokenised upstream
+	  - itemData "Operator Keyword" moves from dsKeyword to dsOperator: and, is,
+	    not and or are keyword.operator.logical in Positron, which the user's own
+	    rule paints the operator cyan
+	  - list "inkw" + list "forkw" + the "ForClause" context: Positron splits in
+	    between keyword.operator.logical, where it compares, and
+	    keyword.control.flow, in a for header, and only the first is cyan. The
+	    forkw rule sits ahead of the flow rule so for pushes the context, which
+	    pops on the in it owns, on a colon, or at the end of the line
+	  - list "codetags" + itemData "Codetag" (dsKeyword) + its rule in the three
+	    comment contexts, ahead of IncludeRules ##Comments, which would hand
+	    TODO to dsAlert: Positron scopes the six codetags
+	    keyword.codetag.notation.python, so they take the keyword purple rather
+	    than the comment colour
+	  - itemData "Exceptions" moves from dsPreprocessor to dsBuiltIn: Positron
+	    reads an exception name in a call through meta.function-call support.type
+	    at the function blue, the form raise and a call give it. Bare, in an
+	    except clause, no user rule reaches it and the base theme paints it
+	    #F0C674, which no style of this theme carries
 	The four identifier and keyword rules sit ahead of DetectIdentifier on
 	purpose: that rule consumes every bare identifier, so a rule appended after
 	it never fires. The two added characters stay after IncludeRules Number so
@@ -150,12 +172,29 @@
 			<item>lambda</item>
 			<item>nonlocal</item>
 		</list>
+		<!-- hebstr -->
 		<list name="operators">
 			<item>and</item>
-			<item>in</item>
 			<item>is</item>
 			<item>not</item>
 			<item>or</item>
+		</list>
+		<!-- hebstr -->
+		<list name="inkw">
+			<item>in</item>
+		</list>
+		<!-- hebstr -->
+		<list name="forkw">
+			<item>for</item>
+		</list>
+		<!-- hebstr -->
+		<list name="codetags">
+			<item>BUG</item>
+			<item>FIXME</item>
+			<item>HACK</item>
+			<item>NOTE</item>
+			<item>TODO</item>
+			<item>XXX</item>
 		</list>
 		<list name="flow">
 			<item>assert</item>
@@ -511,8 +550,10 @@
 
 				<keyword attribute="Special Variable" String="specialvars" context="#stay"/>
 				<keyword attribute="Language Constant" String="langconstants" context="#stay"/><!-- hebstr -->
+				<keyword attribute="Flow Control Keyword" String="forkw" context="ForClause"/><!-- hebstr -->
 				<keyword attribute="Flow Control Keyword" String="flow" context="#stay"/>
 				<keyword attribute="Operator Keyword" String="operators" context="#stay"/>
+				<keyword attribute="Operator Keyword" String="inkw" context="#stay"/><!-- hebstr -->
 				<keyword attribute="Builtin Function" String="builtinfuncs" context="#stay"/>
 				<keyword attribute="Definition Keyword" String="defs" context="#stay"/>
 				<keyword attribute="Function Definition" String="funcdefs" context="DefName"/><!-- hebstr -->
@@ -542,6 +583,12 @@
 				<LineContinue attribute="Operator" context="MultiLineExpr"/>
 
 				<Int attribute="Error"/>
+			</context>
+			<!-- hebstr: the in of a for header, which Positron reads as flow and not as an operator -->
+			<context name="ForClause" attribute="Normal Text" lineEndContext="#pop">
+				<keyword attribute="Flow Control Keyword" String="inkw" context="#pop"/>
+				<DetectChar attribute="Normal Text" char=":" context="#pop"/>
+				<IncludeRules context="Normal"/>
 			</context>
 			<!-- hebstr: the name a def introduces, which upstream leaves untokenised -->
 			<context name="DefName" attribute="Normal Text" lineEndContext="#pop" fallthrough="1" fallthroughContext="#pop">
@@ -772,6 +819,7 @@
 
 			<context name="Hash comment" attribute="Comment" lineEndContext="#pop">
 				<DetectSpaces />
+				<keyword attribute="Codetag" String="codetags" context="#stay"/><!-- hebstr -->
 				<IncludeRules context="##Comments" />
 				<DetectIdentifier/>
 			</context>
@@ -779,6 +827,7 @@
 			<context name="Triple A-comment" attribute="Comment" lineEndContext="#stay" noIndentationBasedFolding="true">
 				<DetectSpaces/>
 				<StringDetect attribute="Comment" String="'''" context="#pop" endRegion="Triple A-region"/>
+				<keyword attribute="Codetag" String="codetags" context="#stay"/><!-- hebstr -->
 				<IncludeRules context="##Comments" />
 				<DetectIdentifier/>
 				<IncludeRules context="stringescape"/>
@@ -787,6 +836,7 @@
 			<context name="Triple Q-comment" attribute="Comment" lineEndContext="#stay" noIndentationBasedFolding="true">
 				<DetectSpaces/>
 				<StringDetect attribute="Comment" String="&quot;&quot;&quot;" context="#pop" endRegion="Triple Q-region"/>
+				<keyword attribute="Codetag" String="codetags" context="#stay"/><!-- hebstr -->
 				<IncludeRules context="##Comments" />
 				<DetectIdentifier/>
 				<IncludeRules context="stringescape"/>
@@ -2430,7 +2480,8 @@
 			<itemData name="Normal Text" defStyleNum="dsNormal" spellChecking="false"/>
 			<itemData name="Definition Keyword" defStyleNum="dsKeyword" spellChecking="false"/>
 			<itemData name="Operator" defStyleNum="dsOperator" spellChecking="false"/>
-			<itemData name="Operator Keyword" defStyleNum="dsKeyword" spellChecking="false"/>
+			<itemData name="Operator Keyword" defStyleNum="dsOperator" spellChecking="false"/><!-- hebstr: was dsKeyword -->
+			<itemData name="Codetag" defStyleNum="dsKeyword" spellChecking="false"/><!-- hebstr -->
 			<itemData name="Flow Control Keyword" defStyleNum="dsControlFlow" spellChecking="false"/>
 			<itemData name="Builtin Function" defStyleNum="dsBuiltIn" spellChecking="false"/>
 			<itemData name="Special Variable" defStyleNum="dsVariable" spellChecking="false"/>
@@ -2439,7 +2490,7 @@
 			<itemData name="Function Name" defStyleNum="dsFunction" spellChecking="false"/><!-- hebstr -->
 			<itemData name="Caps Constant" defStyleNum="dsRegionMarker" spellChecking="false"/><!-- hebstr -->
 			<itemData name="Extensions" defStyleNum="dsExtension" spellChecking="false"/>
-			<itemData name="Exceptions" defStyleNum="dsPreprocessor" spellChecking="false"/>
+			<itemData name="Exceptions" defStyleNum="dsBuiltIn" spellChecking="false"/><!-- hebstr: was dsPreprocessor -->
 			<itemData name="Overloaders" defStyleNum="dsFunction" spellChecking="false"/>
 			<itemData name="Import" defStyleNum="dsKeyword" spellChecking="false"/><!-- hebstr: was dsImport -->
 			<itemData name="Float" defStyleNum="dsFloat" spellChecking="false"/>

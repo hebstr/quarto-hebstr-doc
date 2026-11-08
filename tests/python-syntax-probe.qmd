@@ -20,5 +20,8 @@ class Frame(Path):
         label = f"a\n{sep}"
         if self.empty is True or sep is None:
             raise ValueError(label)
+        for row in sorted(label):
+            if row not in pattern and row is not None:
+                del row
         return pl.read_csv(pattern).head(MAX_ROWS)
 ```

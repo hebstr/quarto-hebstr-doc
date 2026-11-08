@@ -46,7 +46,7 @@ be rewritten, and the third-party table of `LICENSE.md` with it.
 
 Changes
 
-Twelve changes were made, each marked `hebstr` in the file on every line it
+Sixteen changes were made, each marked `hebstr` in the file on every line it
 touches. Every one of them moves a token onto a default style whose colour in
 `theme-base.scss` is already the value the maintainer's Positron configuration
 resolves for the matching TextMate scope, so none of them introduces a colour:
@@ -68,6 +68,16 @@ resolves for the matching TextMate scope, so none of them introduces a colour:
   - the `Decorator` item moves from `dsAttribute` to `dsFunction`
   - the operator `AnyChar` of the `Normal` context gains `,` and `.`, both
     untokenised upstream
+  - the `Operator Keyword` item moves from `dsKeyword` to `dsOperator`, `and`,
+    `is`, `not` and `or` being `keyword.operator.logical`
+  - the `inkw` and `forkw` lists and the `ForClause` context: `in` is an
+    operator where it compares and a flow keyword in a `for` header, and only
+    the first is cyan. The `forkw` rule sits ahead of the `flow` rule, and the
+    context pops on its own `in`, on a colon, or at the end of the line
+  - the `codetags` list, the `Codetag` item (`dsKeyword`) and its rule in the
+    three comment contexts, ahead of `IncludeRules context="##Comments"`, which
+    would otherwise hand `TODO` to `dsAlert`
+  - the `Exceptions` item moves from `dsPreprocessor` to `dsBuiltIn`
 
 Unlike `r.xml`, the language is **not** renamed and no Lua filter is needed:
 Quarto ships no Python definition of its own, so there is no last-wins collision
@@ -82,15 +92,19 @@ Refresh procedure
     gh api "repos/jgm/skylighting/contents/skylighting-core/xml/python.xml?ref=<commit>" \
       --jq '.content' | base64 -d > python-upstream.xml
 
-Re-apply the twelve changes above, update the commit recorded here, and run
+Re-apply the sixteen changes above, update the commit recorded here, and run
 `bash tests/python-syntax-tokens.sh`, which asserts each of them in a real
-render. Four things the re-application has to preserve, in that order of
+render. Six things the re-application has to preserve, in that order of
 fragility:
 
   1. the two identifier rules stay **ahead of** `DetectIdentifier` in the
      `Normal` context: that rule consumes every bare identifier, so a rule
      appended after it never fires
-  2. the two split lists stay split, upstream adding items to both over time
-  3. the two characters added to the operator `AnyChar` stay **after**
+  2. the `forkw` rule stays **ahead of** the `flow` rule, which holds `for` too
+     and would otherwise match first and never push `ForClause`
+  3. the `codetags` rule stays **ahead of** `IncludeRules context="##Comments"`
+     in each of the three comment contexts
+  4. the three split lists stay split, upstream adding items to them over time
+  5. the two characters added to the operator `AnyChar` stay **after**
      `IncludeRules context="Number"`, so a float keeps its own token
-  4. the six `itemData` mappings
+  6. the nine `itemData` mappings

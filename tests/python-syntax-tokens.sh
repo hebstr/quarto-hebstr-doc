@@ -86,8 +86,8 @@ assert() {
 
 assert yes '```python' 'the probe still holds a markdown fence rather than an executable chunk' "$staged"
 
-# The nine conditions pandoc's own definition cannot satisfy: a Quarto that
-# started shipping python.xml would redden all nine at once.
+# The fourteen conditions pandoc's own definition cannot satisfy: a Quarto that
+# started shipping python.xml would redden all fourteen at once.
 assert_token im 'def' 'def leaves the keyword style it shared with class and lambda'
 assert_token kw 'import' 'import reads as a keyword rather than as an import token'
 assert_token cn 'True' 'a language constant leaves the style it shared with self'
@@ -97,9 +97,16 @@ assert_token fu '@cache' 'a decorator carries the function style'
 assert_token op ',' 'the argument separator is tokenised'
 assert_token op '.' 'the attribute separator is tokenised'
 assert_token re 'MAX_ROWS' 'an ALL_CAPS name is tokenised'
+assert_token op 'is' 'a logical operator leaves the keyword style'
+assert_token op 'in' 'in reads as an operator where it compares'
+assert_token cf 'in' 'in keeps the flow style in a for header'
+assert_token kw 'TODO' 'a codetag leaves the comment colour for the keyword style'
+assert_token bu 'ValueError' 'an exception name carries the builtin style'
 
 assert_token va 'self' 'self keeps the variable style the constants left'
 assert no 'class="im">import' 'the import keyword no longer carries the namespace gold'
+assert no 'class="kw">is' 'a logical operator no longer reads as a keyword'
+assert no 'class="pp">ValueError' 'an exception name no longer carries the preprocessor style'
 
 # The three classes the theme's own groupings exist to colour, each emitted by
 # the upstream base rather than by a change of this fork.
@@ -118,7 +125,7 @@ if [ "$failures" -ne 0 ]; then
       "$failures" "$checks" "$source_failures" >&2
     printf 'longer carries the authoring form the other conditions rest on.\n' >&2
   else
-    printf '\n%s of %s render assertions failed. Read each FAIL line: the nine\n' \
+    printf '\n%s of %s render assertions failed. Read each FAIL line: the fourteen\n' \
       "$render_failures" "$render_checks" >&2
     printf "fork conditions wrong at once means Quarto now ships a python.xml of\n" >&2
     printf 'its own and won the last-wins list, where one or two mean a rule of\n' >&2

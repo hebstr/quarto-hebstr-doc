@@ -16,6 +16,11 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - feat: Lead a code block's name with a larger icon and a smaller name, on a code window's title bar and on a folded header alike, so the icon carries the recognition and the name no longer competes with it.
   Every code block in a document changes size this way, the title bar's own height excepted.
 
+### Bug Fixes
+
+- fix: Read Python's logical operators as operators, its codetags as keywords and its exception names as builtins, so `and`, `is`, `not`, `or` and a comparing `in` take the operator colour, a `TODO` in a comment stands out of the comment, and `raise ValueError(...)` reads like any other call.
+  The `in` of a `for` header keeps the keyword colour, which is the one place the word is not an operator.
+
 ## 1.11.0 (2026-11-07)
 
 ### New Features
