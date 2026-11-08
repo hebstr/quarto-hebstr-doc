@@ -27,6 +27,10 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   It renders at 0.9rem, below the body text, the underline and the indentation being what mark it as a heading.
 - fix: Apply the syntax palette to inline highlighted code, so a token written as an inline span takes the theme's colour rather than Quarto's, and a bracket there loses the near-white tile Quarto paints behind it.
 - fix: Fall back to the closed folder icon when a dynamic file tree cannot read its open variant, so an expanded folder keeps an icon instead of losing it.
+- fix: Fit a callout's icon to its glyph, so the three type icons whose glyph is wider than the box it was given stop overhanging it, and the icon no longer grows with the document's line spacing.
+- fix: Strip the heading ladder's underline and indentation from a heading placed in the margin column, so it reads as a heading of that column instead of carrying a body-width rule into a narrow one.
+- fix: Keep a code window's line numbers out of the code's accessible text, so a screen reader announces the line rather than a bare number before it, as the callout icons and the scheme toggle already do.
+- fix: Name the file tree's list structure explicitly, so the hierarchy survives in a browser that drops list semantics from an unmarked list, the indentation being the only other thing that carries it.
 
 ## 1.11.0 (2026-11-07)
 
