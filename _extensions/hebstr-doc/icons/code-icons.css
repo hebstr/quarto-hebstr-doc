@@ -1,11 +1,13 @@
-:is(.code-with-filename.code-window-auto, body div[data-code-filename])
-  :is(.code-with-filename-file pre, details > summary)::before {
-  content: "";
-  background-image: linear-gradient(currentcolor, currentcolor);
-  mask-image: url("code-slash.svg");
-  mask-repeat: no-repeat;
-  mask-position: center;
-  mask-size: contain;
+@supports (mask-image: none) {
+  :is(.code-with-filename.code-window-auto, body div[data-code-filename])
+    :is(.code-with-filename-file pre, details > summary)::before {
+    content: "";
+    background-image: linear-gradient(currentcolor, currentcolor);
+    mask-image: url("code-slash.svg");
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+  }
 }
 
 :is(.code-with-filename.code-window-auto, body div[data-code-filename]):has(

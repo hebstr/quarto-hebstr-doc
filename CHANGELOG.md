@@ -31,6 +31,8 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - fix: Strip the heading ladder's underline and indentation from a heading placed in the margin column, so it reads as a heading of that column instead of carrying a body-width rule into a narrow one.
 - fix: Keep a code window's line numbers out of the code's accessible text, so a screen reader announces the line rather than a bare number before it, as the callout icons and the scheme toggle already do.
 - fix: Name the file tree's list structure explicitly, so the hierarchy survives in a browser that drops list semantics from an unmarked list, the indentation being the only other thing that carries it.
+- fix: Drop the fallback `</>` glyph on a browser that cannot mask an image, so a code window's title bar and a folded header read as they did before the icons landed instead of carrying a solid coloured square where the glyph should be.
+  The twenty keyed language icons are unaffected and still show there.
 
 ## 1.11.0 (2026-11-07)
 
