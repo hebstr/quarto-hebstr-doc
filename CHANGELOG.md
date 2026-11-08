@@ -23,6 +23,10 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - fix: Colour a bare builtin type or exception name, `class`, `lambda`, the name a class definition introduces and a string escape, each with the value a Python editor gives it, so a snippet in a document reads as it does in the editor it was written in.
   This adds four colours to the code palette, three of them carried by token classes no other language of the theme uses.
 - fix: Give a Python bracket, and the braces of an f-string placeholder, the gold an editor paints a bracket pair, which R's brackets already carry, and leave a return arrow the colour of the body text rather than that of an operator.
+- fix: Bring `h6` into the heading ladder, so a sixth-level heading takes the theme's underline, its indentation and its normal weight instead of reading as emphasised body text at the fifth level's size.
+  It renders at 0.9rem, below the body text, the underline and the indentation being what mark it as a heading.
+- fix: Apply the syntax palette to inline highlighted code, so a token written as an inline span takes the theme's colour rather than Quarto's, and a bracket there loses the near-white tile Quarto paints behind it.
+- fix: Fall back to the closed folder icon when a dynamic file tree cannot read its open variant, so an expanded folder keeps an icon instead of losing it.
 
 ## 1.11.0 (2026-11-07)
 
