@@ -85,18 +85,20 @@
 	Upstream: jgm/skylighting, skylighting-core/xml/python.xml at commit
 	fcaf8658 (byte-identical to KDE frameworks/syntax-highlighting master at
 	data/syntax/python.xml, verified 2026-11-07).
-	Twenty-three changes, all marked "hebstr" below. Each moves a token onto the
+	Twenty-four changes, all marked "hebstr" below. Each moves a token onto the
 	default style whose colour in theme-base.scss is the value the user's
 	Positron configuration resolves for the matching TextMate scope.
 	That value is read through the whole resolution rather than through the
-	user's own rules alone: a TextMate rule matches the token's deepest scope,
-	and whatever none of them reaches falls back to the base theme, so a scope
-	no user rule names is NOT white.
+	user's own rules alone: a rule matches the token's deepest scope, and a
+	scope that matches none inherits the style of the scope beneath it in the
+	stack, so an unmatched token is the body colour of source.python rather
+	than the base theme's own foreground.
+	Two colours come from outside the TextMate layer entirely: a bracket takes
+	its pair's nesting colour, gold at level 1, over whatever its token says.
 	Up to 2026-11-07 a token whose editor colour was absent from the theme was
 	left diverging; since 2026-11-08 the theme carries that colour instead, on
-	a default style no language of this repository emits, which is why five of
-	the changes below land on dsPreprocessor, dsAnnotation, dsCommentVar,
-	dsInformation and dsDocumentation:
+	a default style no language of this repository emits, which is why three of
+	the changes below land on dsPreprocessor, dsAnnotation and dsInformation:
 	  - list "funcdefs" + itemData "Function Definition" (dsImport): def leaves
 	    the "defs" list, so it no longer shares a style with class, del, global,
 	    lambda and nonlocal. Positron holds entity.name.namespace.r and
@@ -157,12 +159,17 @@
 	  - context "ClassName" + itemData "Class Name" (dsInformation): the name a
 	    class introduces, which the Function Name rule would otherwise paint
 	    like a call, where Positron gives entity.name.type.class #FFCB6B
-	  - itemData "String Substitution" moves from dsSpecialChar to dsCommentVar:
-	    the braces of an f-string placeholder are constant.character in Positron
-	    at #DE935F, and dsSpecialChar is R's comma, which must stay cyan
-	  - a Detect2Chars on "->" + itemData "Body Text" (dsDocumentation): a
-	    return annotation is punctuation.separator.annotation.result, which no
-	    user rule reaches, so the editor leaves it at the base theme's #C5C8C6
+	  - itemData "Bracket" (dsRegionMarker) on the six bracket characters, the
+	    three that open a context and the three that close one: the editor
+	    paints a bracket by its pair's nesting depth rather than by any scope,
+	    level 1 being gold, and dsRegionMarker is the gold r.xml already gives
+	    R's brackets for the same reason
+	  - itemData "String Substitution" moves from dsSpecialChar to
+	    dsRegionMarker: an f-string placeholder's braces are bracket-paired too,
+	    and dsSpecialChar is R's comma, which must stay cyan
+	  - a Detect2Chars on "->" writing Normal Text, ahead of the operator
+	    AnyChar that would otherwise cyan it: a return annotation reaches no
+	    rule of the user's and inherits the body colour from source.python
 	The identifier and keyword rules sit ahead of DetectIdentifier on purpose:
 	that rule consumes every bare identifier, so a rule appended after it never
 	fires. The three keyword rules moved after Function Name sit between the
@@ -599,9 +606,9 @@
 			<context name="Normal" attribute="Normal Text" lineEndContext="#stay">
 				<DetectSpaces attribute="Normal Text"/>
 
-				<DetectChar attribute="Normal Text" char="(" context="Tuple" beginRegion="Tuple"/>
-				<DetectChar attribute="Normal Text" char="[" context="List" beginRegion="List"/>
-				<DetectChar attribute="Normal Text" char="{" context="Dictionary" beginRegion="Dictionary"/>
+				<DetectChar attribute="Bracket" char="(" context="Tuple" beginRegion="Tuple"/><!-- hebstr -->
+				<DetectChar attribute="Bracket" char="[" context="List" beginRegion="List"/><!-- hebstr -->
+				<DetectChar attribute="Bracket" char="{" context="Dictionary" beginRegion="Dictionary"/><!-- hebstr -->
 
 				<DetectChar attribute="Comment" char="#" context="Hash comment"/>
 
@@ -638,7 +645,7 @@
 				<DetectIdentifier attribute="Normal Text"/>
 
 				<RegExpr attribute="Decorator" String="@[_a-zA-Z[:^ascii:]][\._a-zA-Z0-9[:^ascii:]]*" firstNonSpace="true"/>
-				<Detect2Chars attribute="Body Text" char="-" char1="&gt;" context="#stay"/><!-- hebstr: a return annotation, which Positron leaves at the body grey -->
+				<Detect2Chars attribute="Normal Text" char="-" char1="&gt;" context="#stay"/><!-- hebstr: a return annotation, which the editor leaves at the body colour -->
 				<Detect2Chars attribute="Operator" char=":" char1="=" context="#stay"/>
 				<AnyChar attribute="Operator" String="+*/%|=;&lt;&gt;!^&amp;~-@,." context="#stay"/><!-- hebstr: , and . -->
 
@@ -857,21 +864,21 @@
 
 			<context name="Dictionary" attribute="Normal Text" lineEndContext="#stay" noIndentationBasedFolding="true">
 				<DetectSpaces/>
-				<DetectChar attribute="Normal Text" char="}" context="#pop" endRegion="Dictionary"/>
+				<DetectChar attribute="Bracket" char="}" context="#pop" endRegion="Dictionary"/><!-- hebstr -->
 				<IncludeRules context="StringVariants" />
 				<IncludeRules context="Normal" />
 			</context>
 
 			<context name="List" attribute="Normal Text" lineEndContext="#stay" noIndentationBasedFolding="true">
 				<DetectSpaces/>
-				<DetectChar attribute="Normal Text" char="]" context="#pop" endRegion="List"/>
+				<DetectChar attribute="Bracket" char="]" context="#pop" endRegion="List"/><!-- hebstr -->
 				<IncludeRules context="StringVariants" />
 				<IncludeRules context="Normal" />
 			</context>
 
 			<context name="Tuple" attribute="Normal Text" lineEndContext="#stay" noIndentationBasedFolding="true">
 				<DetectSpaces/>
-				<DetectChar attribute="Normal Text" char=")" context="#pop" endRegion="Tuple"/>
+				<DetectChar attribute="Bracket" char=")" context="#pop" endRegion="Tuple"/><!-- hebstr -->
 				<IncludeRules context="StringVariants" />
 				<IncludeRules context="Normal" />
 			</context>
@@ -2552,7 +2559,7 @@
 			<itemData name="Storage Keyword" defStyleNum="dsAnnotation" spellChecking="false"/><!-- hebstr -->
 			<itemData name="Builtin Type" defStyleNum="dsPreprocessor" spellChecking="false"/><!-- hebstr -->
 			<itemData name="Class Name" defStyleNum="dsInformation" spellChecking="false"/><!-- hebstr -->
-			<itemData name="Body Text" defStyleNum="dsDocumentation" spellChecking="false"/><!-- hebstr -->
+			<itemData name="Bracket" defStyleNum="dsRegionMarker" spellChecking="false"/><!-- hebstr -->
 			<itemData name="Flow Control Keyword" defStyleNum="dsControlFlow" spellChecking="false"/>
 			<itemData name="Builtin Function" defStyleNum="dsBuiltIn" spellChecking="false"/>
 			<itemData name="Special Variable" defStyleNum="dsVariable" spellChecking="false"/>
@@ -2595,7 +2602,7 @@
 
 			<!-- Char -->
 			<itemData name="String Char" defStyleNum="dsChar" spellChecking="false"/>
-			<itemData name="String Substitution" defStyleNum="dsCommentVar" spellChecking="false"/><!-- hebstr: was dsSpecialChar -->
+			<itemData name="String Substitution" defStyleNum="dsRegionMarker" spellChecking="false"/><!-- hebstr: was dsSpecialChar -->
 			<!-- Other -->
 			<itemData name="Decorator" defStyleNum="dsFunction" spellChecking="false"/><!-- hebstr: was dsAttribute -->
 			<itemData name="Error" defStyleNum="dsError"/>

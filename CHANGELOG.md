@@ -20,8 +20,9 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 - fix: Read Python's logical operators as operators, its codetags as keywords and its exception names as builtins, so `and`, `is`, `not`, `or` and a comparing `in` take the operator colour, a `TODO` in a comment stands out of the comment, and `raise ValueError(...)` reads like any other call.
   The `in` of a `for` header keeps the keyword colour, which is the one place the word is not an operator.
-- fix: Colour a bare builtin type or exception name, `class`, `lambda`, the name a class definition introduces, the braces of an f-string placeholder and a return arrow, each with the value a Python editor gives it, so a snippet in a document reads as it does in the editor it was written in.
-  This adds five colours to the code palette, carried by token classes no other language of the theme uses.
+- fix: Colour a bare builtin type or exception name, `class`, `lambda`, the name a class definition introduces and a string escape, each with the value a Python editor gives it, so a snippet in a document reads as it does in the editor it was written in.
+  This adds four colours to the code palette, three of them carried by token classes no other language of the theme uses.
+- fix: Give a Python bracket, and the braces of an f-string placeholder, the gold an editor paints a bracket pair, which R's brackets already carry, and leave a return arrow the colour of the body text rather than that of an operator.
 
 ## 1.11.0 (2026-11-07)
 

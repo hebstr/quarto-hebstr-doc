@@ -86,8 +86,8 @@ assert() {
 
 assert yes '```python' 'the probe still holds a markdown fence rather than an executable chunk' "$staged"
 
-# The twenty conditions pandoc's own definition cannot satisfy: a Quarto that
-# started shipping python.xml would redden all twenty at once.
+# The twenty-one conditions pandoc's own definition cannot satisfy: a Quarto that
+# started shipping python.xml would redden all twenty-one at once.
 assert_token im 'def' 'def leaves the keyword style it shared with class and lambda'
 assert_token kw 'import' 'import reads as a keyword rather than as an import token'
 assert_token cn 'True' 'a language constant leaves the style it shared with self'
@@ -106,8 +106,8 @@ assert_token pp 'str' 'a builtin type read bare carries the editor type colour'
 assert_token an 'class' 'class leaves the keyword style for the editor storage colour'
 assert_token an 'lambda' 'lambda leaves the keyword style with it'
 assert_token 'in' 'Frame' 'the name a class introduces is tokenised apart from a call'
-assert_token cv '{' 'an f-string placeholder leaves the operator cyan'
-assert_token 'do' '-&gt;' 'a return annotation leaves the operator cyan for the body grey'
+assert_token re '{' 'an f-string placeholder takes the bracket gold'
+assert_token re '(' 'a bracket takes the gold the editor paints its pair'
 
 assert_token va 'self' 'self keeps the variable style the constants left'
 assert_token bu 'len' 'a builtin function read bare keeps the builtin style'
@@ -117,6 +117,7 @@ assert no 'class="kw">is' 'a logical operator no longer reads as a keyword'
 assert no 'class="pp">ValueError' 'an exception name in a call no longer reads bare'
 assert no 'class="kw">class' 'class no longer shares the keyword style with del'
 assert no 'class="sc">{' 'an f-string placeholder no longer shares R comma style'
+assert no 'class="op">-&gt;' 'a return annotation is left untokenised rather than read as an operator'
 
 # The three classes the theme's own groupings exist to colour, each emitted by
 # the upstream base rather than by a change of this fork.
@@ -135,7 +136,7 @@ if [ "$failures" -ne 0 ]; then
       "$failures" "$checks" "$source_failures" >&2
     printf 'longer carries the authoring form the other conditions rest on.\n' >&2
   else
-    printf '\n%s of %s render assertions failed. Read each FAIL line: the twenty\n' \
+    printf '\n%s of %s render assertions failed. Read each FAIL line: the twenty-one\n' \
       "$render_failures" "$render_checks" >&2
     printf "fork conditions wrong at once means Quarto now ships a python.xml of\n" >&2
     printf 'its own and won the last-wins list, where one or two mean a rule of\n' >&2

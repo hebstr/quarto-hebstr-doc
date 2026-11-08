@@ -46,12 +46,14 @@ be rewritten, and the third-party table of `LICENSE.md` with it.
 
 Changes
 
-Twenty-three changes were made, each marked `hebstr` in the file on every line
+Twenty-four changes were made, each marked `hebstr` in the file on every line
 it touches. Every one of them moves a token onto the default style whose colour
 in `theme-base.scss` is the value the maintainer's Positron configuration
-resolves for the matching TextMate scope. The first sixteen introduced no
-colour; the last seven, of 2026-11-08, land on five styles no other language of
-the theme emits, which `theme-base.scss` paints with the editor's own values:
+resolves for the matching TextMate scope, or, for a bracket, the colour the
+editor paints its pair. The first sixteen introduced no colour; the last eight,
+of 2026-11-08, land on three styles no other language of the theme emits, which
+`theme-base.scss` paints with the editor's own values, and on the bracket gold
+`r.xml` already uses:
 
   - the `funcdefs` list and the `Function Definition` item (`dsImport`): `def`
     leaves the `defs` list and stops sharing a style with `class`, `del`,
@@ -89,8 +91,13 @@ the theme emits, which `theme-base.scss` paints with the editor's own values:
     (`dsAnnotation`): `class` and `lambda` leave `defs` by rule order
   - the `ClassName` context and the `Class Name` item (`dsInformation`): the
     name a class introduces, which upstream leaves to the call rule
-  - the `String Substitution` item moves from `dsSpecialChar` to `dsCommentVar`
-  - a `Detect2Chars` on `->` and the `Body Text` item (`dsDocumentation`)
+  - the `Bracket` item (`dsRegionMarker`) on the six bracket characters, the
+    editor painting a bracket by its pair's nesting depth rather than by any
+    scope, and `r.xml` already giving R's brackets that same gold
+  - the `String Substitution` item moves from `dsSpecialChar` to
+    `dsRegionMarker`, an f-string placeholder's braces being bracket-paired too
+  - a `Detect2Chars` on `->` writing `Normal Text`, ahead of the operator
+    `AnyChar` that would otherwise colour it
 
 Unlike `r.xml`, the language is **not** renamed and no Lua filter is needed:
 Quarto ships no Python definition of its own, so there is no last-wins collision
@@ -105,7 +112,7 @@ Refresh procedure
     gh api "repos/jgm/skylighting/contents/skylighting-core/xml/python.xml?ref=<commit>" \
       --jq '.content' | base64 -d > python-upstream.xml
 
-Re-apply the twenty-three changes above, update the commit recorded here, and
+Re-apply the twenty-four changes above, update the commit recorded here, and
 run `bash tests/python-syntax-tokens.sh`, which asserts each of them in a real
 render. Seven things the re-application has to preserve, in that order of
 fragility:
@@ -128,10 +135,11 @@ fragility:
      `->` `Detect2Chars` stays **before** that `AnyChar`
   7. the fourteen `itemData` mappings
 
-Five of those mappings are borrowings, and `theme-base.scss` paints them for
-Python: `dsPreprocessor`, `dsAnnotation`, `dsCommentVar`, `dsInformation` and
-`dsDocumentation` carry the editor's `#F0C674`, `#B294BB`, `#DE935F`, `#FFCB6B`
-and `#C5C8C6`. No other language the theme ships emits any of the five
-(measured 2026-11-08 over R, bash, YAML, SCSS, Lua, SQL and JSON), so a C
-preprocessor directive or a documentation comment in a future document would
-take a Python colour.
+Three of those mappings are borrowings, and `theme-base.scss` paints them for
+Python: `dsPreprocessor`, `dsAnnotation` and `dsInformation` carry the editor's
+`#F0C674`, `#B294BB` and `#FFCB6B`. No other language the theme ships emits any
+of the three (measured 2026-11-08 over R, bash, YAML, SCSS, Lua, SQL and JSON),
+so a C preprocessor directive in a future document would take a Python colour.
+`dsRegionMarker` is not a borrowing of this fork's making: `r.xml` already
+holds it for R's brackets, and Python's brackets are the same thing seen in a
+second language.

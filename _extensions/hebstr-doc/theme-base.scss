@@ -429,10 +429,13 @@ code span {
   .fl,
   .dt,
   .bn,
-  .ch,
   .er,
   .wa {
     color: #ff7869;
+  }
+
+  .ch {
+    color: #f77669;
   }
 
   .cn {
@@ -480,14 +483,11 @@ code span {
   }
 
   .co,
-  .al {
+  .do,
+  .al,
+  .cv {
     font-style: normal !important;
     color: var(--code-comment-color);
-  }
-
-  .do {
-    font-style: normal !important;
-    color: #c5c8c6;
   }
 
   .at {
@@ -495,15 +495,13 @@ code span {
   }
 
   .pp {
+    font-style: normal !important;
     color: #f0c674;
   }
 
   .an {
+    font-style: normal !important;
     color: #b294bb;
-  }
-
-  .cv {
-    color: #de935f;
   }
 
   .in {
