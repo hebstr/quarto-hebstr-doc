@@ -606,7 +606,7 @@ end
 
 local function render_html(nodes, opts, buffer, level)
   level = level or 1
-  buffer[#buffer + 1] = "<ul>"
+  buffer[#buffer + 1] = '<ul role="list">'
   for _, node in ipairs(nodes) do
     local key = icon_key(node.name, node.dir)
     local classes = { node.dir and "ft-dir" or "ft-file" }
@@ -652,7 +652,7 @@ local function render_html(nodes, opts, buffer, level)
       head = head .. '<span class="ft-desc">' .. inlines_to_html(desc) .. "</span>"
     end
 
-    buffer[#buffer + 1] = '<li class="' .. table.concat(classes, " ") .. '"' .. style .. ">"
+    buffer[#buffer + 1] = '<li class="' .. table.concat(classes, " ") .. '" role="listitem"' .. style .. ">"
     if toggled then
       -- `depth` is the level open on load ; deeper folders stay in the DOM but
       -- collapsed, and `<details>` carries the toggle without a script.
@@ -663,7 +663,7 @@ local function render_html(nodes, opts, buffer, level)
     end
 
     if node.truncated then
-      buffer[#buffer + 1] = '<ul><li class="ft-more">'
+      buffer[#buffer + 1] = '<ul role="list"><li class="ft-more" role="listitem">'
         .. '<span class="ft-name" aria-hidden="true">…</span>'
         .. '<span class="ft-sr-only">further entries not shown</span></li></ul>'
     elseif node.children and #node.children > 0 then
