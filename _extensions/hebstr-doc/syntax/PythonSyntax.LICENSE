@@ -46,10 +46,12 @@ be rewritten, and the third-party table of `LICENSE.md` with it.
 
 Changes
 
-Sixteen changes were made, each marked `hebstr` in the file on every line it
-touches. Every one of them moves a token onto a default style whose colour in
-`theme-base.scss` is already the value the maintainer's Positron configuration
-resolves for the matching TextMate scope, so none of them introduces a colour:
+Twenty-three changes were made, each marked `hebstr` in the file on every line
+it touches. Every one of them moves a token onto the default style whose colour
+in `theme-base.scss` is the value the maintainer's Positron configuration
+resolves for the matching TextMate scope. The first sixteen introduced no
+colour; the last seven, of 2026-11-08, land on five styles no other language of
+the theme emits, which `theme-base.scss` paints with the editor's own values:
 
   - the `funcdefs` list and the `Function Definition` item (`dsImport`): `def`
     leaves the `defs` list and stops sharing a style with `class`, `del`,
@@ -77,7 +79,18 @@ resolves for the matching TextMate scope, so none of them introduces a colour:
   - the `codetags` list, the `Codetag` item (`dsKeyword`) and its rule in the
     three comment contexts, ahead of `IncludeRules context="##Comments"`, which
     would otherwise hand `TODO` to `dsAlert`
-  - the `Exceptions` item moves from `dsPreprocessor` to `dsBuiltIn`
+  - the `exceptions` and `builtinfuncs` keyword rules move after the
+    `Function Name` `RegExpr`, so a called name keeps the function style and
+    only the bare form reaches its own rule
+  - the `builtintypes` list and the `Builtin Type` item (`dsPreprocessor`),
+    placed with them: it shadows the same nineteen names inside `builtinfuncs`
+    by rule order, leaving upstream's list byte-identical
+  - the `classkw` and `lambdakw` lists and the `Storage Keyword` item
+    (`dsAnnotation`): `class` and `lambda` leave `defs` by rule order
+  - the `ClassName` context and the `Class Name` item (`dsInformation`): the
+    name a class introduces, which upstream leaves to the call rule
+  - the `String Substitution` item moves from `dsSpecialChar` to `dsCommentVar`
+  - a `Detect2Chars` on `->` and the `Body Text` item (`dsDocumentation`)
 
 Unlike `r.xml`, the language is **not** renamed and no Lua filter is needed:
 Quarto ships no Python definition of its own, so there is no last-wins collision
@@ -92,19 +105,33 @@ Refresh procedure
     gh api "repos/jgm/skylighting/contents/skylighting-core/xml/python.xml?ref=<commit>" \
       --jq '.content' | base64 -d > python-upstream.xml
 
-Re-apply the sixteen changes above, update the commit recorded here, and run
-`bash tests/python-syntax-tokens.sh`, which asserts each of them in a real
-render. Six things the re-application has to preserve, in that order of
+Re-apply the twenty-three changes above, update the commit recorded here, and
+run `bash tests/python-syntax-tokens.sh`, which asserts each of them in a real
+render. Seven things the re-application has to preserve, in that order of
 fragility:
 
   1. the two identifier rules stay **ahead of** `DetectIdentifier` in the
      `Normal` context: that rule consumes every bare identifier, so a rule
      appended after it never fires
-  2. the `forkw` rule stays **ahead of** the `flow` rule, which holds `for` too
+  2. the `builtintypes`, `exceptions` and `builtinfuncs` keyword rules stay
+     **after** the `Function Name` `RegExpr` and ahead of `DetectIdentifier`,
+     and `builtintypes` stays ahead of `builtinfuncs`, which still holds the
+     same nineteen names
+  3. the `forkw` rule stays **ahead of** the `flow` rule, which holds `for` too
      and would otherwise match first and never push `ForClause`
-  3. the `codetags` rule stays **ahead of** `IncludeRules context="##Comments"`
+  4. the `classkw` and `lambdakw` rules stay **ahead of** the `defs` rule,
+     which still holds both words
+  5. the `codetags` rule stays **ahead of** `IncludeRules context="##Comments"`
      in each of the three comment contexts
-  4. the three split lists stay split, upstream adding items to them over time
-  5. the two characters added to the operator `AnyChar` stay **after**
-     `IncludeRules context="Number"`, so a float keeps its own token
-  6. the nine `itemData` mappings
+  6. the two characters added to the operator `AnyChar` stay **after**
+     `IncludeRules context="Number"`, so a float keeps its own token, and the
+     `->` `Detect2Chars` stays **before** that `AnyChar`
+  7. the fourteen `itemData` mappings
+
+Five of those mappings are borrowings, and `theme-base.scss` paints them for
+Python: `dsPreprocessor`, `dsAnnotation`, `dsCommentVar`, `dsInformation` and
+`dsDocumentation` carry the editor's `#F0C674`, `#B294BB`, `#DE935F`, `#FFCB6B`
+and `#C5C8C6`. No other language the theme ships emits any of the five
+(measured 2026-11-08 over R, bash, YAML, SCSS, Lua, SQL and JSON), so a C
+preprocessor directive or a documentation comment in a future document would
+take a Python colour.

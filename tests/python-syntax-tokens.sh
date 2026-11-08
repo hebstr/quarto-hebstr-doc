@@ -86,8 +86,8 @@ assert() {
 
 assert yes '```python' 'the probe still holds a markdown fence rather than an executable chunk' "$staged"
 
-# The fourteen conditions pandoc's own definition cannot satisfy: a Quarto that
-# started shipping python.xml would redden all fourteen at once.
+# The twenty conditions pandoc's own definition cannot satisfy: a Quarto that
+# started shipping python.xml would redden all twenty at once.
 assert_token im 'def' 'def leaves the keyword style it shared with class and lambda'
 assert_token kw 'import' 'import reads as a keyword rather than as an import token'
 assert_token cn 'True' 'a language constant leaves the style it shared with self'
@@ -101,12 +101,22 @@ assert_token op 'is' 'a logical operator leaves the keyword style'
 assert_token op 'in' 'in reads as an operator where it compares'
 assert_token cf 'in' 'in keeps the flow style in a for header'
 assert_token kw 'TODO' 'a codetag leaves the comment colour for the keyword style'
-assert_token bu 'ValueError' 'an exception name carries the builtin style'
+assert_token fu 'ValueError' 'an exception name in a call carries the function style'
+assert_token pp 'str' 'a builtin type read bare carries the editor type colour'
+assert_token an 'class' 'class leaves the keyword style for the editor storage colour'
+assert_token an 'lambda' 'lambda leaves the keyword style with it'
+assert_token 'in' 'Frame' 'the name a class introduces is tokenised apart from a call'
+assert_token cv '{' 'an f-string placeholder leaves the operator cyan'
+assert_token 'do' '-&gt;' 'a return annotation leaves the operator cyan for the body grey'
 
 assert_token va 'self' 'self keeps the variable style the constants left'
+assert_token bu 'len' 'a builtin function read bare keeps the builtin style'
+assert_token pp 'KeyError' 'an exception name read bare takes the editor type colour'
 assert no 'class="im">import' 'the import keyword no longer carries the namespace gold'
 assert no 'class="kw">is' 'a logical operator no longer reads as a keyword'
-assert no 'class="pp">ValueError' 'an exception name no longer carries the preprocessor style'
+assert no 'class="pp">ValueError' 'an exception name in a call no longer reads bare'
+assert no 'class="kw">class' 'class no longer shares the keyword style with del'
+assert no 'class="sc">{' 'an f-string placeholder no longer shares R comma style'
 
 # The three classes the theme's own groupings exist to colour, each emitted by
 # the upstream base rather than by a change of this fork.
@@ -125,7 +135,7 @@ if [ "$failures" -ne 0 ]; then
       "$failures" "$checks" "$source_failures" >&2
     printf 'longer carries the authoring form the other conditions rest on.\n' >&2
   else
-    printf '\n%s of %s render assertions failed. Read each FAIL line: the fourteen\n' \
+    printf '\n%s of %s render assertions failed. Read each FAIL line: the twenty\n' \
       "$render_failures" "$render_checks" >&2
     printf "fork conditions wrong at once means Quarto now ships a python.xml of\n" >&2
     printf 'its own and won the last-wins list, where one or two mean a rule of\n' >&2

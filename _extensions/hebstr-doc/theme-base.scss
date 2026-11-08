@@ -480,18 +480,35 @@ code span {
   }
 
   .co,
-  .do,
-  .al,
-  .an,
-  .cv,
-  .in {
+  .al {
     font-style: normal !important;
     color: var(--code-comment-color);
   }
 
-  .at,
-  .pp {
+  .do {
+    font-style: normal !important;
+    color: #c5c8c6;
+  }
+
+  .at {
     color: var(--code-foreground-color);
+  }
+
+  .pp {
+    color: #f0c674;
+  }
+
+  .an {
+    color: #b294bb;
+  }
+
+  .cv {
+    color: #de935f;
+  }
+
+  .in {
+    font-style: normal !important;
+    color: #ffcb6b;
   }
 }
 

@@ -85,13 +85,18 @@
 	Upstream: jgm/skylighting, skylighting-core/xml/python.xml at commit
 	fcaf8658 (byte-identical to KDE frameworks/syntax-highlighting master at
 	data/syntax/python.xml, verified 2026-11-07).
-	Sixteen changes, all marked "hebstr" below, each one moving a token onto a
-	default style whose colour in theme-base.scss is already the value the
-	user's Positron configuration resolves for the matching TextMate scope.
+	Twenty-three changes, all marked "hebstr" below. Each moves a token onto the
+	default style whose colour in theme-base.scss is the value the user's
+	Positron configuration resolves for the matching TextMate scope.
 	That value is read through the whole resolution rather than through the
 	user's own rules alone: a TextMate rule matches the token's deepest scope,
 	and whatever none of them reaches falls back to the base theme, so a scope
-	no user rule names is NOT white:
+	no user rule names is NOT white.
+	Up to 2026-11-07 a token whose editor colour was absent from the theme was
+	left diverging; since 2026-11-08 the theme carries that colour instead, on
+	a default style no language of this repository emits, which is why five of
+	the changes below land on dsPreprocessor, dsAnnotation, dsCommentVar,
+	dsInformation and dsDocumentation:
 	  - list "funcdefs" + itemData "Function Definition" (dsImport): def leaves
 	    the "defs" list, so it no longer shares a style with class, del, global,
 	    lambda and nonlocal. Positron holds entity.name.namespace.r and
@@ -132,15 +137,37 @@
 	    TODO to dsAlert: Positron scopes the six codetags
 	    keyword.codetag.notation.python, so they take the keyword purple rather
 	    than the comment colour
-	  - itemData "Exceptions" moves from dsPreprocessor to dsBuiltIn: Positron
-	    reads an exception name in a call through meta.function-call support.type
-	    at the function blue, the form raise and a call give it. Bare, in an
-	    except clause, no user rule reaches it and the base theme paints it
-	    #F0C674, which no style of this theme carries
-	The four identifier and keyword rules sit ahead of DetectIdentifier on
-	purpose: that rule consumes every bare identifier, so a rule appended after
-	it never fires. The two added characters stay after IncludeRules Number so
-	a float keeps its own token.
+	  - the "exceptions" and "builtinfuncs" keyword rules move after the
+	    Function Name RegExpr, so a called name reaches that rule first and
+	    keeps the function blue, where the bare form falls through to its own
+	    keyword rule: Positron reads an exception or a builtin type through
+	    meta.function-call support.type in a call, at the function blue, and
+	    through support.type bare, at #F0C674
+	  - list "builtintypes" + itemData "Builtin Type" (dsPreprocessor), placed
+	    with them: it shadows the same nineteen names inside builtinfuncs by
+	    rule order, so upstream's list stays byte-identical. A builtin type is
+	    #F0C674 bare and blue in a call; the one case this cannot reach is a
+	    type used as a call argument (isinstance(x, str)), which Positron reads
+	    blue through the meta.function-call ancestor and skylighting cannot see
+	  - itemData "Exceptions" stays on dsPreprocessor, which now means the bare
+	    form alone
+	  - lists "classkw" and "lambdakw" + itemData "Storage Keyword"
+	    (dsAnnotation): class and lambda leave the "defs" list by rule order,
+	    Positron reading both through storage.type at #B294BB
+	  - context "ClassName" + itemData "Class Name" (dsInformation): the name a
+	    class introduces, which the Function Name rule would otherwise paint
+	    like a call, where Positron gives entity.name.type.class #FFCB6B
+	  - itemData "String Substitution" moves from dsSpecialChar to dsCommentVar:
+	    the braces of an f-string placeholder are constant.character in Positron
+	    at #DE935F, and dsSpecialChar is R's comma, which must stay cyan
+	  - a Detect2Chars on "->" + itemData "Body Text" (dsDocumentation): a
+	    return annotation is punctuation.separator.annotation.result, which no
+	    user rule reaches, so the editor leaves it at the base theme's #C5C8C6
+	The identifier and keyword rules sit ahead of DetectIdentifier on purpose:
+	that rule consumes every bare identifier, so a rule appended after it never
+	fires. The three keyword rules moved after Function Name sit between the
+	two. The two added characters stay after IncludeRules Number so a float
+	keeps its own token.
 	Unlike r.xml the language is NOT renamed and no filter is needed: Quarto
 	ships no Python definition, so there is no last-wins collision to dodge.
 	If a future Quarto starts shipping one, it is appended after the document's
@@ -186,6 +213,36 @@
 		<!-- hebstr -->
 		<list name="forkw">
 			<item>for</item>
+		</list>
+		<!-- hebstr: shadows the same names inside builtinfuncs by rule order -->
+		<list name="builtintypes">
+			<item>bool</item>
+			<item>bytearray</item>
+			<item>bytes</item>
+			<item>classmethod</item>
+			<item>complex</item>
+			<item>dict</item>
+			<item>float</item>
+			<item>frozenset</item>
+			<item>int</item>
+			<item>list</item>
+			<item>object</item>
+			<item>property</item>
+			<item>set</item>
+			<item>slice</item>
+			<item>staticmethod</item>
+			<item>str</item>
+			<item>super</item>
+			<item>tuple</item>
+			<item>type</item>
+		</list>
+		<!-- hebstr: shadows the same names inside defs by rule order -->
+		<list name="classkw">
+			<item>class</item>
+		</list>
+		<!-- hebstr -->
+		<list name="lambdakw">
+			<item>lambda</item>
 		</list>
 		<!-- hebstr -->
 		<list name="codetags">
@@ -554,14 +611,14 @@
 				<keyword attribute="Flow Control Keyword" String="flow" context="#stay"/>
 				<keyword attribute="Operator Keyword" String="operators" context="#stay"/>
 				<keyword attribute="Operator Keyword" String="inkw" context="#stay"/><!-- hebstr -->
-				<keyword attribute="Builtin Function" String="builtinfuncs" context="#stay"/>
+				<keyword attribute="Storage Keyword" String="classkw" context="ClassName"/><!-- hebstr -->
+				<keyword attribute="Storage Keyword" String="lambdakw" context="#stay"/><!-- hebstr -->
 				<keyword attribute="Definition Keyword" String="defs" context="#stay"/>
 				<keyword attribute="Function Definition" String="funcdefs" context="DefName"/><!-- hebstr -->
 
 				<keyword attribute="Flow Control Keyword" String="flow_yield" context="kw_yield"/>
 				<keyword attribute="Flow Control Keyword" String="patternmatching" context="Pattern Matching" lookAhead="1" firstNonSpace="1"/>
 				<keyword attribute="Import" String="import" context="#stay"/>
-				<keyword attribute="Exceptions" String="exceptions" context="#stay"/>
 				<keyword attribute="Overloaders" String="overloaders" context="#stay"/>
 				<keyword attribute="Extensions" String="bindings" context="#stay"/>
 
@@ -574,9 +631,14 @@
 				<!-- hebstr: both ahead of DetectIdentifier, which consumes every bare identifier -->
 				<RegExpr attribute="Caps Constant" String="[A-Z][A-Z0-9_]*(?![\w])" context="#stay"/>
 				<RegExpr attribute="Function Name" String="[_a-zA-Z[:^ascii:]][_a-zA-Z0-9[:^ascii:]]*(?=[\s]*[(])" context="#stay"/>
+				<!-- hebstr: after Function Name, so the called form keeps the function blue -->
+				<keyword attribute="Builtin Type" String="builtintypes" context="#stay"/>
+				<keyword attribute="Exceptions" String="exceptions" context="#stay"/>
+				<keyword attribute="Builtin Function" String="builtinfuncs" context="#stay"/>
 				<DetectIdentifier attribute="Normal Text"/>
 
 				<RegExpr attribute="Decorator" String="@[_a-zA-Z[:^ascii:]][\._a-zA-Z0-9[:^ascii:]]*" firstNonSpace="true"/>
+				<Detect2Chars attribute="Body Text" char="-" char1="&gt;" context="#stay"/><!-- hebstr: a return annotation, which Positron leaves at the body grey -->
 				<Detect2Chars attribute="Operator" char=":" char1="=" context="#stay"/>
 				<AnyChar attribute="Operator" String="+*/%|=;&lt;&gt;!^&amp;~-@,." context="#stay"/><!-- hebstr: , and . -->
 
@@ -589,6 +651,11 @@
 				<keyword attribute="Flow Control Keyword" String="inkw" context="#pop"/>
 				<DetectChar attribute="Normal Text" char=":" context="#pop"/>
 				<IncludeRules context="Normal"/>
+			</context>
+			<!-- hebstr: the name a class introduces, which Positron paints apart from a call -->
+			<context name="ClassName" attribute="Normal Text" lineEndContext="#pop" fallthrough="1" fallthroughContext="#pop">
+				<DetectSpaces attribute="Normal Text"/>
+				<RegExpr attribute="Class Name" String="[_a-zA-Z[:^ascii:]][_a-zA-Z0-9[:^ascii:]]*" context="#pop"/>
 			</context>
 			<!-- hebstr: the name a def introduces, which upstream leaves untokenised -->
 			<context name="DefName" attribute="Normal Text" lineEndContext="#pop" fallthrough="1" fallthroughContext="#pop">
@@ -2482,6 +2549,10 @@
 			<itemData name="Operator" defStyleNum="dsOperator" spellChecking="false"/>
 			<itemData name="Operator Keyword" defStyleNum="dsOperator" spellChecking="false"/><!-- hebstr: was dsKeyword -->
 			<itemData name="Codetag" defStyleNum="dsKeyword" spellChecking="false"/><!-- hebstr -->
+			<itemData name="Storage Keyword" defStyleNum="dsAnnotation" spellChecking="false"/><!-- hebstr -->
+			<itemData name="Builtin Type" defStyleNum="dsPreprocessor" spellChecking="false"/><!-- hebstr -->
+			<itemData name="Class Name" defStyleNum="dsInformation" spellChecking="false"/><!-- hebstr -->
+			<itemData name="Body Text" defStyleNum="dsDocumentation" spellChecking="false"/><!-- hebstr -->
 			<itemData name="Flow Control Keyword" defStyleNum="dsControlFlow" spellChecking="false"/>
 			<itemData name="Builtin Function" defStyleNum="dsBuiltIn" spellChecking="false"/>
 			<itemData name="Special Variable" defStyleNum="dsVariable" spellChecking="false"/>
@@ -2490,7 +2561,7 @@
 			<itemData name="Function Name" defStyleNum="dsFunction" spellChecking="false"/><!-- hebstr -->
 			<itemData name="Caps Constant" defStyleNum="dsRegionMarker" spellChecking="false"/><!-- hebstr -->
 			<itemData name="Extensions" defStyleNum="dsExtension" spellChecking="false"/>
-			<itemData name="Exceptions" defStyleNum="dsBuiltIn" spellChecking="false"/><!-- hebstr: was dsPreprocessor -->
+			<itemData name="Exceptions" defStyleNum="dsPreprocessor" spellChecking="false"/><!-- hebstr: the exceptions rule now sits after Function Name, so this is the bare form alone -->
 			<itemData name="Overloaders" defStyleNum="dsFunction" spellChecking="false"/>
 			<itemData name="Import" defStyleNum="dsKeyword" spellChecking="false"/><!-- hebstr: was dsImport -->
 			<itemData name="Float" defStyleNum="dsFloat" spellChecking="false"/>
@@ -2524,7 +2595,7 @@
 
 			<!-- Char -->
 			<itemData name="String Char" defStyleNum="dsChar" spellChecking="false"/>
-			<itemData name="String Substitution" defStyleNum="dsSpecialChar" spellChecking="false"/>
+			<itemData name="String Substitution" defStyleNum="dsCommentVar" spellChecking="false"/><!-- hebstr: was dsSpecialChar -->
 			<!-- Other -->
 			<itemData name="Decorator" defStyleNum="dsFunction" spellChecking="false"/><!-- hebstr: was dsAttribute -->
 			<itemData name="Error" defStyleNum="dsError"/>

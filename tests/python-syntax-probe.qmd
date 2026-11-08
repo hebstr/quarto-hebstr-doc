@@ -14,14 +14,19 @@ MAX_ROWS = 0xFF
 
 @cache
 class Frame(Path):
-    def width(self, sep=", "):
+    def width(self, sep: str = ", ") -> int:
         # TODO: widen
         pattern = r"\d+"
         label = f"a\n{sep}"
+        fallback = len
+        key = lambda v: v
         if self.empty is True or sep is None:
             raise ValueError(label)
         for row in sorted(label):
             if row not in pattern and row is not None:
                 del row
-        return pl.read_csv(pattern).head(MAX_ROWS)
+        try:
+            return pl.read_csv(pattern).head(MAX_ROWS)
+        except KeyError:
+            return fallback(key(label))
 ```
