@@ -5,6 +5,8 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+## 1.12.0 (2026-11-08)
+
 ### New Features
 
 - feat: Highlight Python code from the theme's own syntax definition, in HTML and in Word, so keywords, imports, constants, function names and decorators read in the theme's colours instead of Pandoc's defaults.
