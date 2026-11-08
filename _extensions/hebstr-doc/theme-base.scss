@@ -279,7 +279,8 @@ mjx-container {
 h2,
 h3,
 h4,
-h5 {
+h5,
+h6 {
   margin-top: 1.5em;
   margin-bottom: 1rem;
 }
@@ -288,7 +289,8 @@ h1,
 h2,
 h3,
 h4,
-h5 {
+h5,
+h6 {
   border-bottom: 3px solid var(--primary-back);
   padding-bottom: 0.3rem;
   font-weight: normal;
@@ -317,6 +319,11 @@ h5 {
   margin-top: 1.5em;
   margin-left: 2.5rem;
   font-size: 1rem;
+}
+
+h6 {
+  margin-left: 3rem;
+  font-size: 0.9rem;
 }
 
 .figure-img {
