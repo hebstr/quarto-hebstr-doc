@@ -128,7 +128,7 @@ body {
 }
 
 .blockquote {
-  color: currentcolor;
+  color: inherit;
   border-color: currentcolor;
 }
 
@@ -139,8 +139,8 @@ mjx-container {
 .panel-tabset {
   .nav-tabs {
     margin-top: 2rem;
+    border-bottom: 0;
 
-    --bs-nav-tabs-border-color: none;
     --bs-nav-tabs-link-hover-border-color: var(--primary-back);
     --bs-nav-link-color: var(--primary-dark);
     --bs-nav-link-hover-color: var(--primary);
@@ -333,25 +333,23 @@ figure.figure > figcaption:not(.quarto-float-caption) {
   color: var(--caption-color);
 }
 
-.quarto-float {
-  &-subcaption {
-    font-weight: normal;
-    font-size: 0.85rem;
-    color: var(--neutral);
-  }
+.quarto-float-subcaption {
+  font-weight: normal;
+  font-size: 0.85rem;
+  color: var(--neutral);
+}
 
-  &-fig {
-    padding-bottom: 1em;
-  }
+.quarto-float-fig {
+  padding-bottom: 1em;
+}
 
-  // The `anx` custom float carries no built-in styling. Keyed on the float
-  // type, this rule is the one that survives a document moving the caption,
-  // where the position-keyed rule below stops applying.
-  &-tbl,
-  &-anx {
-    margin-top: 2rem;
-    text-align: center;
-  }
+// The `anx` custom float carries no built-in styling. Keyed on the float
+// type, this rule is the one that survives a document moving the caption,
+// where the position-keyed rule below stops applying.
+.quarto-float-tbl,
+.quarto-float-anx {
+  margin-top: 2rem;
+  text-align: center;
 }
 
 figure.figure > figcaption {
@@ -421,90 +419,90 @@ code:not(.sourceCode) {
 }
 
 code span {
-  .va {
+  &.va {
     color: var(--code-foreground-color);
   }
 
-  .dv,
-  .fl,
-  .dt,
-  .bn,
-  .er,
-  .wa {
+  &.dv,
+  &.fl,
+  &.dt,
+  &.bn,
+  &.er,
+  &.wa {
     color: #ff7869;
   }
 
-  .ch {
+  &.ch {
     color: #f77669;
   }
 
-  .cn {
+  &.cn {
     color: #ffbc6a;
     font-weight: bold;
   }
 
-  .st,
-  .ss,
-  .vs {
+  &.st,
+  &.ss,
+  &.vs {
     color: #c5ff93;
   }
 
-  .op,
-  .ot,
-  .sc {
+  &.op,
+  &.ot,
+  &.sc {
     color: #a2fff6;
   }
 
-  .kw,
-  .cf {
+  &.kw,
+  &.cf {
     color: #d08aff;
     font-weight: bold;
   }
 
-  .im,
-  .re {
+  &.im,
+  &.re {
     color: #fad430;
   }
 
-  .im {
+  &.im {
     font-weight: bold;
   }
 
   // Quarto's highlight style ships RegionMarker with a near-white background,
   // which the brackets borrowing that class would otherwise carry.
-  .re {
+  &.re {
     background-color: transparent;
   }
 
-  .fu,
-  .bu,
-  .ex {
+  &.fu,
+  &.bu,
+  &.ex {
     color: #90e1ff;
   }
 
-  .co,
-  .do,
-  .al,
-  .cv {
+  &.co,
+  &.do,
+  &.al,
+  &.cv {
     font-style: normal !important;
     color: var(--code-comment-color);
   }
 
-  .at {
+  &.at {
     color: var(--code-foreground-color);
   }
 
-  .pp {
+  &.pp {
     font-style: normal !important;
     color: #f0c674;
   }
 
-  .an {
+  &.an {
     font-style: normal !important;
     color: #b294bb;
   }
 
-  .in {
+  &.in {
     font-style: normal !important;
     color: #ffcb6b;
   }
@@ -568,8 +566,6 @@ body details.code-fold {
     width: fit-content;
     font-family: $font-family-monospace;
     font-size: 0.75rem;
-
-    // letter-spacing: 1px;
     color: var(--neutral);
     background-color: var(--code-fold-summary-bg);
     margin-bottom: 0;
@@ -987,6 +983,6 @@ $callout-types: (
   // Material variant carried by `--ft-icon-open`, so no chevron is needed and
   // folder and file icons stay aligned on the same edge.
   details[open] > summary .ft-name::before {
-    background-image: var(--ft-icon-open);
+    background-image: var(--ft-icon-open, var(--ft-icon));
   }
 }
