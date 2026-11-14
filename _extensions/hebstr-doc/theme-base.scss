@@ -400,6 +400,10 @@ mjx-container {
     li > a.active {
       border-left: 2px solid var(--primary);
     }
+
+    > ul > li > a {
+      font-weight: 700;
+    }
   }
 }
 
