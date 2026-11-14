@@ -1,7 +1,6 @@
 <script>
   (function () {
     var home = null;
-    var formatsHome = null;
 
     function labelFormats(formats) {
       formats.querySelectorAll("a").forEach(function (link) {
@@ -22,22 +21,11 @@
       });
     }
 
-    function moveFormats(row) {
+    function moveFormats(target) {
       var formats = document.querySelector(".quarto-alternate-formats");
-      if (!formats) return;
-      if (!formatsHome) {
-        formatsHome = { parent: formats.parentNode, next: formats.nextSibling };
-      }
-      if (row) {
-        if (formats.parentNode === row) return;
-        labelFormats(formats);
-        row.appendChild(formats);
-      } else if (
-        formatsHome.parent &&
-        formats.parentNode !== formatsHome.parent
-      ) {
-        formatsHome.parent.insertBefore(formats, formatsHome.next);
-      }
+      if (!formats || !target || formats.parentNode === target) return;
+      labelFormats(formats);
+      target.appendChild(formats);
     }
 
     function moveToggle() {
@@ -64,7 +52,7 @@
           if (home.floating) toggle.classList.add("top-right");
           home.parent.insertBefore(toggle, home.next);
         }
-        moveFormats(null);
+        moveFormats(home.parent);
         return true;
       }
       var row = sidebar.querySelector(".hebstr-toggle-row");

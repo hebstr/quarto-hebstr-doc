@@ -8,7 +8,7 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 ### New Features
 
 - feat: Show the links of `format-links` as icons beside the colour-scheme toggle, at the top of the margin sidebar, so the downloads sit in one aligned row instead of a text block under the table of contents.
-  Each icon keeps its label as a tooltip and an accessible name; on a narrow screen, where the sidebar is hidden, the links stay hidden with it as before.
+  Each icon keeps its label as a tooltip and an accessible name; on a narrow screen, where the sidebar is hidden, the links stack under the toggle in the top-right corner instead of disappearing with the sidebar.
 
 ## 1.12.0 (2026-11-08)
 

@@ -264,82 +264,102 @@ mjx-container {
   .hebstr-toggle-row {
     align-items: center;
     gap: 0.75rem;
+  }
+}
 
-    .quarto-alternate-formats {
+:is(
+  #quarto-margin-sidebar .hebstr-toggle-row,
+  .quarto-color-scheme-toggle-container
+) {
+  .quarto-alternate-formats {
+    display: flex;
+    margin: 0;
+    padding: 0;
+
+    h2 {
+      display: none;
+    }
+
+    ul {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
       display: flex;
       margin: 0;
-      margin-left: 0.35rem;
       padding: 0;
+    }
 
-      h2 {
-        display: none;
+    a {
+      display: inline-flex;
+      justify-content: center;
+      min-width: 1.5rem;
+      color: var(--primary-dark);
+      font-size: 1.5rem;
+      line-height: 1;
+
+      &:hover {
+        color: var(--primary);
       }
 
-      ul {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
+      > i {
         margin: 0;
-        padding: 0;
-        list-style: none;
+        font-size: inherit;
       }
 
-      li {
-        display: flex;
-        margin: 0;
-        padding: 0;
+      > i.bi-file-word::before,
+      > i.bi-file-pdf::before {
+        background-image: none !important;
+        font-family: "Font Awesome 7 Free", sans-serif !important;
+        font-weight: 900;
+        color: inherit;
       }
 
-      a {
-        display: inline-flex;
-        justify-content: center;
-        min-width: 1.5rem;
-        color: var(--primary-dark);
-        font-size: 1.5rem;
-        line-height: 1;
+      > i.bi-file-word::before {
+        content: "\f1c2";
+      }
 
-        &:hover {
-          color: var(--primary);
-        }
+      > i.bi-file-pdf::before {
+        content: "\f1c1";
+      }
 
-        > i {
-          margin: 0;
-          font-size: inherit;
-        }
-
-        > i.bi-file-word::before,
-        > i.bi-file-pdf::before {
-          background-image: none !important;
-          font-family: "Font Awesome 7 Free", sans-serif !important;
-          font-weight: 900;
-          color: inherit;
-        }
-
+      @supports (content: "a" / "b") {
         > i.bi-file-word::before {
-          content: "\f1c2";
+          content: "\f1c2" / "";
         }
 
         > i.bi-file-pdf::before {
-          content: "\f1c1";
+          content: "\f1c1" / "";
         }
-
-        @supports (content: "a" / "b") {
-          > i.bi-file-word::before {
-            content: "\f1c2" / "";
-          }
-
-          > i.bi-file-pdf::before {
-            content: "\f1c1" / "";
-          }
-        }
-      }
-
-      .hebstr-format-label {
-        display: none;
       }
     }
-  }
 
+    .hebstr-format-label {
+      display: none;
+    }
+  }
+}
+
+#quarto-margin-sidebar .hebstr-toggle-row .quarto-alternate-formats {
+  margin-left: 0.35rem;
+}
+
+.quarto-color-scheme-toggle-container .quarto-alternate-formats {
+  position: absolute;
+  top: 3.75rem;
+  right: 0.65rem;
+
+  ul {
+    flex-direction: column;
+  }
+}
+
+#quarto-margin-sidebar {
   h2#toc-title {
     font-size: 0.95rem;
     color: var(--primary-dark);
