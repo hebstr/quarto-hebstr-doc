@@ -6,6 +6,7 @@ format:
   hebstr-doc-html:
     code-tools:
       source: https://github.com/hebstr/quarto-hebstr-doc
+  hebstr-doc-docx: default
 ---
 
 ```{r}
