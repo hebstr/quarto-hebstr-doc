@@ -8,7 +8,6 @@ format:
       - hebstr-doc-docx
       - text: PDF
         href: example.pdf
-        icon: file-pdf
     code-tools:
       source: https://github.com/hebstr/quarto-hebstr-doc
   hebstr-doc-docx: default
