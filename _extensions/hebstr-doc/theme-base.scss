@@ -29,6 +29,12 @@ $filetree-guide: #7d7b76 !default;
 
 /*-- scss:rules --*/
 
+@media screen and (width >= 1440px) {
+  html {
+    zoom: calc(100vw / 1440px);
+  }
+}
+
 :root {
   --primary: #{$primary};
   --secondary: #{$secondary};

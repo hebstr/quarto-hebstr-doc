@@ -326,6 +326,17 @@ To align body text left, the rule must include the `#quarto-document-content` id
 
 A plain `p { text-align: left }` has no effect.
 
+### Wide screens
+
+From 1440 px of window width the whole page scales with the window, so a wide screen shows the same layout as a 1440 px one.
+To keep the fixed, centred layout instead, add this to `custom.scss`:
+
+```scss
+html {
+  zoom: 1;
+}
+```
+
 ### Figure captions
 
 Captions of cross-referenced figures sit below the figure and are left-aligned.

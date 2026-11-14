@@ -7,6 +7,8 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ### New Features
 
+- feat: Scale the whole page with the window width beyond 1440 px, so with the default grid a wide screen shows the same layout as a 1440 px one instead of a centred column between empty bands.
+  Text, table of contents and figures grow together, and the line length in characters stays constant; `html { zoom: 1 }` in a consumer's CSS restores the fixed layout.
 - feat: Show the links of `format-links` as icons beside the colour-scheme toggle, at the top of the margin sidebar, so the downloads sit in one aligned row instead of a text block under the table of contents.
   Each icon keeps its label as a tooltip and an accessible name; on a narrow screen, where the sidebar is hidden, the links stack under the toggle in the top-right corner instead of disappearing with the sidebar.
 
