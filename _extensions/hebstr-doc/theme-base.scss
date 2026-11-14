@@ -7,6 +7,10 @@ $font-size-root: 1rem !default;
 $toc-font-size: 0.8rem !default;
 $callout-icon-scale: -10% !default;
 
+// Page grid (invariant)
+$grid-page-gutter-start: 4.5rem !default;
+$grid-page-gutter-end: 4.5rem !default;
+
 // Tabsets (invariant)
 $tab-surface: color-mix(in srgb, var(--primary), transparent 93%) !default;
 
@@ -214,6 +218,7 @@ mjx-container {
 
 .quarto-color-scheme-toggle {
   > i.bi::before {
+    width: auto;
     background-image: none !important;
     font-family: "Font Awesome 7 Free", sans-serif !important;
     content: "\f185";
@@ -241,22 +246,30 @@ mjx-container {
   text-align: left;
   padding: 1rem 1rem 0 1.5rem;
   background-color: var(--primary-back);
+}
 
-  // The row is built by `filters/toggle-position.html` ; without it the toggle
-  // keeps Quarto's floating position.
-  .hebstr-toggle-row {
-    display: flex;
-    justify-content: center;
+// The rail is built by `filters/toggle-position.html` ; without it the toggle
+// keeps Quarto's floating position.
+.hebstr-rail {
+  position: fixed;
+  top: 1rem;
+  left: 0.625rem;
+  z-index: 1020;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  width: 3.25rem;
+  padding: 0.8rem 0;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  background-color: var(--primary-back);
 
-    // Cancels the panel's asymmetric padding, or the toggle centres on the toc
-    // column rather than on the panel.
-    margin: 0 -1rem 0.75rem -1.5rem;
-  }
-
-  .quarto-color-scheme-toggle.hebstr-sidebar-toggle {
+  .quarto-color-scheme-toggle.hebstr-rail-toggle {
     display: inline-flex;
     color: var(--primary-dark);
     font-size: 1.5rem;
+    line-height: 1;
 
     > i.bi {
       width: 1.15em;
@@ -267,16 +280,16 @@ mjx-container {
     }
   }
 
-  .hebstr-toggle-row {
-    align-items: center;
-    gap: 0.75rem;
+  &:empty {
+    display: none;
+  }
+
+  @media print {
+    display: none;
   }
 }
 
-:is(
-  #quarto-margin-sidebar .hebstr-toggle-row,
-  .quarto-color-scheme-toggle-container
-) {
+:is(.hebstr-rail, .quarto-color-scheme-toggle-container) {
   .quarto-alternate-formats {
     display: flex;
     margin: 0;
@@ -351,8 +364,8 @@ mjx-container {
   }
 }
 
-#quarto-margin-sidebar .hebstr-toggle-row .quarto-alternate-formats {
-  margin-left: 0.35rem;
+.hebstr-rail .quarto-alternate-formats ul {
+  flex-direction: column;
 }
 
 .quarto-color-scheme-toggle-container .quarto-alternate-formats {

@@ -43,30 +43,28 @@
       if (!toggle.hasAttribute("aria-label")) {
         toggle.setAttribute("aria-label", "Toggle light and dark mode");
       }
-      var sidebar = document.getElementById("quarto-margin-sidebar");
-      // Below Quarto's breakpoint the sidebar is dropped from the layout, and a
-      // toggle parked inside it would go with it.
-      if (!sidebar || sidebar.getClientRects().length === 0) {
+      var narrow = !window.matchMedia("(min-width: 768px)").matches;
+      if (narrow || document.getElementById("quarto-sidebar")) {
         if (home.parent && toggle.parentNode !== home.parent) {
-          toggle.classList.remove("hebstr-sidebar-toggle");
+          toggle.classList.remove("hebstr-rail-toggle");
           if (home.floating) toggle.classList.add("top-right");
           home.parent.insertBefore(toggle, home.next);
         }
         moveFormats(home.parent);
         return true;
       }
-      var row = sidebar.querySelector(".hebstr-toggle-row");
-      if (!row) {
-        row = document.createElement("div");
-        row.className = "hebstr-toggle-row";
-        sidebar.insertBefore(row, sidebar.firstChild);
+      var rail = document.querySelector(".hebstr-rail");
+      if (!rail) {
+        rail = document.createElement("div");
+        rail.className = "hebstr-rail";
+        document.body.appendChild(rail);
       }
-      if (toggle.parentNode !== row) {
+      if (toggle.parentNode !== rail) {
         toggle.classList.remove("top-right");
-        toggle.classList.add("hebstr-sidebar-toggle");
-        row.appendChild(toggle);
+        toggle.classList.add("hebstr-rail-toggle");
+        rail.appendChild(toggle);
       }
-      moveFormats(row);
+      moveFormats(rail);
       return true;
     }
     function tryMove(retries) {

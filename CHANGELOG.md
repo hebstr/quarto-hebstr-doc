@@ -7,12 +7,15 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ### New Features
 
-- feat: Widen the margin column to 475 px and narrow the text column to 950 px, so the table of contents reads more freely and the text keeps a shorter measure.
-  The default `sidebar-width` becomes 25 px, and the total width is unchanged, so the 1440 px threshold of the wide-screen scaling still holds; a consumer's own `grid:` block is untouched.
+- feat: Widen the margin column to 500 px and narrow the text column to 950 px, so the table of contents reads more freely and the text keeps a shorter measure.
+  A consumer's own `grid:` block is untouched.
+- feat: Widen the page's two side gutters from 3 rem to 4.5 rem, so the left rail has room on both sides and the table of contents keeps its distance from the screen edge.
+  The text column gives up 48 px at 1440 px (`$grid-page-gutter-start` and `$grid-page-gutter-end` set the gutters); a consumer's own `grid:` block and the gap between the text and the margin are untouched.
 - feat: Scale the whole page with the window width beyond 1440 px, so with the default grid a wide screen shows the same layout as a 1440 px one instead of a centred column between empty bands.
   Text, table of contents and figures grow together, and the line length in characters stays constant; `html { zoom: 1 }` in a consumer's CSS restores the fixed layout.
-- feat: Show the links of `format-links` as icons beside the colour-scheme toggle, at the top of the margin sidebar, so the downloads sit in one aligned row instead of a text block under the table of contents.
-  Each icon keeps its label as a tooltip and an accessible name; on a narrow screen, where the sidebar is hidden, the links stack under the toggle in the top-right corner instead of disappearing with the sidebar.
+- feat: Show the colour-scheme toggle and the links of `format-links` as icons in a fixed vertical rail on the left edge, toggle first, so the downloads sit in one place instead of a text block under the table of contents, which keeps its column to itself.
+  Each icon keeps its label as a tooltip and an accessible name; the rail is left out of print.
+  Below 768 px, or on a page with its own sidebar, the links stack under the floating toggle in the top-right corner instead of disappearing.
 
 ## 1.12.0 (2026-11-08)
 
