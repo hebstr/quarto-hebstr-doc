@@ -46,6 +46,7 @@ jobs:
           mkdir -p _site
           mv example.html _site/index.html
           mv example.docx _site/
+          cp example.pdf _site/
           if [ -d example_files ]; then mv example_files _site/; fi
 
       - uses: actions/upload-pages-artifact@v5
