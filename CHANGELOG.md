@@ -7,8 +7,8 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ### New Features
 
-- feat: Widen the margin column to 500 px and narrow the text column to 950 px, so the table of contents reads more freely and the text keeps a shorter measure.
-  The total width is unchanged, so the 1440 px threshold of the wide-screen scaling still holds; a consumer's own `grid:` block is untouched.
+- feat: Widen the margin column to 475 px and narrow the text column to 950 px, so the table of contents reads more freely and the text keeps a shorter measure.
+  The default `sidebar-width` becomes 25 px, and the total width is unchanged, so the 1440 px threshold of the wide-screen scaling still holds; a consumer's own `grid:` block is untouched.
 - feat: Scale the whole page with the window width beyond 1440 px, so with the default grid a wide screen shows the same layout as a 1440 px one instead of a centred column between empty bands.
   Text, table of contents and figures grow together, and the line length in characters stays constant; `html { zoom: 1 }` in a consumer's CSS restores the fixed layout.
 - feat: Show the links of `format-links` as icons beside the colour-scheme toggle, at the top of the margin sidebar, so the downloads sit in one aligned row instead of a text block under the table of contents.
