@@ -75,9 +75,9 @@ contributes:
         - filters/toggle-position.html
       lightbox: false
       grid:
-        sidebar-width: 0px
-        body-width: 1000px
-        margin-width: 450px
+        sidebar-width: 25px
+        body-width: 950px
+        margin-width: 475px
         gutter-width: 3rem
       filters:
         - at: pre-quarto
