@@ -17,6 +17,7 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - feat: Show the colour-scheme toggle and the links of `format-links` as icons in a fixed vertical rail on the left edge, toggle first, so the downloads sit in one place instead of a text block under the table of contents, which keeps its column to itself.
   Each icon keeps its label as a tooltip and an accessible name; the rail is left out of print.
   Below 768 px, or on a page with its own sidebar, the links stack under the floating toggle in the top-right corner instead of disappearing.
+- feat: Set the bibliography in 0.75 em in HTML, so the references read smaller than the body text, as the Word template already does.
 
 ## 1.12.0 (2026-11-08)
 

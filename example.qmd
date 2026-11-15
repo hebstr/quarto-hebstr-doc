@@ -2,6 +2,7 @@
 title: "hebstr-doc"
 subtitle: "Multi-format Quarto extension"
 author: "hebstr"
+bibliography: example.bib
 format:
   hebstr-doc-html:
     format-links:
@@ -55,6 +56,7 @@ Ordered:
 
 # Figure {#sec-figure}
 
+The data come from the Palmer Archipelago [@gorman2014; @horst2020].
 @fig-penguins follows the colour scheme: the chunk produces one plot per scheme with `renderings: [light, dark]`, on a transparent background.
 Switch the scheme with the toggle to see the other version.
 
@@ -454,7 +456,12 @@ Free-form annexe written as a fenced div.
 - Equation reference: @eq-ols
 - Annexe reference: @anx-notes
 
-\ 
+# References {.unnumbered}
+
+::: {#refs}
+:::
+
+\
 
 # Session {.unnumbered .unlisted}
 
