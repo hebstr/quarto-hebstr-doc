@@ -1,0 +1,30 @@
+<script>
+  (function () {
+    var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function follow(behavior) {
+      var panel = document.getElementById("quarto-margin-sidebar");
+      if (!panel || panel.scrollHeight <= panel.clientHeight) return;
+      var links = panel.querySelectorAll('nav[role="doc-toc"] a.active');
+      var link = links[links.length - 1];
+      if (!link) return;
+      var zoom =
+        parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+      var rect = link.getBoundingClientRect();
+      var offset = rect.top + rect.height / 2 - window.innerHeight / 2;
+      panel.scrollTo({
+        top: panel.scrollTop + offset / zoom,
+        behavior: behavior,
+      });
+    }
+
+    window.addEventListener("quarto-sectionChanged", function () {
+      follow(reducedMotion.matches ? "auto" : "smooth");
+    });
+    window.addEventListener("load", function () {
+      requestAnimationFrame(function () {
+        follow("auto");
+      });
+    });
+  })();
+</script>

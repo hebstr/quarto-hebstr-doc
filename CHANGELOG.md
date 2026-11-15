@@ -18,6 +18,16 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   Each icon keeps its label as a tooltip and an accessible name; the rail is left out of print.
   Below 768 px, or on a page with its own sidebar, the links stack under the floating toggle in the top-right corner instead of disappearing.
 - feat: Set the bibliography in 0.75 em in HTML, so the references read smaller than the body text, as the Word template already does.
+- feat: Raise the default `linestretch` of the HTML output from 1.75 to 2, so the lines of a long paragraph sit further apart.
+  A document's own `linestretch` is untouched.
+- feat: Scroll the table of contents to keep the active heading at the vertical middle of the window, so on a long page the highlighted entry never leaves the visible part of the list.
+  It acts only when the list is taller than the window, stops at the list's ends, scrolls smoothly unless the reader asks for reduced motion, and also positions the list on load and on a `#section` link.
+- feat: Set the table of contents in 0.75 rem instead of 0.8 rem, so it recedes a little further behind the text.
+  `$toc-font-size` sets it, and a consumer's own value is untouched.
+
+### Bug Fixes
+
+- fix: Keep the table of contents within the window above 1440 px, where the page zoom made its panel taller than the screen and cut off its lower entries.
 
 ## 1.12.0 (2026-11-08)
 

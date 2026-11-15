@@ -41,7 +41,7 @@ contributes:
       date: last-modified
       mainfont: "Luciole"
       monofont: "Fira Code"
-      linestretch: 1.75
+      linestretch: 2
       toc-expand: true
       toc-title: " "
       anchor-sections: false
@@ -73,6 +73,7 @@ contributes:
             </script>
       include-after-body:
         - filters/toggle-position.html
+        - filters/toc-follow.html
       lightbox: false
       grid:
         sidebar-width: 0px

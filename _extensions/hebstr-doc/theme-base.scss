@@ -4,7 +4,7 @@
 $font-family-sans-serif: "Luciole", system-ui, sans-serif !default;
 $font-family-monospace: "Fira Code", ui-monospace, monospace !default;
 $font-size-root: 1rem !default;
-$toc-font-size: 0.8rem !default;
+$toc-font-size: 0.75rem !default;
 $callout-icon-scale: -10% !default;
 
 // Page grid (invariant)
@@ -36,6 +36,10 @@ $filetree-guide: #7d7b76 !default;
 @media screen and (width >= 1440px) {
   html {
     zoom: calc(100vw / 1440px);
+  }
+
+  .sidebar.margin-sidebar {
+    max-height: calc(100vh / (100vw / 1440px));
   }
 }
 
