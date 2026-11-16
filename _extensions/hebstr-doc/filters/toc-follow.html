@@ -24,6 +24,7 @@
           : document.querySelector(decodeURI(target));
         if (!section) return;
         Object.defineProperty(section, "offsetTop", {
+          configurable: true,
           get: function () {
             return pageZoom() === 1
               ? nativeOffsetTop.call(section)
@@ -33,7 +34,9 @@
       });
       Object.defineProperty(document.body, "offsetHeight", {
         get: function () {
-          return nativeOffsetHeight.call(document.body) * pageZoom();
+          var zoom = pageZoom();
+          var height = nativeOffsetHeight.call(document.body);
+          return zoom === 1 ? height : (height - 1) * zoom;
         },
       });
     }
@@ -46,8 +49,7 @@
       var links = panel.querySelectorAll('nav[role="doc-toc"] a.active');
       var link = links[links.length - 1];
       if (!link) return;
-      var zoom =
-        parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+      var zoom = pageZoom();
       var rect = link.getBoundingClientRect();
       var offset = rect.top + rect.height / 2 - window.innerHeight / 2;
       panel.scrollTo({
