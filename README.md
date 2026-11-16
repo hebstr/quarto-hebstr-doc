@@ -281,6 +281,7 @@ knitr::include_graphics("output/name-light.svg")
 ````
 
 In HTML, the theme looks for `name-dark.svg` beside the light file and, when it exists, shows one image in each scheme.
+The path may read from the document's folder or from the project root, the two places Quarto resolves an image from.
 The pair stays one numbered figure: sub-captions, `layout-nrow`, `out.width` and the cross-reference work as for a single image.
 A light file with no dark twin is left as it is, and so is every other format: the DOCX output keeps the image the chunk names.
 

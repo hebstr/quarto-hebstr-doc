@@ -21,6 +21,22 @@ local function with_document(files, fn)
   end)
 end
 
+local function with_project(files, fn)
+  pandoc.system.with_temporary_directory("figure-pair", function(dir)
+    pandoc.system.make_directory(pandoc.path.join({ dir, "sub" }))
+    pandoc.system.make_directory(pandoc.path.join({ dir, "out" }))
+    for _, name in ipairs(files) do
+      touch(pandoc.path.join({ dir, name }))
+    end
+    local f = support.load_filter(FILTER, {
+      input_file = pandoc.path.join({ dir, "sub", "doc.qmd" }),
+      project_dir = dir,
+    })
+    fn(f, dir)
+    return true
+  end)
+end
+
 local function image(src, classes)
   return pandoc.Image({ pandoc.Str("alt") }, src, "", pandoc.Attr("fig-x", classes or {}, { { "width", "50%" } }))
 end
@@ -66,6 +82,26 @@ function TestFigurePair:test_the_twin_is_looked_up_beside_the_document_not_the_w
   with_document({ "out/a-light.svg", "out/a-dark.svg" }, function(f, dir)
     lu.assertNotEquals(pandoc.system.get_working_directory(), dir)
     lu.assertEquals(#f.Image(image("out/a-light.svg")), 2)
+  end)
+end
+
+function TestFigurePair:test_a_project_rooted_src_is_paired_from_a_document_in_a_subdirectory()
+  with_project({ "out/a-light.svg", "out/a-dark.svg" }, function(f)
+    local out = f.Image(image("out/a-light.svg"))
+    lu.assertEquals(#out, 2)
+    lu.assertEquals(out[2].src, "out/a-dark.svg")
+  end)
+end
+
+function TestFigurePair:test_a_src_beside_the_document_is_still_paired_when_the_project_is_known()
+  with_project({ "sub/a-light.svg", "sub/a-dark.svg" }, function(f)
+    lu.assertEquals(#f.Image(image("a-light.svg")), 2)
+  end)
+end
+
+function TestFigurePair:test_a_twin_under_neither_the_document_nor_the_project_leaves_the_image_alone()
+  with_project({ "out/a-light.svg" }, function(f)
+    lu.assertNil(f.Image(image("out/a-light.svg")))
   end)
 end
 

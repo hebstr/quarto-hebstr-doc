@@ -1,0 +1,15 @@
+---
+title: Figure pair project probe
+format: hebstr-doc-html
+---
+
+A figure whose path is relative to the project root, in a document that lives in a subdirectory of the project.
+
+```{r}
+#| label: fig-rooted
+#| fig-cap: "Rooted."
+
+knitr::include_graphics("out/a-light.svg")
+```
+
+See @fig-rooted.
