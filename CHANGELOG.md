@@ -5,6 +5,10 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bug Fixes
+
+- fix: Keep the highlighted entry of the table of contents on the heading being read on wide screens, where the page is scaled up and the entry ran ahead of the page by several sections, up to the last one past the middle of a long document.
+
 ## 1.13.2 (2026-11-16)
 
 ### Bug Fixes

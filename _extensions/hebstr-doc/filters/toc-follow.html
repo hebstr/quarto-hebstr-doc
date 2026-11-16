@@ -1,6 +1,44 @@
 <script>
   (function () {
     var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var nativeOffsetTop = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "offsetTop",
+    ).get;
+    var nativeOffsetHeight = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      "offsetHeight",
+    ).get;
+
+    function pageZoom() {
+      return parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+    }
+
+    function alignScrollSpy() {
+      var toc = document.querySelector('nav.toc-active[role="doc-toc"]');
+      if (!toc) return;
+      toc.querySelectorAll("a[data-scroll-target]").forEach(function (link) {
+        var target = link.getAttribute("data-scroll-target");
+        var section = target.startsWith("#")
+          ? document.getElementById(decodeURI(target.slice(1)))
+          : document.querySelector(decodeURI(target));
+        if (!section) return;
+        Object.defineProperty(section, "offsetTop", {
+          get: function () {
+            return pageZoom() === 1
+              ? nativeOffsetTop.call(section)
+              : section.getBoundingClientRect().top + window.pageYOffset;
+          },
+        });
+      });
+      Object.defineProperty(document.body, "offsetHeight", {
+        get: function () {
+          return nativeOffsetHeight.call(document.body) * pageZoom();
+        },
+      });
+    }
+
+    alignScrollSpy();
 
     function follow(behavior) {
       var panel = document.getElementById("quarto-margin-sidebar");
