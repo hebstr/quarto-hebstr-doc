@@ -136,6 +136,11 @@ $footer-fg: $body-color !default;
   background-color: var(--primary-surface) !important;
 }
 
+.gt_row[style*="background-color: #FFFFFF"]:not([style*="; color:"]),
+.gt_group_heading[style*="background-color: #FFFFFF"]:not([style*="; color:"]) {
+  background-color: var(--primary-surface) !important;
+}
+
 // A heading separator drawn in the colour of the block it sits on is invisible
 // by design; keeping it on that block's own background preserves it, where the
 // hairline group above would have made it appear.

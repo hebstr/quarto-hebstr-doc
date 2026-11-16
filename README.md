@@ -288,8 +288,9 @@ A light file with no dark twin is left as it is, and so is every other format: t
 ### Tables that follow the light/dark toggle
 
 `gt` tables need no configuration: in dark mode, the theme replaces their colours.
-Colours set in R with `gt::tab_options()` apply in light mode only.
-To adjust the dark rendering, override `$primary-back` (table background), `$primary-surface` (column labels, striped rows, notes), `$body-color` (text) and `$neutral` (cell borders).
+Colours set in R with `gt::tab_options()` apply in light mode only, and so does a `gt::tab_style()` fill on a body cell, with one exception: a white `cell_fill()` on a body cell or a row-group label becomes `$primary-surface` in dark mode, so a table whose alternate rows are painted white keeps its rhythm.
+A cell that also sets its own text colour, as `gt::data_color()` does, keeps both colours.
+To adjust the dark rendering, override `$primary-back` (table background), `$primary-surface` (column labels, striped rows, white-filled cells, notes), `$body-color` (text) and `$neutral` (cell borders).
 
 `reactable` tables without a `theme` argument get the same treatment.
 A table with `reactableTheme()` keeps its colours; use CSS variables to follow the toggle:

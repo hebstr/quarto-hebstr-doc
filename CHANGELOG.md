@@ -5,6 +5,11 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### Bug Fixes
+
+- fix: Keep a `gt` table's white-filled rows readable in dark mode, where a `gt::cell_fill("white")` left body cells white under light text and made the painted row-group labels fall to the table ground, which broke the stripe rhythm; both now take the table's surface colour.
+  A cell that also sets its own text colour, as `gt::data_color()` does, is left alone.
+
 ## 1.13.1 (2026-11-16)
 
 ### Bug Fixes
