@@ -5,6 +5,8 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+## 1.13.0 (2026-11-16)
+
 ### New Features
 
 - feat: Widen the margin column to 500 px and narrow the text column to 950 px, so the table of contents reads more freely and the text keeps a shorter measure.
