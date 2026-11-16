@@ -1,0 +1,48 @@
+<script>
+  (function () {
+    var EPSILON = 0.002;
+    var ratios = new WeakMap();
+
+    function declaredWidth(table) {
+      var maxWidth = table.style.maxWidth;
+      var zoom = table.style.zoom;
+      table.style.maxWidth = "none";
+      table.style.zoom = "";
+      var width = parseFloat(getComputedStyle(table).width);
+      table.style.maxWidth = maxWidth;
+      table.style.zoom = zoom;
+      return width;
+    }
+
+    function fit(table) {
+      var box = table.parentElement ? table.parentElement.clientWidth : 0;
+      if (!box) return;
+      var declared = declaredWidth(table);
+      if (!(declared > 0)) return;
+      var ratio = Math.min(1, box / declared);
+      var last = ratios.has(table) ? ratios.get(table) : 1;
+      if (Math.abs(ratio - last) < EPSILON) return;
+      ratios.set(table, ratio);
+      if (ratio < 1) {
+        table.style.maxWidth = "none";
+        table.style.zoom = String(ratio);
+      } else {
+        table.style.maxWidth = "";
+        table.style.zoom = "";
+      }
+    }
+
+    var observer = new ResizeObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var table = entry.target.querySelector("table.gt_table");
+        if (table) fit(table);
+      });
+    });
+
+    document.querySelectorAll("table.gt_table").forEach(function (table) {
+      if (!table.parentElement) return;
+      fit(table);
+      observer.observe(table.parentElement);
+    });
+  })();
+</script>

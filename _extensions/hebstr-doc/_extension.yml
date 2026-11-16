@@ -74,6 +74,7 @@ contributes:
       include-after-body:
         - filters/toggle-position.html
         - filters/toc-follow.html
+        - filters/gt-fit.html
       lightbox: false
       grid:
         sidebar-width: 0px

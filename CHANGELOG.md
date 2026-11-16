@@ -5,6 +5,11 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+### New Features
+
+- feat: Scale a `gt` table wider than its column as one block, so a table declared with `tbl_format(width =)` or `gt::tab_options(table.width = gt::px())` keeps its grid, its line breaks and its proportions at any window width, with no horizontal scroll, where its columns were compressed under the unchanged text size.
+  A table that fits is left alone, and without JavaScript the table is compressed as before.
+
 ### Bug Fixes
 
 - fix: Keep the highlighted entry of the table of contents on the heading being read on wide screens, where the page is scaled up and the entry ran ahead of the page by several sections, up to the last one past the middle of a long document.
