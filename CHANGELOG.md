@@ -24,6 +24,8 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   It acts only when the list is taller than the window, stops at the list's ends, scrolls smoothly unless the reader asks for reduced motion, and also positions the list on load and on a `#section` link.
 - feat: Set the table of contents in 0.75 rem instead of 0.8 rem, so it recedes a little further behind the text.
   `$toc-font-size` sets it, and a consumer's own value is untouched.
+- feat: Switch a figure with the page's light and dark scheme in HTML when its light SVG has a `-dark.svg` twin beside it, so a figure written as `name-light.svg` and `name-dark.svg` follows the colour-scheme toggle.
+  The pair stays one numbered figure, with its sub-captions, layout, `out.width` and cross-reference; a figure with no twin, and the DOCX output, are untouched.
 
 ### Bug Fixes
 

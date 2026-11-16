@@ -1,0 +1,37 @@
+---
+title: Figure pair probe
+format: hebstr-doc-html
+---
+
+A two-panel figure with a sub-caption layout, a single figure, and a figure with no dark twin.
+
+```{r}
+#| label: fig-two
+#| fig-cap: "Two panels."
+#| fig-subcap:
+#|   - "First"
+#|   - "Second"
+#| layout-nrow: 2
+#| out.width: "50%"
+
+knitr::include_graphics(c(
+  "tests/fixtures/figure-pair/a-light.svg",
+  "tests/fixtures/figure-pair/b-light.svg"
+))
+```
+
+```{r}
+#| label: fig-one
+#| fig-cap: "One panel."
+
+knitr::include_graphics("tests/fixtures/figure-pair/a-light.svg")
+```
+
+```{r}
+#| label: fig-lone
+#| fig-cap: "No twin."
+
+knitr::include_graphics("tests/fixtures/figure-pair/lone-light.svg")
+```
+
+See @fig-two, @fig-one and @fig-lone.

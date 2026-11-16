@@ -18,6 +18,7 @@ require("test_docx_cell_paragraph")
 require("test_docx_layout_flatten")
 require("test_docx_list_style")
 require("test_docx_toc_break")
+require("test_figure_pair")
 require("test_filetree")
 require("test_r_syntax")
 

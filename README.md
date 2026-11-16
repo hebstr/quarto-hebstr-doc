@@ -265,6 +265,25 @@ Caption goes here.
 The `ink` argument requires ggplot2 4.0 and does not colour axis text or grid lines, which need `axis.text`, `panel.grid` and `axis.ticks`.
 See the Figure section of [`example.qmd`](example.qmd).
 
+### Figures from a pair of image files
+
+`renderings` fits a plot drawn by the chunk itself.
+A figure that already exists as files, whatever drew it, follows the toggle when it comes as a pair: `name-light.svg` and `name-dark.svg` in the same folder.
+The chunk includes the light file only:
+
+````markdown
+```{r}
+#| label: fig-example
+#| fig-cap: "Caption goes here."
+
+knitr::include_graphics("output/name-light.svg")
+```
+````
+
+In HTML, the theme looks for `name-dark.svg` beside the light file and, when it exists, shows one image in each scheme.
+The pair stays one numbered figure: sub-captions, `layout-nrow`, `out.width` and the cross-reference work as for a single image.
+A light file with no dark twin is left as it is, and so is every other format: the DOCX output keeps the image the chunk names.
+
 ### Tables that follow the light/dark toggle
 
 `gt` tables need no configuration: in dark mode, the theme replaces their colours.

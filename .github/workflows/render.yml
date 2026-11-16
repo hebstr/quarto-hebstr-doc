@@ -75,6 +75,12 @@ jobs:
       - name: Annexe float assertions
         run: bash tests/anx-float.sh
 
+      # The pairing filter sits in a post-quarto stage and reads the Image
+      # Quarto leaves inside a sub-captioned layout: only a render shows it
+      # kept one numbered figure, its layout and its cross-reference.
+      - name: Figure pair assertions
+        run: bash tests/figure-pair.sh
+
       # The one assertion no render can make on its own: LibreOffice converts a
       # document Word refuses, so a cell left open by a raw OOXML table shows
       # nowhere else.
