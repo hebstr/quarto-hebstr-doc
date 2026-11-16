@@ -8,6 +8,9 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 ### Bug Fixes
 
 - fix: Keep the highlighted entry of the table of contents on the heading being read on wide screens, where the page is scaled up and the entry ran ahead of the page by several sections, up to the last one past the middle of a long document.
+- fix: Leave the colour-scheme toggle and the format links where Quarto puts them on a website with a navbar, where the left rail covered the toggle under the fixed navbar and the format links dropped an unstyled "Other Formats" list into it.
+- fix: Name the left rail as a landmark and hide Quarto's emptied toggle container, so landmark navigation reaches the toggle instead of an empty banner.
+- fix: Keep keyboard focus on the colour-scheme toggle when a window or zoom change moves it across the 768 px breakpoint.
 
 ## 1.13.2 (2026-11-16)
 

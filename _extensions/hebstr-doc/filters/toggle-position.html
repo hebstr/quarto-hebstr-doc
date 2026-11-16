@@ -28,6 +28,12 @@
       target.appendChild(formats);
     }
 
+    function place(toggle, parent, before) {
+      var focused = document.activeElement === toggle;
+      parent.insertBefore(toggle, before);
+      if (focused) toggle.focus();
+    }
+
     function moveToggle() {
       var toggle = document.querySelector(".quarto-color-scheme-toggle");
       if (!toggle) return false;
@@ -36,19 +42,20 @@
           parent: toggle.parentNode,
           next: toggle.nextSibling,
           floating: toggle.classList.contains("top-right"),
+          container: toggle.closest(".quarto-color-scheme-toggle-container"),
         };
       }
-      // Quarto builds the toggle with no text and no label, so the glyph would be
-      // its only accessible name.
       if (!toggle.hasAttribute("aria-label")) {
         toggle.setAttribute("aria-label", "Toggle light and dark mode");
       }
+      if (!home.floating) return true;
       var narrow = !window.matchMedia("(min-width: 768px)").matches;
       if (narrow || document.getElementById("quarto-sidebar")) {
         if (home.parent && toggle.parentNode !== home.parent) {
+          if (home.container) home.container.hidden = false;
           toggle.classList.remove("hebstr-rail-toggle");
-          if (home.floating) toggle.classList.add("top-right");
-          home.parent.insertBefore(toggle, home.next);
+          toggle.classList.add("top-right");
+          place(toggle, home.parent, home.next);
         }
         moveFormats(home.parent);
         return true;
@@ -57,12 +64,15 @@
       if (!rail) {
         rail = document.createElement("div");
         rail.className = "hebstr-rail";
+        rail.setAttribute("role", "region");
+        rail.setAttribute("aria-label", toggle.getAttribute("aria-label"));
         document.body.appendChild(rail);
       }
       if (toggle.parentNode !== rail) {
         toggle.classList.remove("top-right");
         toggle.classList.add("hebstr-rail-toggle");
-        rail.appendChild(toggle);
+        place(toggle, rail, null);
+        if (home.container) home.container.hidden = true;
       }
       moveFormats(rail);
       return true;
