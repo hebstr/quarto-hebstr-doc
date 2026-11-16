@@ -5,6 +5,12 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## Unreleased
 
+## 1.13.1 (2026-11-16)
+
+### Bug Fixes
+
+- fix: Pair a figure with its dark twin when the document sits in a subfolder of a project and the chunk writes the light path from the project root, so such a figure follows the colour-scheme toggle instead of staying light.
+
 ## 1.13.0 (2026-11-16)
 
 ### New Features
