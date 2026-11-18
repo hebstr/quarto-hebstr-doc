@@ -4,6 +4,7 @@ default:
     "_extensions": "the extension itself, as `quarto add` installs it"
     "_extensions/hebstr-doc": "formats, filters, SCSS themes, bundled fonts and the R syntax definition"
     "scripts": "R scripts the example injects with the `script` shortcode"
+    "tools": "maintainer scripts: the DOCX template rebuild recipe and its invariant check"
     "example.qmd": "feature showcase, rendered to example.html"
     "README.md": "installation, shortcodes and customization"
     "CHANGELOG.md": "release notes"

@@ -7,7 +7,7 @@ Quarto builds for it out of its own nominal width, so Word crushes a table neste
 it and clips an image at the cell edge.
 
 Every expected value here belongs to tests/docx-template-probe.qmd, so this asserts
-that probe and no other document; scripts/check-docx.R is the half that reads any
+that probe and no other document; tools/check-docx.R is the half that reads any
 DOCX. Both arguments are required, the second being the staged probe, whose own shape
 one condition reads.
 
@@ -140,7 +140,7 @@ for cell in root.iter(W + "tc"):
         failures.append(
             "a w:tc ends on a w:tbl, so a float wrapper docx-caption.lua did not lift and"
             " Word crushes what that cell holds; the refusal to open is check_cells in"
-            " scripts/check-docx.R, which counts the closing paragraph this one steps over"
+            " tools/check-docx.R, which counts the closing paragraph this one steps over"
         )
 
 # Hyphenation is document-wide in settings.xml and suppressed per style, so it
@@ -311,7 +311,7 @@ if update is None or update.get(W + "val") not in ("true", "1", "on"):
 children = root.findall(f"{W}body/*")
 
 # The title block and the footnote are the probe's only call on the Title,
-# Subtitle, Author and FootnoteText styles, and scripts/check-docx.R resolves
+# Subtitle, Author and FootnoteText styles, and tools/check-docx.R resolves
 # those through the parts it reads rather than requiring either shape, so
 # dropping one from the probe would cost that coverage with nothing to see.
 opening = [el for el in children if el.tag == W + "p"][: len(TITLE_BLOCK)]

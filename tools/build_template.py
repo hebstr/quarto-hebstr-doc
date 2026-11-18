@@ -13,8 +13,8 @@ different file.
 
 Usage, from the repository root:
 
-    uv run scripts/build_template.py [output]
-    Rscript scripts/check-docx.R _extensions/hebstr-doc/template.dotx
+    uv run tools/build_template.py [output]
+    Rscript tools/check-docx.R _extensions/hebstr-doc/template.dotx
 
 The output defaults to the extension's template.dotx.
 """

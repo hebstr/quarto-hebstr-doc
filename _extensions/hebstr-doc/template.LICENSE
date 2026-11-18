@@ -14,7 +14,7 @@ It is rebuilt from the copy Quarto's bundled Pandoc prints with
 `quarto pandoc --print-default-data-file reference.docx`, verified 2026-09-15
 against Pandoc 3.10.
 
-`scripts/build_template.py`, in the hebstr/quarto-hebstr-doc repository,
+`tools/build_template.py`, in the hebstr/quarto-hebstr-doc repository,
 records every change as a substitution that must match exactly once. In
 summary:
 
@@ -37,8 +37,8 @@ summary:
 
 Rebuild procedure, from the repository root:
 
-    uv run scripts/build_template.py
-    Rscript scripts/check-docx.R _extensions/hebstr-doc/template.dotx
+    uv run tools/build_template.py
+    Rscript tools/check-docx.R _extensions/hebstr-doc/template.dotx
 
 --------------------------------------------------------------------------------
 

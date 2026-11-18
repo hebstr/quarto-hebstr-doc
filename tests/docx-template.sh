@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Renders tests/docx-template-probe.qmd to DOCX and hands the output to the two
-# assertion scripts: scripts/check-docx.R, which reads what any DOCX owes a
+# assertion scripts: tools/check-docx.R, which reads what any DOCX owes a
 # Word reader, then tests/docx-template-assert.py, which reads what this probe
 # owes template.dotx, filters/docx-caption.lua, filters/docx-list-style.lua,
 # filters/docx-layout-flatten.lua, filters/docx-callout-flatten.lua,
@@ -30,5 +30,5 @@ trap cleanup EXIT
 cp -- "$probe" "$staged"
 quarto render "$staged" --to hebstr-doc-docx --quiet
 
-Rscript "${repo_root}/scripts/check-docx.R" "$rendered"
+Rscript "${repo_root}/tools/check-docx.R" "$rendered"
 python3 "${repo_root}/tests/docx-template-assert.py" "$rendered" "$staged"

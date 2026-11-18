@@ -88,7 +88,7 @@ jobs:
         run: bash tests/docx-cell.sh
 
       # The caption filter hangs on the shape and stage Quarto writes float
-      # captions in, neither documented, and scripts/check-docx.R (officer)
+      # captions in, neither documented, and tools/check-docx.R (officer)
       # reads what of template.dotx Pandoc carries into the output.
       - name: DOCX template assertions
         run: bash tests/docx-template.sh

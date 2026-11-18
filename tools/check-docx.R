@@ -4,7 +4,7 @@
 # None of these failures stops a render, and LibreOffice converts every one of
 # them without a warning, so this is the only place they surface.
 #
-# Usage: Rscript scripts/check-docx.R <file.docx>
+# Usage: Rscript tools/check-docx.R <file.docx>
 
 library(xml2)
 
@@ -194,7 +194,7 @@ check_fonts <- \(dir) {
 
 main <- \(args = commandArgs(trailingOnly = TRUE)) {
   if (length(args) != 1L || !file.exists(args[[1]])) {
-    cat("usage: Rscript scripts/check-docx.R <file.docx>\n", file = stderr())
+    cat("usage: Rscript tools/check-docx.R <file.docx>\n", file = stderr())
     return(2L)
   }
 
