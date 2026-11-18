@@ -9,6 +9,9 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 - feat: Scale a `gt` table wider than its column as one block, so a table declared with `tbl_format(width =)` or `gt::tab_options(table.width = gt::px())` keeps its grid, its line breaks and its proportions at any window width, with no horizontal scroll, where its columns were compressed under the unchanged text size.
   A table that fits is left alone, and without JavaScript the table is compressed as before.
+- feat: List the authors of the HTML title block on one line with a superscript number per affiliation, followed by the numbered affiliations, each written once, so a shared affiliation is no longer repeated under every author.
+  The authors are set in bold, the affiliations, the date and its label smaller, and the label takes the colour of the subtitle instead of a faded one; a document without `affiliations` shows the author line alone.
+- feat: Set the title in 1.5 rem and the subtitle in 1.25 rem, so the title card takes less room above the first section.
 
 ### Bug Fixes
 

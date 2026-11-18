@@ -200,19 +200,47 @@ mjx-container {
   padding: 1.5rem 2rem;
 
   .title {
+    font-size: 1.5rem;
     margin-top: 0.5rem;
     border-bottom: none;
     color: var(--primary);
   }
 
   .subtitle {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: var(--primary-dark);
   }
 
   .quarto-title-meta-heading,
   .block-title {
     color: var(--primary-dark);
+  }
+
+  &.quarto-title-block.default {
+    .quarto-title-meta-heading {
+      font-size: 0.7em;
+      opacity: 1;
+    }
+
+    .quarto-title-meta-contents {
+      font-size: 0.8em;
+    }
+  }
+
+  .quarto-title-authors {
+    p {
+      text-align: left;
+    }
+
+    .author-name {
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: var(--primary-dark);
+    }
+
+    .affiliation {
+      font-size: 0.8em;
+    }
   }
 
   .quarto-title-block > div {

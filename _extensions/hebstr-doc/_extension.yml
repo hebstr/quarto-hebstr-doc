@@ -63,6 +63,8 @@ contributes:
       css:
         - fonts/fonts.css
         - icons/code-icons.css
+      template-partials:
+        - partials/title-metadata.html
       syntax-definitions:
         - syntax/r.xml
         - syntax/python.xml
