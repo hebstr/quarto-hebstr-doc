@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### New Features
+
+- feat: Set the DOCX title in 24 pt and the subtitle in 20 pt, so the title block takes less room.
+
 ## 1.14.0 (2026-11-18)
 
 ### New Features

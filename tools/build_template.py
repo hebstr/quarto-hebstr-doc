@@ -204,7 +204,7 @@ def build_styles(styles):
     )
 
     title_rpr = (
-        "<w:b/><w:bCs/>" + color(BLUE) + '<w:spacing w:val="5"/><w:kern w:val="28"/>' + sz(56)
+        "<w:b/><w:bCs/>" + color(BLUE) + '<w:spacing w:val="5"/><w:kern w:val="28"/>' + sz(48)
     )
     styles = replace_style(
         styles,
@@ -247,7 +247,7 @@ def build_styles(styles):
             next_="BodyText",
             link="SubtitleChar",
             rpr='<w:b w:val="0"/><w:bCs w:val="0"/><w:spacing w:val="0"/><w:kern w:val="0"/>'
-            + sz(48),
+            + sz(40),
         ),
     )
     styles = replace_style(
@@ -260,7 +260,7 @@ def build_styles(styles):
             based_on="DefaultParagraphFont",
             link="Subtitle",
             custom=True,
-            rpr=color(BLUE) + sz(48),
+            rpr=color(BLUE) + sz(40),
         ),
     )
     for sid, bold in (("Author", "<w:b/><w:bCs/>"), ("Date", "<w:bCs/>")):
