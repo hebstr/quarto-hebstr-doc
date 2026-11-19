@@ -400,6 +400,20 @@ Callouts use `callout-appearance: simple`.
 {{< lipsum 1 >}}
 :::
 
+A callout with a title and no body :
+
+::: {.callout-note}
+# A title-only callout.
+:::
+
+A collapsible callout :
+
+::: {.callout-tip collapse="true"}
+# A collapsible callout.
+
+{{< lipsum 1 >}}
+:::
+
 # Block quote
 
 > A citation.

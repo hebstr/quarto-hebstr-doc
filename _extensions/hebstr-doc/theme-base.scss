@@ -959,11 +959,32 @@ body div[data-code-filename] {
 }
 
 .callout.callout-style-simple {
+  > .callout-header {
+    align-items: flex-start;
+  }
+
+  &:not(.no-icon) > .callout-header > .callout-icon-container {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    height: 1lh;
+    margin-top: 0.4rem;
+    padding-top: 0;
+  }
+
+  .callout-toggle {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    height: 1lh;
+    margin-top: 0.05rem;
+  }
+
   .callout-toggle::before {
     height: 1.2rem;
     width: 1.2rem;
     background-size: 1.2rem;
-    margin-top: 0.3rem;
+    mask-position: center;
   }
 
   .callout-icon::before {

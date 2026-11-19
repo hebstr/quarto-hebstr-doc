@@ -9,6 +9,10 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 - feat: Set the DOCX title in 24 pt and the subtitle in 20 pt, so the title block takes less room.
 
+### Bug Fixes
+
+- fix: Centre the callout icon and the collapse chevron on the first line of the title, with or without a body.
+
 ## 1.14.0 (2026-11-18)
 
 ### New Features
