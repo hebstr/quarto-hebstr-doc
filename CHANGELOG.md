@@ -12,6 +12,8 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 ### Bug Fixes
 
 - fix: Centre the callout icon and the collapse chevron on the first line of the title, with or without a body.
+- fix: Let the text fill a phone screen under 768 px, with a 1 rem margin instead of the 4.5 rem bands of the desktop layout.
+- fix: Style the colour toggle of a phone like the desktop rail's, so it stays visible on the dark scheme.
 
 ## 1.14.0 (2026-11-18)
 

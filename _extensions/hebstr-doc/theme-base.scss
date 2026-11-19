@@ -43,6 +43,34 @@ $filetree-guide: #7d7b76 !default;
   }
 }
 
+@media screen and (width < 768px) {
+  .page-columns {
+    grid-template-columns:
+      [screen-start] 1rem
+      [screen-start-inset page-start page-start-inset body-start-outset body-start body-content-start]
+      minmax(0, 1fr)
+      [body-content-end body-end body-end-outset page-end-inset page-end screen-end-inset]
+      1rem [screen-end] !important;
+  }
+
+  .quarto-color-scheme-toggle.top-right {
+    top: 1rem;
+    right: 1.25rem;
+    display: inline-flex;
+    color: var(--primary-dark);
+    font-size: 1.5rem;
+    line-height: 1;
+
+    > i.bi {
+      width: 1.15em;
+    }
+
+    &:hover {
+      color: var(--primary);
+    }
+  }
+}
+
 :root {
   --primary: #{$primary};
   --secondary: #{$secondary};
@@ -404,6 +432,11 @@ mjx-container {
   position: absolute;
   top: 3.75rem;
   right: 0.65rem;
+
+  @media screen and (width < 768px) {
+    top: 3.25rem;
+    right: 1.25rem;
+  }
 
   ul {
     flex-direction: column;
