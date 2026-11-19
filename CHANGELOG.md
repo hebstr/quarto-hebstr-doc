@@ -14,6 +14,8 @@ The project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 - fix: Centre the callout icon and the collapse chevron on the first line of the title, with or without a body.
 - fix: Let the text fill a phone screen under 768 px, with a 1 rem margin instead of the 4.5 rem bands of the desktop layout.
 - fix: Style the colour toggle of a phone like the desktop rail's, so it stays visible on the dark scheme.
+- fix: Wrap long URLs in links, references and notes at the column edge, so a long link no longer widens the page on a phone.
+- fix: Keep each file tree entry on one line on a phone and scroll the tree sideways like a code block, so descriptions no longer wrap.
 
 ## 1.14.0 (2026-11-18)
 

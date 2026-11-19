@@ -584,6 +584,10 @@ table.gt_table {
   max-width: 100%;
 }
 
+#quarto-document-content a {
+  overflow-wrap: anywhere;
+}
+
 div.csl-bib-body {
   font-size: 0.75em;
 }
@@ -1186,6 +1190,17 @@ $callout-types: (
       font-size: inherit;
       color: inherit;
       background: none !important;
+    }
+  }
+}
+
+@media screen and (width < 768px) {
+  .filetree {
+    overflow-x: auto;
+
+    .ft-name,
+    .ft-desc {
+      white-space: nowrap;
     }
   }
 }
